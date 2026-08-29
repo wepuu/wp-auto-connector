@@ -25,15 +25,20 @@ Output fields:
 
 ## Phase 1.2
 
-| Ability | Type | WordPress capability baseline |
-| --- | --- | --- |
-| `wp-auto/site-info` | Read-only | `read` |
-| `wp-auto/posts-search` | Read-only | `read` plus visibility enforcement |
-| `wp-auto/post-get` | Read-only | object visibility/capability enforcement |
-| `wp-auto/pages-search` | Read-only | `read` plus visibility enforcement |
-| `wp-auto/page-get` | Read-only | object visibility/capability enforcement |
-| `wp-auto/categories-list` | Read-only | `read` |
-| `wp-auto/tags-list` | Read-only | `read` |
+Phase 1.2 retains the implemented Phase 1.1 tool and adds seven planned read-only tools. Its expected final dedicated-server count is exactly eight. Full schemas, authorization rules, privacy behavior, and errors are frozen in `docs/PHASE_1_2_READ_TOOLS.md`.
+
+| Ability | MCP tool | Type | WordPress capability baseline | Status |
+| --- | --- | --- | --- | --- |
+| `wp-auto/site-health` | `wp-auto-site-health` | Read-only | `read` | Implemented |
+| `wp-auto/site-info` | `wp-auto-site-info` | Read-only | `read` | Planned |
+| `wp-auto/posts-search` | `wp-auto-posts-search` | Read-only | `read` plus per-object visibility enforcement | Planned |
+| `wp-auto/post-get` | `wp-auto-post-get` | Read-only | `read_post` for the target object | Planned |
+| `wp-auto/pages-search` | `wp-auto-pages-search` | Read-only | `read` plus per-object visibility enforcement | Planned |
+| `wp-auto/page-get` | `wp-auto-page-get` | Read-only | `read_post` for the target object | Planned |
+| `wp-auto/categories-list` | `wp-auto-categories-list` | Read-only | `read` | Planned |
+| `wp-auto/tags-list` | `wp-auto-tags-list` | Read-only | `read` | Planned |
+
+The dedicated server must explicitly allowlist only these abilities. It must not expose third-party/default abilities, generic WordPress REST routes, or any mutation tool.
 
 ## Phase 1.3
 

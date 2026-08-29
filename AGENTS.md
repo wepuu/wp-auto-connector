@@ -8,7 +8,9 @@ Build a secure, WordPress.org-compliant WordPress connector that gives compatibl
 
 Phase 1 - Direct WordPress MCP MVP.
 
-The immediate active task is Phase 1.1: establish the direct MCP server foundation and prove the end-to-end path with one safe read-only site ability.
+Phase 1.1 is complete: the direct MCP server foundation proves the authenticated end-to-end path with the read-only `wp-auto/site-health` ability.
+
+Phase 1.2 is active. The immediate active task is Phase 1.2.0: freeze the public contracts for the read-only site and content tools before implementing them.
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
@@ -72,6 +74,15 @@ Phase 1 is not complete until at least Claude Code and one additional standard M
 - Phase 1 defaults to read + draft/editor operations only.
 - Publishing, permanent deletion, plugin/theme administration, user administration, and arbitrary settings writes are out of scope.
 - Mutation tools must later implement idempotency and optimistic concurrency as specified in the Phase 1 plan.
+
+## Phase 1.2 read-only invariants
+
+- Phase 1.2 adds read-only abilities only; it must not mutate WordPress state.
+- Search and list abilities must be bounded and paginated. Unlimited queries are prohibited.
+- WordPress authentication and object-level authorization determine visibility. Never disclose inaccessible private content or its existence.
+- Search results are lightweight discovery records. Full stored content is returned only by a get ability after target-object authorization.
+- Do not expose arbitrary post meta, custom fields, query arguments, REST routes, or registered abilities.
+- Only the explicitly approved WP-Auto abilities may enter the dedicated MCP server allowlist.
 
 ## Architecture rules
 

@@ -10,7 +10,7 @@ Status: complete baseline.
 
 Goal: a user can install WP-Auto Connector and connect a compatible MCP client directly to the WordPress site to perform safe, permission-aware WordPress operations.
 
-### Phase 1.1 - MCP server foundation
+### Phase 1.1 - MCP server foundation (complete)
 
 Goal: prove the direct MCP transport and WordPress Abilities path end to end.
 
@@ -31,7 +31,7 @@ Acceptance target:
 - unauthenticated/unauthorized invocation is rejected;
 - no content mutation exists yet.
 
-### Phase 1.2 - Read-only site/content tools
+### Phase 1.2 - Read-only site/content tools (active)
 
 Scope:
 - site info/health;
@@ -40,6 +40,18 @@ Scope:
 - categories/tags list;
 - explicit schemas and capability checks;
 - pagination/limits for list operations.
+
+Delivery checkpoints:
+
+1. **Phase 1.2.0 - Contract freeze (complete):** approved the exact ability/tool names, schemas, permission boundaries, privacy behavior, errors, and final allowlist.
+2. **Phase 1.2.1 - Site info:** implement and validate `wp-auto/site-info`.
+3. **Phase 1.2.2 - Posts search/get:** implement and validate bounded post discovery and object-authorized retrieval.
+4. **Phase 1.2.3 - Pages search/get:** implement and validate bounded page discovery and object-authorized retrieval.
+5. **Phase 1.2.4 - Categories/tags list:** implement and validate bounded taxonomy term lists.
+6. **Phase 1.2.5 - Final MCP allowlist:** expose exactly the eight approved Phase 1.2 tools through the dedicated server.
+7. **Phase 1.2.6 - Integration/security validation:** complete automated and live MCP permission, privacy, schema, and compatibility checks.
+
+Phase 1.2 is complete only when `tools/list` returns exactly eight approved tools and all seven new abilities pass live MCP invocation plus the documented permission and security scenarios. The authoritative contract is `docs/PHASE_1_2_READ_TOOLS.md`.
 
 ### Phase 1.3 - Safe draft/content mutation
 
