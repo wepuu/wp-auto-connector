@@ -139,13 +139,110 @@ A task is not complete until:
 - relevant documentation is updated;
 - the patch remains inside the requested phase/sub-phase.
 
-## Commit guidance
+## Git workflow for solo development
 
-Use small conventional commits where practical, for example:
-- `chore: initialize direct mcp phase`
-- `feat: add direct mcp server foundation`
-- `feat: expose site health ability`
-- `test: cover mcp transport permissions`
-- `docs: update mcp tool contract`
+`main` is the only long-lived branch and the only release source. Keep its history linear and keep every commit independently understandable and reversible.
 
-Do not batch unrelated features into one commit.
+### Start every task safely
+
+1. Run `git status --short --branch` and inspect the current branch and working tree.
+2. If the working tree contains changes, treat them as user-owned. Do not discard, overwrite, stash, reset, or mix them into the new task without explicit direction.
+3. Start clean work from an up-to-date `main`:
+
+```bash
+git switch main
+git pull --ff-only
+```
+
+`--ff-only` is required. If it fails, stop and inspect the divergence instead of creating an automatic merge commit.
+
+### Choose direct main or a short-lived branch
+
+Small, complete, low-risk changes may be developed directly on `main`. Examples include focused documentation fixes, a narrow test correction, or a self-contained implementation that can be completed and validated in one session.
+
+Create a short-lived branch for:
+- multi-step or unfinished work;
+- dependency upgrades;
+- cross-module refactors;
+- experimental changes;
+- security-sensitive or otherwise high-risk changes.
+
+Use these branch prefixes:
+- `feat/<short-description>`;
+- `fix/<short-description>`;
+- `chore/<short-description>`.
+
+Before merging an unpublished short-lived branch, update it onto current `main`, then fast-forward `main`:
+
+```bash
+git fetch origin
+git rebase origin/main
+git switch main
+git pull --ff-only
+git merge --ff-only <branch-name>
+git push origin main
+git branch -d <branch-name>
+```
+
+Delete the remote short-lived branch after a successful push when one was published. Never keep a second long-lived development branch.
+
+### Commit discipline
+
+- One commit must represent one independently reversible outcome. Do not batch unrelated changes.
+- Use Conventional Commits: `feat:`, `fix:`, `test:`, `docs:`, `refactor:`, `chore:`, `build:`, or `ci:`.
+- Write imperative, outcome-focused subjects, for example:
+  - `feat: expose site health ability`;
+  - `test: cover mcp transport permissions`;
+  - `docs: document direct mcp validation`.
+- Prefer `git add <explicit-paths>` or `git add -p` over broad staging.
+- Before committing, inspect `git diff`, `git diff --cached`, and `git status --short` for unrelated files, secrets, generated junk, and missing tests or docs.
+- Do not amend or rebase commits that have already been pushed. Fix published mistakes with a new commit or `git revert`.
+
+### Required checks before commit
+
+Run checks from narrowest to broadest. The minimum repository gate is:
+
+```bash
+composer validate --strict
+composer test
+composer lint
+```
+
+When `composer.json` or `composer.lock` changes, also run:
+
+```bash
+composer audit --locked
+composer install --no-dev --prefer-dist --optimize-autoloader --dry-run --no-interaction
+```
+
+Do not commit with failing checks. If a required environment is unavailable, document the exact blocker instead of claiming completion.
+
+### Checkpoints and rollback
+
+- Prefer a small committed checkpoint on a short-lived branch over long-lived `git stash` state. Temporary WIP commits must be cleaned into meaningful commits before merging.
+- To unstage a mistaken path without losing its working copy, use `git restore --staged <path>`.
+- An unpublished local commit may be adjusted with `git reset --soft HEAD~1`, but inspect the target commit first.
+- Revert any pushed change with `git revert <commit>` and push the revert normally.
+- Never use `git reset --hard`, `git checkout -- <path>`, force push, or published-history rewriting as a routine rollback mechanism.
+- Existing release tags are immutable. Never move or overwrite a published tag; create a corrective commit and a new patch release instead.
+
+### Release and tag procedure
+
+Use semantic versions and annotated tags named `vX.Y.Z`.
+
+1. Update the plugin header version, `WP_AUTO_CONNECTOR_VERSION`, `readme.txt` `Stable tag`, and changelog together.
+2. Commit the release metadata as `chore: release vX.Y.Z`.
+3. Run all required local checks, including dependency audit and production-install dry run.
+4. Push `main` and wait for the GitHub Actions quality workflow to pass.
+5. Create and push the immutable annotated tag:
+
+```bash
+git tag -a vX.Y.Z -m "WP-Auto Connector vX.Y.Z"
+git push origin vX.Y.Z
+```
+
+GitHub is the development source. WordPress.org SVN remains the release distribution source after directory approval.
+
+### Codex Git authority
+
+Codex may inspect Git state as part of normal development, but must not create commits, tags, branches, releases, or pushes unless the user explicitly requests that Git operation. Destructive Git commands and force pushes require explicit target-specific authorization and remain disallowed when a safer revert-based path exists.
