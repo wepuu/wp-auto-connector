@@ -12,6 +12,8 @@ use WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
 use WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
 use WP\MCP\Transport\HttpTransport;
 use WP_Error;
+use WPAuto\Connector\Abilities\Content\PostGetAbility;
+use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
@@ -43,7 +45,7 @@ final class McpServerRegistrarTest extends TestCase {
 	/**
 	 * Verify the exact endpoint parameters and tool allowlist.
 	 */
-	public function test_registers_a_custom_http_server_with_exact_site_allowlist(): void {
+	public function test_registers_a_custom_http_server_with_exact_allowlist(): void {
 		$adapter   = new class() {
 			/**
 			 * Captured create_server arguments.
@@ -75,10 +77,12 @@ final class McpServerRegistrarTest extends TestCase {
 			array(
 				SiteHealthAbility::NAME,
 				SiteInfoAbility::NAME,
+				PostsSearchAbility::NAME,
+				PostGetAbility::NAME,
 			),
 			$adapter->arguments[9]
 		);
-		self::assertCount( 2, $adapter->arguments[9] );
+		self::assertCount( 4, $adapter->arguments[9] );
 		self::assertSame( array(), $adapter->arguments[10] );
 		self::assertSame( array(), $adapter->arguments[11] );
 		self::assertIsCallable( $adapter->arguments[12] );

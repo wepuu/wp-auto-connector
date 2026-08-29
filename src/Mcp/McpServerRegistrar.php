@@ -7,6 +7,8 @@
 
 namespace WPAuto\Connector\Mcp;
 
+use WPAuto\Connector\Abilities\Content\PostGetAbility;
+use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
 use WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
@@ -56,6 +58,8 @@ final class McpServerRegistrar {
 			array(
 				SiteHealthAbility::NAME,
 				SiteInfoAbility::NAME,
+				PostsSearchAbility::NAME,
+				PostGetAbility::NAME,
 			),
 			array(),
 			array(),

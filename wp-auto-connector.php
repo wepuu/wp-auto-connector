@@ -26,8 +26,12 @@ define( 'WP_AUTO_CONNECTOR_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WP_AUTO_CONNECTOR_URL', plugin_dir_url( __FILE__ ) );
 
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Diagnostics/EnvironmentDiagnostics.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/ContentReadService.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Site/SiteHealthAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Site/SiteInfoAbility.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/ContentAbilityCategory.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/PostsSearchAbility.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/PostGetAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Mcp/McpAdapterLoader.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Mcp/McpServerRegistrar.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Admin/AdminPage.php';

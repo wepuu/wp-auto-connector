@@ -7,6 +7,9 @@
 
 namespace WPAuto\Connector;
 
+use WPAuto\Connector\Abilities\Content\ContentAbilityCategory;
+use WPAuto\Connector\Abilities\Content\PostGetAbility;
+use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
 use WPAuto\Connector\Admin\AdminPage;
@@ -67,8 +70,11 @@ final class Plugin {
 	 * Register the direct MCP services.
 	 */
 	public function boot(): void {
+		( new ContentAbilityCategory() )->register();
 		( new SiteHealthAbility() )->register();
 		( new SiteInfoAbility() )->register();
+		( new PostsSearchAbility() )->register();
+		( new PostGetAbility() )->register();
 		( new McpServerRegistrar() )->register();
 		McpAdapterLoader::initialize();
 
