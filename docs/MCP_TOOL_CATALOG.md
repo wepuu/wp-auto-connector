@@ -30,7 +30,7 @@ Phase 1.2 retains the implemented Phase 1.1 tool and adds seven planned read-onl
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
 | `wp-auto/site-health` | `wp-auto-site-health` | Read-only | `read` | Implemented |
-| `wp-auto/site-info` | `wp-auto-site-info` | Read-only | `read` | Planned |
+| `wp-auto/site-info` | `wp-auto-site-info` | Read-only | `read` | Implemented |
 | `wp-auto/posts-search` | `wp-auto-posts-search` | Read-only | `read` plus per-object visibility enforcement | Planned |
 | `wp-auto/post-get` | `wp-auto-post-get` | Read-only | `read_post` for the target object | Planned |
 | `wp-auto/pages-search` | `wp-auto-pages-search` | Read-only | `read` plus per-object visibility enforcement | Planned |

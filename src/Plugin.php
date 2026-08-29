@@ -8,6 +8,7 @@
 namespace WPAuto\Connector;
 
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
+use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
 use WPAuto\Connector\Admin\AdminPage;
 use WPAuto\Connector\Mcp\McpAdapterLoader;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
@@ -63,10 +64,11 @@ final class Plugin {
 	}
 
 	/**
-	 * Register the Phase 1.1 services.
+	 * Register the direct MCP services.
 	 */
 	public function boot(): void {
 		( new SiteHealthAbility() )->register();
+		( new SiteInfoAbility() )->register();
 		( new McpServerRegistrar() )->register();
 		McpAdapterLoader::initialize();
 

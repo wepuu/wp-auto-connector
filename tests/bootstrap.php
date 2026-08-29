@@ -17,6 +17,16 @@ namespace {
 	$GLOBALS['wp_auto_test_can_read']           = false;
 	$GLOBALS['wp_auto_test_logged_in']          = false;
 	$GLOBALS['wp_auto_test_is_ssl']             = true;
+	$GLOBALS['wp_auto_test_site_info']          = array(
+		'name'                => 'WP-Auto Test Site',
+		'description'         => 'A safe connector test site.',
+		'site_url'            => 'https://example.test/wordpress',
+		'home_url'            => 'https://example.test',
+		'language'            => 'en-US',
+		'timezone'            => 'Asia/Shanghai',
+		'permalink_structure' => '/%postname%/',
+		'multisite'           => false,
+	);
 
 	class WP_Ability {}
 	class WP_REST_Server {}
@@ -80,6 +90,32 @@ namespace WPAuto\Connector\Abilities\Site {
 	function __( string $text ): string {
 		return $text;
 	}
+
+	function get_bloginfo( string $show ): string {
+		return (string) $GLOBALS['wp_auto_test_site_info'][ $show ];
+	}
+
+	function get_site_url(): string {
+		return $GLOBALS['wp_auto_test_site_info']['site_url'];
+	}
+
+	function get_home_url(): string {
+		return $GLOBALS['wp_auto_test_site_info']['home_url'];
+	}
+
+	function wp_timezone_string(): string {
+		return $GLOBALS['wp_auto_test_site_info']['timezone'];
+	}
+
+	function get_option( string $option ) {
+		return 'permalink_structure' === $option
+			? $GLOBALS['wp_auto_test_site_info']['permalink_structure']
+			: false;
+	}
+
+	function is_multisite(): bool {
+		return $GLOBALS['wp_auto_test_site_info']['multisite'];
+	}
 }
 
 namespace WPAuto\Connector\Diagnostics {
@@ -113,6 +149,7 @@ namespace WPAuto\Connector\Mcp {
 namespace {
 	require_once dirname( __DIR__ ) . '/src/Diagnostics/EnvironmentDiagnostics.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteHealthAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteInfoAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpAdapterLoader.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpServerRegistrar.php';
 }

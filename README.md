@@ -6,7 +6,7 @@ Development repository for the free WordPress.org WP-Auto Connector.
 
 Phase 1 is Direct WordPress MCP. The plugin should let compatible AI agents connect directly to a WordPress site and invoke explicitly exposed, permission-aware WordPress abilities.
 
-Phase 1.1 implements the MCP server foundation and one read-only site-health ability. The dedicated endpoint is `/wp-json/wp-auto/mcp`, and the exposed MCP tool is `wp-auto-site-health`.
+Phase 1.2.1 builds on the MCP server foundation with two read-only site abilities. The dedicated endpoint is `/wp-json/wp-auto/mcp`, and the exposed MCP tools are `wp-auto-site-health` and `wp-auto-site-info`.
 
 Start with:
 
@@ -43,7 +43,7 @@ composer test
 composer lint
 ```
 
-See `docs/PHASE_1_1_VALIDATION.md` for authenticated Streamable HTTP validation with a WordPress Application Password.
+See `docs/PHASE_1_1_VALIDATION.md` and `docs/PHASE_1_2_1_VALIDATION.md` for authenticated Streamable HTTP validation with a WordPress Application Password.
 Runtime package versions, licenses, and distribution handling are documented in `docs/DEPENDENCIES.md`.
 
 Production plugin builds must install Composer dependencies without development packages and include the resulting `vendor/` directory:

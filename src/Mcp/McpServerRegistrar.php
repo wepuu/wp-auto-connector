@@ -8,6 +8,7 @@
 namespace WPAuto\Connector\Mcp;
 
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
+use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
 use WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
 use WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
 use WP\MCP\Transport\HttpTransport;
@@ -52,7 +53,10 @@ final class McpServerRegistrar {
 			array( HttpTransport::class ),
 			ErrorLogMcpErrorHandler::class,
 			NullMcpObservabilityHandler::class,
-			array( SiteHealthAbility::NAME ),
+			array(
+				SiteHealthAbility::NAME,
+				SiteInfoAbility::NAME,
+			),
 			array(),
 			array(),
 			array( $this, 'check_transport_permission' )
@@ -60,7 +64,7 @@ final class McpServerRegistrar {
 	}
 
 	/**
-	 * Require a WordPress identity with the narrow Phase 1.1 capability.
+	 * Require a WordPress identity with the narrow direct-MCP capability.
 	 *
 	 * @return bool|WP_Error
 	 */
