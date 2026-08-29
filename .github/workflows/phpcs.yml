@@ -1,4 +1,4 @@
-name: PHP Coding Standards
+name: PHP Quality
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  phpcs:
+  quality:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,8 +23,14 @@ jobs:
           tools: composer:v2
           coverage: none
 
+      - name: Validate Composer files
+        run: composer validate --strict
+
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
+
+      - name: Run PHPUnit tests
+        run: composer test
 
       - name: Run WordPress Coding Standards
         run: composer lint
