@@ -24,6 +24,8 @@ namespace {
 	$GLOBALS['wp_auto_test_terms']                = array();
 	$GLOBALS['wp_auto_test_thumbnail_ids']        = array();
 	$GLOBALS['wp_auto_test_last_query_args']      = array();
+	$GLOBALS['wp_auto_test_query_args_history']   = array();
+	$GLOBALS['wp_auto_test_object_capabilities']  = array();
 	$GLOBALS['wp_auto_test_site_info']            = array(
 		'name'                => 'WP-Auto Test Site',
 		'description'         => 'A safe connector test site.',
@@ -45,6 +47,7 @@ namespace {
 		public string $post_title;
 		public string $post_excerpt;
 		public string $post_content;
+		public string $post_password;
 		public int $post_author;
 		public string $post_date_gmt;
 		public string $post_modified_gmt;
@@ -57,6 +60,7 @@ namespace {
 			$this->post_title         = (string) ( $data['post_title'] ?? '' );
 			$this->post_excerpt       = (string) ( $data['post_excerpt'] ?? '' );
 			$this->post_content       = (string) ( $data['post_content'] ?? '' );
+			$this->post_password      = (string) ( $data['post_password'] ?? '' );
 			$this->post_author        = (int) ( $data['post_author'] ?? 1 );
 			$this->post_date_gmt      = (string) ( $data['post_date_gmt'] ?? '2026-01-01 00:00:00' );
 			$this->post_modified_gmt  = (string) ( $data['post_modified_gmt'] ?? $this->post_date_gmt );
@@ -69,6 +73,7 @@ namespace {
 
 		public function __construct( array $args ) {
 			$GLOBALS['wp_auto_test_last_query_args'] = $args;
+			$GLOBALS['wp_auto_test_query_args_history'][] = $args;
 			$posts = array_values(
 				array_filter(
 					$GLOBALS['wp_auto_test_posts'],
@@ -98,17 +103,25 @@ namespace {
 				)
 			);
 
-			$property = array(
-				'date'     => 'post_date_gmt',
-				'modified' => 'post_modified_gmt',
-				'title'    => 'post_title',
-				'ID'       => 'ID',
-			)[ $args['orderby'] ];
 			usort(
 				$posts,
-				static function ( WP_Post $left, WP_Post $right ) use ( $property, $args ): int {
-					$result = $left->{$property} <=> $right->{$property};
-					return 'ASC' === $args['order'] ? $result : -$result;
+				static function ( WP_Post $left, WP_Post $right ) use ( $args ): int {
+					$properties = array(
+						'date'     => 'post_date_gmt',
+						'modified' => 'post_modified_gmt',
+						'title'    => 'post_title',
+						'ID'       => 'ID',
+					);
+
+					foreach ( $args['orderby'] as $orderby => $direction ) {
+						$property = $properties[ $orderby ];
+						$result   = $left->{$property} <=> $right->{$property};
+						if ( 0 !== $result ) {
+							return 'ASC' === $direction ? $result : -$result;
+						}
+					}
+
+					return 0;
 				}
 			);
 
@@ -149,7 +162,15 @@ namespace {
 	}
 
 	function wp_auto_test_user_can( string $capability, int $object_id = 0 ): bool {
-		if ( 'read_post' !== $capability ) {
+		if (
+			$object_id > 0
+			&& isset( $GLOBALS['wp_auto_test_object_capabilities'][ $capability ] )
+			&& array_key_exists( $object_id, $GLOBALS['wp_auto_test_object_capabilities'][ $capability ] )
+		) {
+			return $GLOBALS['wp_auto_test_object_capabilities'][ $capability ][ $object_id ];
+		}
+
+		if ( ! in_array( $capability, array( 'read_post', 'edit_post' ), true ) ) {
 			return ! empty( $GLOBALS['wp_auto_test_capabilities'][ $capability ] );
 		}
 
@@ -158,19 +179,37 @@ namespace {
 			return false;
 		}
 
-		if ( 'publish' === $post->post_status || $post->post_author === $GLOBALS['wp_auto_test_current_user_id'] ) {
+		if ( 'read_post' === $capability && ( 'publish' === $post->post_status || $post->post_author === $GLOBALS['wp_auto_test_current_user_id'] ) ) {
 			return wp_auto_test_user_can( 'read' );
 		}
 
-		if ( 'private' === $post->post_status ) {
+		if ( 'read_post' === $capability && 'private' === $post->post_status ) {
 			return wp_auto_test_user_can( 'read_private_posts' );
 		}
 
-		if ( 'future' === $post->post_status ) {
+		if ( 'read_post' === $capability && 'future' === $post->post_status ) {
 			return wp_auto_test_user_can( 'edit_others_posts' ) && wp_auto_test_user_can( 'edit_published_posts' );
 		}
 
-		return wp_auto_test_user_can( 'edit_others_posts' );
+		if ( 'read_post' === $capability ) {
+			return wp_auto_test_user_can( 'edit_others_posts' );
+		}
+
+		if ( $post->post_author === $GLOBALS['wp_auto_test_current_user_id'] ) {
+			return in_array( $post->post_status, array( 'publish', 'future' ), true )
+				? wp_auto_test_user_can( 'edit_published_posts' )
+				: wp_auto_test_user_can( 'edit_posts' );
+		}
+
+		if ( ! wp_auto_test_user_can( 'edit_others_posts' ) ) {
+			return false;
+		}
+
+		if ( in_array( $post->post_status, array( 'publish', 'future' ), true ) ) {
+			return wp_auto_test_user_can( 'edit_published_posts' );
+		}
+
+		return 'private' !== $post->post_status || wp_auto_test_user_can( 'edit_private_posts' );
 	}
 
 	function get_post( int $post_id ) {

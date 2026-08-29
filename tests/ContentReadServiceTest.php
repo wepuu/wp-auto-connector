@@ -27,13 +27,15 @@ final class ContentReadServiceTest extends TestCase {
 	 * Reset the fake Core state for each behavior test.
 	 */
 	protected function setUp(): void {
-		$this->service                           = new ContentReadService();
-		$GLOBALS['wp_auto_test_current_user_id'] = 10;
-		$GLOBALS['wp_auto_test_capabilities']    = array( 'read' => true );
-		$GLOBALS['wp_auto_test_posts']           = array();
-		$GLOBALS['wp_auto_test_terms']           = array();
-		$GLOBALS['wp_auto_test_thumbnail_ids']   = array();
-		$GLOBALS['wp_auto_test_last_query_args'] = array();
+		$this->service                               = new ContentReadService();
+		$GLOBALS['wp_auto_test_current_user_id']     = 10;
+		$GLOBALS['wp_auto_test_capabilities']        = array( 'read' => true );
+		$GLOBALS['wp_auto_test_posts']               = array();
+		$GLOBALS['wp_auto_test_terms']               = array();
+		$GLOBALS['wp_auto_test_thumbnail_ids']       = array();
+		$GLOBALS['wp_auto_test_last_query_args']     = array();
+		$GLOBALS['wp_auto_test_query_args_history']  = array();
+		$GLOBALS['wp_auto_test_object_capabilities'] = array();
 	}
 
 	/**
@@ -53,10 +55,16 @@ final class ContentReadServiceTest extends TestCase {
 		self::assertSame( 'post', $args['post_type'] );
 		self::assertSame( 'publish', $args['post_status'] );
 		self::assertSame( '', $args['s'] );
-		self::assertSame( 11, $args['posts_per_page'] );
+		self::assertSame( 100, $args['posts_per_page'] );
 		self::assertNotSame( -1, $args['posts_per_page'] );
 		self::assertSame( 0, $args['offset'] );
-		self::assertSame( 'modified', $args['orderby'] );
+		self::assertSame(
+			array(
+				'modified' => 'DESC',
+				'ID'       => 'DESC',
+			),
+			$args['orderby']
+		);
 		self::assertSame( 'DESC', $args['order'] );
 		self::assertSame( 'readable', $args['perm'] );
 		self::assertTrue( $args['no_found_rows'] );
@@ -74,10 +82,19 @@ final class ContentReadServiceTest extends TestCase {
 		}
 
 		foreach ( array(
-			'date'     => 'date',
-			'modified' => 'modified',
-			'title'    => 'title',
-			'id'       => 'ID',
+			'date'     => array(
+				'date' => 'DESC',
+				'ID'   => 'DESC',
+			),
+			'modified' => array(
+				'modified' => 'DESC',
+				'ID'       => 'DESC',
+			),
+			'title'    => array(
+				'title' => 'DESC',
+				'ID'    => 'DESC',
+			),
+			'id'       => array( 'ID' => 'DESC' ),
 		) as $input => $mapped ) {
 			$result = $this->service->search_posts( array( 'orderby' => $input ) );
 			self::assertIsArray( $result );
@@ -117,6 +134,7 @@ final class ContentReadServiceTest extends TestCase {
 		return array(
 			'non-object'         => array( 'invalid' ),
 			'extra property'     => array( array( 'post_type' => 'page' ) ),
+			'password property'  => array( array( 'password' => 'secret' ) ),
 			'long search'        => array( array( 'search' => str_repeat( 'a', 201 ) ) ),
 			'invalid status'     => array( array( 'status' => 'any' ) ),
 			'inherit status'     => array( array( 'status' => 'inherit' ) ),
@@ -139,14 +157,14 @@ final class ContentReadServiceTest extends TestCase {
 	}
 
 	/**
-	 * Verify the maximum page size is accepted and queried as max plus one.
+	 * Verify the maximum page size is accepted inside a bounded raw scan chunk.
 	 */
 	public function test_search_accepts_per_page_fifty(): void {
 		$result = $this->service->search_posts( array( 'per_page' => 50 ) );
 
 		self::assertIsArray( $result );
 		self::assertSame( 50, $result['per_page'] );
-		self::assertSame( 51, $GLOBALS['wp_auto_test_last_query_args']['posts_per_page'] );
+		self::assertSame( 100, $GLOBALS['wp_auto_test_last_query_args']['posts_per_page'] );
 	}
 
 	/**
@@ -256,21 +274,18 @@ final class ContentReadServiceTest extends TestCase {
 	}
 
 	/**
-	 * Verify logical pages and has_more are based only on query-readable objects.
+	 * Verify logical offset is applied after final object authorization.
 	 */
-	public function test_permission_aware_pagination_ignores_interleaved_hidden_posts(): void {
-		$GLOBALS['wp_auto_test_posts'] = array(
-			$this->post( 1, 'draft', 10 ),
-			$this->post( 2, 'draft', 20 ),
-			$this->post( 3, 'draft', 20 ),
-			$this->post( 4, 'draft', 10 ),
-			$this->post( 5, 'draft', 20 ),
-			$this->post( 6, 'draft', 10 ),
+	public function test_permission_aware_pagination_starts_with_hidden_then_visible_posts(): void {
+		$GLOBALS['wp_auto_test_posts']                               = array(
+			$this->post( 1, 'publish', 20 ),
+			$this->post( 2, 'publish', 20 ),
+			$this->post( 3, 'publish', 20 ),
 		);
+		$GLOBALS['wp_auto_test_object_capabilities']['read_post'][1] = false;
 
 		$first  = $this->service->search_posts(
 			array(
-				'status'   => 'draft',
 				'page'     => 1,
 				'per_page' => 1,
 				'orderby'  => 'id',
@@ -279,41 +294,74 @@ final class ContentReadServiceTest extends TestCase {
 		);
 		$second = $this->service->search_posts(
 			array(
-				'status'   => 'draft',
 				'page'     => 2,
 				'per_page' => 1,
 				'orderby'  => 'id',
 				'order'    => 'asc',
 			)
 		);
-		$third  = $this->service->search_posts(
-			array(
-				'status'   => 'draft',
-				'page'     => 3,
-				'per_page' => 1,
-				'orderby'  => 'id',
-				'order'    => 'asc',
-			)
+		self::assertSame( array( 2 ), array_column( $first['items'], 'id' ) );
+		self::assertTrue( $first['has_more'] );
+		self::assertSame( array( 3 ), array_column( $second['items'], 'id' ) );
+		self::assertFalse( $second['has_more'] );
+	}
+
+	/**
+	 * Verify multiple interleaved final-authorization failures do not create gaps.
+	 */
+	public function test_permission_aware_pagination_ignores_multiple_interleaved_failures(): void {
+		$GLOBALS['wp_auto_test_posts']                            = array_map(
+			fn ( int $id ): WP_Post => $this->post( $id, 'publish', 20 ),
+			range( 1, 7 )
 		);
-		$beyond = $this->service->search_posts(
+		$GLOBALS['wp_auto_test_object_capabilities']['read_post'] = array(
+			1 => false,
+			3 => false,
+			4 => false,
+			6 => false,
+		);
+
+		foreach ( array( 2, 5, 7 ) as $page => $expected_id ) {
+			$result = $this->service->search_posts(
+				array(
+					'page'     => $page + 1,
+					'per_page' => 1,
+					'orderby'  => 'id',
+					'order'    => 'asc',
+				)
+			);
+
+			self::assertSame( array( $expected_id ), array_column( $result['items'], 'id' ) );
+		}
+	}
+
+	/**
+	 * Verify deep pages and authorization-heavy scans fail with a stable bound.
+	 */
+	public function test_search_returns_stable_error_when_bounded_window_cannot_be_proven(): void {
+		$deep = $this->service->search_posts(
 			array(
-				'status'   => 'draft',
-				'page'     => 4,
+				'page'     => 1000,
 				'per_page' => 1,
-				'orderby'  => 'id',
-				'order'    => 'asc',
 			)
 		);
 
-		self::assertSame( array( 1 ), array_column( $first['items'], 'id' ) );
-		self::assertTrue( $first['has_more'] );
-		self::assertSame( array( 4 ), array_column( $second['items'], 'id' ) );
-		self::assertTrue( $second['has_more'] );
-		self::assertSame( array( 6 ), array_column( $third['items'], 'id' ) );
-		self::assertFalse( $third['has_more'] );
-		self::assertSame( array(), $beyond['items'] );
-		self::assertSame( 0, $beyond['returned'] );
-		self::assertFalse( $beyond['has_more'] );
+		self::assertInstanceOf( WP_Error::class, $deep );
+		self::assertSame( 'wp_auto_pagination_window_exceeded', $deep->get_error_code() );
+		self::assertSame( array(), $GLOBALS['wp_auto_test_query_args_history'] );
+
+		$GLOBALS['wp_auto_test_posts']                            = array_map(
+			fn ( int $id ): WP_Post => $this->post( $id, 'publish', 20 ),
+			range( 1, 1000 )
+		);
+		$GLOBALS['wp_auto_test_object_capabilities']['read_post'] = array_fill_keys( range( 1, 1000 ), false );
+		$bounded = $this->service->search_posts( array( 'per_page' => 1 ) );
+
+		self::assertInstanceOf( WP_Error::class, $bounded );
+		self::assertSame( 'wp_auto_pagination_window_exceeded', $bounded->get_error_code() );
+		self::assertSame( 10, count( $GLOBALS['wp_auto_test_query_args_history'] ) );
+		self::assertSame( 900, $GLOBALS['wp_auto_test_last_query_args']['offset'] );
+		self::assertSame( 100, $GLOBALS['wp_auto_test_last_query_args']['posts_per_page'] );
 	}
 
 	/**
@@ -376,6 +424,68 @@ final class ContentReadServiceTest extends TestCase {
 	}
 
 	/**
+	 * Verify password-protected content requires read_post and edit_post.
+	 */
+	public function test_password_protected_post_requires_object_edit_permission(): void {
+		$GLOBALS['wp_auto_test_posts'] = array(
+			$this->post( 1, 'publish', 20, null, null, 'post', 'secret' ),
+		);
+
+		$rejected_get    = $this->service->get_post( array( 'id' => 1 ) );
+		$rejected_search = $this->service->search_posts(
+			array(
+				'orderby' => 'id',
+				'order'   => 'asc',
+			)
+		);
+
+		self::assertInstanceOf( WP_Error::class, $rejected_get );
+		self::assertSame( 'wp_auto_content_not_found', $rejected_get->get_error_code() );
+		self::assertSame( array(), $rejected_search['items'] );
+
+		$GLOBALS['wp_auto_test_object_capabilities']['edit_post'][1] = true;
+		$allowed_get    = $this->service->get_post( array( 'id' => 1 ) );
+		$allowed_search = $this->service->search_posts(
+			array(
+				'orderby' => 'id',
+				'order'   => 'asc',
+			)
+		);
+
+		self::assertIsArray( $allowed_get );
+		self::assertSame( 1, $allowed_get['id'] );
+		self::assertSame( array( 1 ), array_column( $allowed_search['items'], 'id' ) );
+		self::assertArrayNotHasKey( 'password', $allowed_get );
+		self::assertArrayNotHasKey( 'post_password', $allowed_get );
+	}
+
+	/**
+	 * Verify search and get share identical final eligibility decisions.
+	 */
+	public function test_search_excludes_every_post_that_get_rejects(): void {
+		$GLOBALS['wp_auto_test_posts']                               = array(
+			$this->post( 1, 'publish', 20 ),
+			$this->post( 2, 'publish', 20, null, null, 'post', 'secret' ),
+			$this->post( 3, 'publish', 20 ),
+		);
+		$GLOBALS['wp_auto_test_object_capabilities']['read_post'][3] = false;
+
+		$result = $this->service->search_posts(
+			array(
+				'orderby' => 'id',
+				'order'   => 'asc',
+			)
+		);
+
+		self::assertSame( array( 1 ), array_column( $result['items'], 'id' ) );
+		foreach ( array( 2, 3 ) as $post_id ) {
+			$error = $this->service->get_post( array( 'id' => $post_id ) );
+			self::assertInstanceOf( WP_Error::class, $error );
+			self::assertSame( 'wp_auto_content_not_found', $error->get_error_code() );
+		}
+	}
+
+	/**
 	 * Verify missing, wrong-type, and inaccessible objects are indistinguishable.
 	 */
 	public function test_get_hides_existence_for_missing_wrong_type_and_unauthorized_objects(): void {
@@ -429,6 +539,12 @@ final class ContentReadServiceTest extends TestCase {
 					'context' => 'edit',
 				),
 			),
+			'password input'   => array(
+				array(
+					'id'       => 1,
+					'password' => 'secret',
+				),
+			),
 			'non-object input' => array( 1 ),
 		);
 	}
@@ -442,6 +558,7 @@ final class ContentReadServiceTest extends TestCase {
 	 * @param string|null $date_gmt Stored GMT creation date.
 	 * @param string|null $modified_gmt Stored GMT modification date.
 	 * @param string      $post_type Post type.
+	 * @param string      $password Stored post password.
 	 */
 	private function post(
 		int $id,
@@ -449,7 +566,8 @@ final class ContentReadServiceTest extends TestCase {
 		int $author,
 		?string $date_gmt = null,
 		?string $modified_gmt = null,
-		string $post_type = 'post'
+		string $post_type = 'post',
+		string $password = ''
 	): WP_Post {
 		return new WP_Post(
 			array(
@@ -460,6 +578,7 @@ final class ContentReadServiceTest extends TestCase {
 				'post_title'        => 'Post ' . $id,
 				'post_excerpt'      => 'Stored excerpt ' . $id,
 				'post_content'      => '<!-- wp:paragraph --><p>Stored ' . $id . '</p><!-- /wp:paragraph -->',
+				'post_password'     => $password,
 				'post_author'       => $author,
 				'post_date_gmt'     => $date_gmt ?? sprintf( '2026-01-%02d 00:00:00', min( $id, 28 ) ),
 				'post_modified_gmt' => $modified_gmt ?? sprintf( '2026-02-%02d 00:00:00', min( $id, 28 ) ),

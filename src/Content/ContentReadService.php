@@ -21,6 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class ContentReadService {
 	private const MAX_SEARCH_LENGTH = 200;
 	private const MAX_PER_PAGE      = 50;
+	private const SCAN_CHUNK_SIZE   = 100;
+	private const MAX_SCAN_POSTS    = 1000;
 
 	/**
 	 * Search readable posts using the frozen Phase 1.2 contract.
@@ -34,18 +36,20 @@ final class ContentReadService {
 			return $parameters;
 		}
 
-		$offset = $this->calculate_offset( $parameters['page'], $parameters['per_page'] );
-		if ( is_wp_error( $offset ) ) {
-			return $offset;
+		$logical_offset = $this->calculate_offset( $parameters['page'], $parameters['per_page'] );
+		if ( is_wp_error( $logical_offset ) ) {
+			return $logical_offset;
+		}
+
+		if ( $logical_offset > self::MAX_SCAN_POSTS - $parameters['per_page'] - 1 ) {
+			return $this->pagination_window_exceeded();
 		}
 
 		$query_args = array(
 			'post_type'           => 'post',
 			'post_status'         => $parameters['status'],
 			's'                   => $parameters['search'],
-			'posts_per_page'      => $parameters['per_page'] + 1,
-			'offset'              => $offset,
-			'orderby'             => $this->map_orderby( $parameters['orderby'] ),
+			'orderby'             => $this->map_orderby( $parameters['orderby'], $parameters['order'] ),
 			'order'               => 'asc' === $parameters['order'] ? 'ASC' : 'DESC',
 			'perm'                => 'readable',
 			'ignore_sticky_posts' => true,
@@ -54,15 +58,9 @@ final class ContentReadService {
 
 		$this->apply_visibility_scope( $query_args, $parameters['status'] );
 
-		$query      = new WP_Query( $query_args );
-		$authorized = array();
-
-		foreach ( $query->posts as $post ) {
-			if ( ! $post instanceof WP_Post || ! current_user_can( 'read_post', $post->ID ) ) {
-				continue;
-			}
-
-			$authorized[] = $post;
+		$authorized = $this->scan_authorized_posts( $query_args, $logical_offset, $parameters['per_page'] + 1 );
+		if ( is_wp_error( $authorized ) ) {
+			return $authorized;
 		}
 
 		$has_more = count( $authorized ) > $parameters['per_page'];
@@ -100,7 +98,7 @@ final class ContentReadService {
 		if (
 			! $post instanceof WP_Post
 			|| 'post' !== $post->post_type
-			|| ! current_user_can( 'read_post', $post->ID )
+			|| ! $this->is_post_readable( $post )
 		) {
 			return $this->content_not_found();
 		}
@@ -202,6 +200,66 @@ final class ContentReadService {
 	}
 
 	/**
+	 * Scan bounded raw query chunks and apply the logical offset after authorization.
+	 *
+	 * @param array<string, mixed> $query_args Fixed safe query arguments.
+	 * @param int                  $logical_offset Number of authorized posts to skip.
+	 * @param int                  $required Number of authorized posts to collect.
+	 * @return array<int, WP_Post>|WP_Error
+	 */
+	private function scan_authorized_posts( array $query_args, int $logical_offset, int $required ) {
+		$authorized_seen = 0;
+		$raw_offset      = 0;
+		$selected        = array();
+
+		while ( $raw_offset < self::MAX_SCAN_POSTS ) {
+			$chunk_size                   = min( self::SCAN_CHUNK_SIZE, self::MAX_SCAN_POSTS - $raw_offset );
+			$query_args['posts_per_page'] = $chunk_size;
+			$query_args['offset']         = $raw_offset;
+			$query                        = new WP_Query( $query_args );
+			$raw_count                    = count( $query->posts );
+
+			foreach ( $query->posts as $post ) {
+				if ( ! $post instanceof WP_Post || ! $this->is_post_readable( $post ) ) {
+					continue;
+				}
+
+				if ( $authorized_seen >= $logical_offset ) {
+					$selected[] = $post;
+					if ( count( $selected ) >= $required ) {
+						return $selected;
+					}
+				}
+
+				++$authorized_seen;
+			}
+
+			$raw_offset += $raw_count;
+			if ( $raw_count < $chunk_size ) {
+				return $selected;
+			}
+		}
+
+		return $this->pagination_window_exceeded();
+	}
+
+	/**
+	 * Apply the shared final eligibility rule used by search and get.
+	 *
+	 * Password-protected posts require object-level edit permission because this
+	 * contract deliberately has no password input.
+	 *
+	 * @param WP_Post $post Candidate post.
+	 */
+	private function is_post_readable( WP_Post $post ): bool {
+		if ( ! current_user_can( 'read_post', $post->ID ) ) {
+			return false;
+		}
+
+		return '' === $post->post_password || current_user_can( 'edit_post', $post->ID );
+	}
+
+	/**
 	 * Limit non-public queries to the same capability scope as Core read_post.
 	 *
 	 * @param array<string, mixed> $query_args Query arguments passed by reference.
@@ -234,8 +292,10 @@ final class ContentReadService {
 	 * Map the public ordering enum to known-safe WP_Query values.
 	 *
 	 * @param string $orderby Frozen public ordering value.
+	 * @param string $order Frozen public ordering direction.
+	 * @return array<string, string>
 	 */
-	private function map_orderby( string $orderby ): string {
+	private function map_orderby( string $orderby, string $order ): array {
 		$mapping = array(
 			'date'     => 'date',
 			'modified' => 'modified',
@@ -243,7 +303,15 @@ final class ContentReadService {
 			'id'       => 'ID',
 		);
 
-		return $mapping[ $orderby ];
+		$direction = 'asc' === $order ? 'ASC' : 'DESC';
+		if ( 'id' === $orderby ) {
+			return array( 'ID' => $direction );
+		}
+
+		return array(
+			$mapping[ $orderby ] => $direction,
+			'ID'                 => $direction,
+		);
 	}
 
 	/**
@@ -309,6 +377,17 @@ final class ContentReadService {
 			'wp_auto_content_not_found',
 			__( 'The requested content was not found.', 'wp-auto-connector' ),
 			array( 'status' => 404 )
+		);
+	}
+
+	/**
+	 * Return the stable bounded-scanner error.
+	 */
+	private function pagination_window_exceeded(): WP_Error {
+		return new WP_Error(
+			'wp_auto_pagination_window_exceeded',
+			__( 'The requested page exceeds the supported search window.', 'wp-auto-connector' ),
+			array( 'status' => 400 )
 		);
 	}
 }

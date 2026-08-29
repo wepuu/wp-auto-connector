@@ -128,6 +128,10 @@ The schema and service layer must both enforce `per_page <= 50`; `-1` and other 
 
 Published posts may be returned when readable. A user may discover their own draft when WordPress permits it, but must not discover another user's draft without the relevant capability. Private posts require the WordPress capability for that object. Every returned post must independently pass the same effective read authorization used by `wp-auto/post-get`.
 
+Password-protected posts accept no password input and expose no password field. Such a post is eligible only when the authenticated identity passes both `current_user_can( 'read_post', $id )` and `current_user_can( 'edit_post', $id )`. Search and Get apply this same final eligibility rule.
+
+Logical pagination is applied after final object authorization. The implementation scans fixed raw chunks of at most 100 posts and examines at most 1,000 raw candidates per request. It collects at most `per_page + 1` authorized records after the requested logical offset. If the requested page or the density of rejected candidates prevents the service from proving that page within this bound, it returns `wp_auto_pagination_window_exceeded` with semantic status 400 instead of returning an incorrect page or `has_more` value. This limit permits normal interactive MCP pagination while bounding a request to at most ten post queries and preventing unlimited scans.
+
 ### `wp-auto/pages-search`
 
 - MCP tool: `wp-auto-pages-search`
@@ -145,6 +149,8 @@ Both get abilities accept only one required input:
 | `id` | integer | Minimum 1. |
 
 The target must exist, have the required fixed post type, and be readable by the authenticated WordPress identity. The implementation must perform target-object authorization equivalent to `current_user_can( 'read_post', $id )` before returning stored content.
+
+Because these contracts have no password input, a password-protected target additionally requires `current_user_can( 'edit_post', $id )`. Failure uses the same existence-hiding response as every other inaccessible target. Password values are never accepted or returned.
 
 A missing object, wrong post type, or inaccessible object must produce the same public error code, `wp_auto_content_not_found`, with semantic HTTP status 404. The response must not reveal which condition occurred or disclose object existence.
 
@@ -251,6 +257,7 @@ Phase 1.2 validation must cover at least a published post, the caller's own draf
 - Missing WordPress authentication keeps the existing transport response: HTTP 401.
 - An authenticated identity lacking the transport `read` capability keeps the existing transport response: HTTP 403.
 - Missing, wrong-type, and inaccessible content lookups all use `wp_auto_content_not_found` with semantic status 404.
+- A content search page that cannot be established within the documented bounded authorization scan uses `wp_auto_pagination_window_exceeded` with semantic status 400.
 - Input rejection is driven through WordPress Abilities API and official MCP Adapter schema validation; Phase 1.2 does not add a separate protocol implementation.
 - Any future application-specific error must use a documented `wp_auto_`-prefixed code.
 
