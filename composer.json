@@ -1,0 +1,30 @@
+{
+  "name": "wp-auto/wp-auto-connector",
+  "description": "Development tooling for the WP-Auto Connector WordPress plugin.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.1",
+    "automattic/jetpack-autoloader": "^5.0",
+    "wordpress/mcp-adapter": "0.6.1"
+  },
+  "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "phpcompatibility/php-compatibility": "^9.3",
+    "phpunit/phpunit": "^9.6",
+    "squizlabs/php_codesniffer": "^3.10",
+    "wp-coding-standards/wpcs": "^3.1"
+  },
+  "scripts": {
+    "lint": "phpcs -p .",
+    "lint:fix": "phpcbf -p .",
+    "test": "phpunit"
+  },
+  "config": {
+    "allow-plugins": {
+      "automattic/jetpack-autoloader": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    },
+    "sort-packages": true
+  }
+}

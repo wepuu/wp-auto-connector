@@ -1,0 +1,15 @@
+.git
+.github
+.gitignore
+.distignore
+AGENTS.md
+README.md
+docs
+composer.json
+composer.lock
+phpcs.xml.dist
+tests
+node_modules
+build
+dist
+vendor/wordpress/mcp-adapter/mcp-adapter.php
