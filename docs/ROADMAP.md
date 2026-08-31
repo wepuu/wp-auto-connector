@@ -47,8 +47,8 @@ Delivery checkpoints:
 2. **Phase 1.2.1 - Site info (complete):** implemented and validated `wp-auto/site-info`.
 3. **Phase 1.2.2 - Posts search/get (complete):** implemented and validated bounded post discovery and object-authorized retrieval.
 4. **Phase 1.2.3 - Pages search/get (complete):** implemented and validated bounded page discovery and object-authorized retrieval.
-5. **Phase 1.2.4 - Categories/tags list (next):** implement and validate bounded taxonomy term lists.
-6. **Phase 1.2.5 - Final MCP allowlist:** expose exactly the eight approved Phase 1.2 tools through the dedicated server.
+5. **Phase 1.2.4 - Categories/tags list (complete):** implemented and validated bounded taxonomy term lists and extended the dedicated server to all eight approved tools.
+6. **Phase 1.2.5 - Final MCP allowlist audit (next):** audit and freeze the exact eight-tool allowlist, public schemas, and security boundaries without adding tools.
 7. **Phase 1.2.6 - Integration/security validation:** complete automated and live MCP permission, privacy, schema, and compatibility checks.
 
 Phase 1.2 is complete only when `tools/list` returns exactly eight approved tools and all seven new abilities pass live MCP invocation plus the documented permission and security scenarios. The authoritative contract is `docs/PHASE_1_2_READ_TOOLS.md`.
@@ -77,7 +77,7 @@ Scope:
 ### Phase 1.5 - Taxonomy
 
 Scope:
-- categories/tags list;
+- reuse the Phase 1.2 category/tag list contracts;
 - category/tag create with capabilities;
 - assign terms to supported content.
 

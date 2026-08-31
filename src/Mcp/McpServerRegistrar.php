@@ -13,6 +13,8 @@ use WPAuto\Connector\Abilities\Content\PostGetAbility;
 use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
+use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
+use WPAuto\Connector\Abilities\Taxonomy\TagsListAbility;
 use WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
 use WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
 use WP\MCP\Transport\HttpTransport;
@@ -64,6 +66,8 @@ final class McpServerRegistrar {
 				PostGetAbility::NAME,
 				PagesSearchAbility::NAME,
 				PageGetAbility::NAME,
+				CategoriesListAbility::NAME,
+				TagsListAbility::NAME,
 			),
 			array(),
 			array(),

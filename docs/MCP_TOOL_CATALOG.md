@@ -25,7 +25,7 @@ Output fields:
 
 ## Phase 1.2
 
-Phase 1.2 retains the implemented Phase 1.1 tool and adds seven planned read-only tools. Its expected final dedicated-server count is exactly eight. Full schemas, authorization rules, privacy behavior, and errors are frozen in `docs/PHASE_1_2_READ_TOOLS.md`.
+Phase 1.2 retains the implemented Phase 1.1 tool and adds seven read-only tools. All eight approved tools are implemented as of Phase 1.2.4. Full schemas, authorization rules, privacy behavior, and errors are frozen in `docs/PHASE_1_2_READ_TOOLS.md`.
 
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
@@ -35,8 +35,8 @@ Phase 1.2 retains the implemented Phase 1.1 tool and adds seven planned read-onl
 | `wp-auto/post-get` | `wp-auto-post-get` | Read-only | `read_post`; protected posts also require `edit_post` | Implemented |
 | `wp-auto/pages-search` | `wp-auto-pages-search` | Read-only | `read` plus final per-object eligibility; protected pages also require `edit_post` | Implemented |
 | `wp-auto/page-get` | `wp-auto-page-get` | Read-only | `read_post`; protected pages also require `edit_post` | Implemented |
-| `wp-auto/categories-list` | `wp-auto-categories-list` | Read-only | `read` | Planned |
-| `wp-auto/tags-list` | `wp-auto-tags-list` | Read-only | `read` | Planned |
+| `wp-auto/categories-list` | `wp-auto-categories-list` | Read-only | `read` | Implemented |
+| `wp-auto/tags-list` | `wp-auto-tags-list` | Read-only | `read` | Implemented |
 
 The dedicated server must explicitly allowlist only these abilities. It must not expose third-party/default abilities, generic WordPress REST routes, or any mutation tool.
 

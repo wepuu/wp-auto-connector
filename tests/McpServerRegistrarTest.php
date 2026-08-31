@@ -18,6 +18,8 @@ use WPAuto\Connector\Abilities\Content\PostGetAbility;
 use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
+use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
+use WPAuto\Connector\Abilities\Taxonomy\TagsListAbility;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
 
 /**
@@ -83,10 +85,12 @@ final class McpServerRegistrarTest extends TestCase {
 				PostGetAbility::NAME,
 				PagesSearchAbility::NAME,
 				PageGetAbility::NAME,
+				CategoriesListAbility::NAME,
+				TagsListAbility::NAME,
 			),
 			$adapter->arguments[9]
 		);
-		self::assertCount( 6, $adapter->arguments[9] );
+		self::assertCount( 8, $adapter->arguments[9] );
 		self::assertSame( array(), $adapter->arguments[10] );
 		self::assertSame( array(), $adapter->arguments[11] );
 		self::assertIsCallable( $adapter->arguments[12] );

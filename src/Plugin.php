@@ -14,6 +14,9 @@ use WPAuto\Connector\Abilities\Content\PostGetAbility;
 use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
+use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
+use WPAuto\Connector\Abilities\Taxonomy\TagsListAbility;
+use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAbilityCategory;
 use WPAuto\Connector\Admin\AdminPage;
 use WPAuto\Connector\Mcp\McpAdapterLoader;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
@@ -73,12 +76,15 @@ final class Plugin {
 	 */
 	public function boot(): void {
 		( new ContentAbilityCategory() )->register();
+		( new TaxonomyAbilityCategory() )->register();
 		( new SiteHealthAbility() )->register();
 		( new SiteInfoAbility() )->register();
 		( new PostsSearchAbility() )->register();
 		( new PostGetAbility() )->register();
 		( new PagesSearchAbility() )->register();
 		( new PageGetAbility() )->register();
+		( new CategoriesListAbility() )->register();
+		( new TagsListAbility() )->register();
 		( new McpServerRegistrar() )->register();
 		McpAdapterLoader::initialize();
 

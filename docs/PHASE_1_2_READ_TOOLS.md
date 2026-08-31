@@ -246,6 +246,10 @@ Each item contains exactly `id` (integer), `name` (string), `slug` (string), `de
 
 Neither ability can create, edit, assign, or delete terms.
 
+Both lists use one bounded `WP_Term_Query` through `get_terms()`. The taxonomy is fixed server-side, `number` is `per_page + 1`, and `hierarchical` is `false` so Core applies the SQL limit instead of loading an entire category hierarchy before slicing. Consequently, `hide_empty` uses each term's direct stored count and does not retain an empty parent solely because a descendant is non-empty. `pad_counts` and term-meta cache priming are disabled.
+
+For `name`, `count`, and `slug`, the requested primary order has a same-direction `term_id` tie-breaker scoped only to the WP-Auto query. `id` maps directly to `term_id`. This deterministic ordering prevents equal primary values from causing duplicates or gaps between pages. `count` is the value maintained by WordPress Core for the taxonomy; WP-Auto does not calculate a separate private-content or per-identity total.
+
 ## Authentication and authorization
 
 The existing transport contract remains: remote clients use a WordPress Application Password with HTTP Basic authentication over HTTPS; anonymous requests are denied; and the transport requires `read`. Local development may use HTTP only as already documented.
@@ -262,6 +266,7 @@ Phase 1.2 validation must cover at least a published post, the caller's own draf
 - An authenticated identity lacking the transport `read` capability keeps the existing transport response: HTTP 403.
 - Missing, wrong-type, and inaccessible content lookups all use `wp_auto_content_not_found` with semantic status 404.
 - A content search page that cannot be established within the documented bounded authorization scan uses `wp_auto_pagination_window_exceeded` with semantic status 400.
+- A fixed taxonomy query failure uses `wp_auto_taxonomy_query_failed` with semantic status 500 and a generic message that does not expose internal errors.
 - Input rejection is driven through WordPress Abilities API and official MCP Adapter schema validation; Phase 1.2 does not add a separate protocol implementation.
 - Any future application-specific error must use a documented `wp_auto_`-prefixed code.
 
@@ -277,8 +282,8 @@ Implement and review Phase 1.2 in this order without combining checkpoints:
 2. Phase 1.2.1 - implement site info.
 3. Phase 1.2.2 - implement posts search/get.
 4. Phase 1.2.3 - implement pages search/get.
-5. Phase 1.2.4 - implement categories/tags list.
-6. Phase 1.2.5 - finalize the exact eight-ability MCP allowlist.
+5. Phase 1.2.4 - implement categories/tags list and extend the dedicated server to the eight approved abilities.
+6. Phase 1.2.5 - audit and freeze the exact eight-ability MCP allowlist, schemas, and security boundaries.
 7. Phase 1.2.6 - complete integration and security validation.
 
 ## Definition of done
@@ -303,6 +308,6 @@ Phase 1.2 is complete only when all of the following are true:
 
 Phase 1.2 does not implement or design in detail post creation, post update, page creation, page update, publishing, scheduling, deletion, media, remote media import, taxonomy creation, taxonomy assignment, SEO, Cloud MCP, SaaS pairing, OAuth, Skills, automation, Google Search Console integration, analytics, telemetry, billing, arbitrary post meta, arbitrary WordPress queries, generic REST proxying, or administrative operations.
 
-## Next task after contract freeze
+## Next implementation checkpoint
 
-Phase 1.2.1 only: implement `wp-auto/site-info` exactly as specified here, with its strict empty input schema, exact safe output schema, `read` permission callback, dedicated-server allowlist entry for the checkpoint, and focused automated/live validation. Do not start content or taxonomy abilities in that task.
+Phase 1.2.5 only: audit and freeze the exact eight-tool allowlist, public schemas, authentication/authorization boundaries, and regression evidence. Do not add tools or begin Phase 1.2.6 integration/security validation in that task.
