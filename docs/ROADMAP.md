@@ -48,8 +48,8 @@ Delivery checkpoints:
 3. **Phase 1.2.2 - Posts search/get (complete):** implemented and validated bounded post discovery and object-authorized retrieval.
 4. **Phase 1.2.3 - Pages search/get (complete):** implemented and validated bounded page discovery and object-authorized retrieval.
 5. **Phase 1.2.4 - Categories/tags list (complete):** implemented and validated bounded taxonomy term lists and extended the dedicated server to all eight approved tools.
-6. **Phase 1.2.5 - Final MCP allowlist audit (next):** audit and freeze the exact eight-tool allowlist, public schemas, and security boundaries without adding tools.
-7. **Phase 1.2.6 - Integration/security validation:** complete automated and live MCP permission, privacy, schema, and compatibility checks.
+6. **Phase 1.2.5 - Final MCP allowlist audit (complete):** audited and froze the exact eight-tool allowlist, public schemas, annotations, errors, and security/resource boundaries without adding tools.
+7. **Phase 1.2.6 - Integration/security validation (next):** complete automated and live MCP permission, privacy, schema, and compatibility checks.
 
 Phase 1.2 is complete only when `tools/list` returns exactly eight approved tools and all seven new abilities pass live MCP invocation plus the documented permission and security scenarios. The authoritative contract is `docs/PHASE_1_2_READ_TOOLS.md`.
 

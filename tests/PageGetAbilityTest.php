@@ -64,17 +64,25 @@ final class PageGetAbilityTest extends TestCase {
 
 		self::assertSame( PageGetAbility::NAME, $registration['name'] );
 		self::assertSame( ContentAbilityCategory::SLUG, $args['category'] );
+		self::assertSame( 'object', $input['type'] );
 		self::assertFalse( $input['additionalProperties'] );
 		self::assertSame( array( 'id' ), array_keys( $input['properties'] ) );
 		self::assertSame( 'integer', $input['properties']['id']['type'] );
 		self::assertSame( 1, $input['properties']['id']['minimum'] );
 		self::assertSame( array( 'id' ), $input['required'] );
+		self::assertSame( 'object', $output['type'] );
 		self::assertFalse( $output['additionalProperties'] );
 		self::assertSame( $fields, array_keys( $output['properties'] ) );
 		self::assertSame( $fields, $output['required'] );
+		self::assertSame(
+			array( 'integer', 'string', 'string', 'string', 'string', 'string', 'string', 'string', 'integer', 'string', 'string', 'integer', 'integer' ),
+			array_column( $output['properties'], 'type' )
+		);
 		self::assertSame( array( 'page' ), $output['properties']['type']['enum'] );
 		self::assertSame( 'integer', $output['properties']['parent_id']['type'] );
-		self::assertSame( array( true, false, true ), array_values( $args['meta']['annotations'] ) );
+		self::assertTrue( $args['meta']['annotations']['readonly'] );
+		self::assertFalse( $args['meta']['annotations']['destructive'] );
+		self::assertTrue( $args['meta']['annotations']['idempotent'] );
 	}
 
 	/**

@@ -348,6 +348,7 @@ final class ContentReadServiceTest extends TestCase {
 
 		self::assertInstanceOf( WP_Error::class, $deep );
 		self::assertSame( 'wp_auto_pagination_window_exceeded', $deep->get_error_code() );
+		self::assertSame( array( 'status' => 400 ), $deep->get_error_data() );
 		self::assertSame( array(), $GLOBALS['wp_auto_test_query_args_history'] );
 
 		$GLOBALS['wp_auto_test_posts']                            = array_map(
@@ -359,6 +360,7 @@ final class ContentReadServiceTest extends TestCase {
 
 		self::assertInstanceOf( WP_Error::class, $bounded );
 		self::assertSame( 'wp_auto_pagination_window_exceeded', $bounded->get_error_code() );
+		self::assertSame( array( 'status' => 400 ), $bounded->get_error_data() );
 		self::assertSame( 10, count( $GLOBALS['wp_auto_test_query_args_history'] ) );
 		self::assertSame( 900, $GLOBALS['wp_auto_test_last_query_args']['offset'] );
 		self::assertSame( 100, $GLOBALS['wp_auto_test_last_query_args']['posts_per_page'] );
@@ -781,6 +783,7 @@ final class ContentReadServiceTest extends TestCase {
 		);
 		self::assertInstanceOf( WP_Error::class, $deep );
 		self::assertSame( 'wp_auto_pagination_window_exceeded', $deep->get_error_code() );
+		self::assertSame( array( 'status' => 400 ), $deep->get_error_data() );
 		self::assertSame( array(), $GLOBALS['wp_auto_test_query_args_history'] );
 
 		$GLOBALS['wp_auto_test_posts']                            = array_map(
@@ -791,6 +794,7 @@ final class ContentReadServiceTest extends TestCase {
 		$bounded = $this->service->search_pages( array( 'per_page' => 1 ) );
 		self::assertInstanceOf( WP_Error::class, $bounded );
 		self::assertSame( 'wp_auto_pagination_window_exceeded', $bounded->get_error_code() );
+		self::assertSame( array( 'status' => 400 ), $bounded->get_error_data() );
 		self::assertSame( 10, count( $GLOBALS['wp_auto_test_query_args_history'] ) );
 		self::assertSame( 900, $GLOBALS['wp_auto_test_last_query_args']['offset'] );
 	}

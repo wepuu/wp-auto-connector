@@ -6,7 +6,7 @@ Development repository for the free WordPress.org WP-Auto Connector.
 
 Phase 1 is Direct WordPress MCP. The plugin should let compatible AI agents connect directly to a WordPress site and invoke explicitly exposed, permission-aware WordPress abilities.
 
-Phase 1.2.4 builds on the MCP server foundation with eight read-only site, content, and taxonomy abilities. The dedicated endpoint is `/wp-json/wp-auto/mcp`, and the exposed MCP tools are `wp-auto-site-health`, `wp-auto-site-info`, `wp-auto-posts-search`, `wp-auto-post-get`, `wp-auto-pages-search`, `wp-auto-page-get`, `wp-auto-categories-list`, and `wp-auto-tags-list`.
+Phase 1.2.5 freezes the audited public contract for eight read-only site, content, and taxonomy abilities. The dedicated endpoint is `/wp-json/wp-auto/mcp`, and the exposed MCP tools are `wp-auto-site-health`, `wp-auto-site-info`, `wp-auto-posts-search`, `wp-auto-post-get`, `wp-auto-pages-search`, `wp-auto-page-get`, `wp-auto-categories-list`, and `wp-auto-tags-list`. Phase 1.2.6 full integration/security validation is next.
 
 Start with:
 

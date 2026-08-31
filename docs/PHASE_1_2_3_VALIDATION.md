@@ -23,7 +23,7 @@ Missing, wrong-type, unauthorized, and inaccessible password-protected targets a
 
 ## Automated validation
 
-Executed on 2026-08-29:
+Executed on 2026-08-31:
 
 - PHPUnit: 93 tests, 514 assertions passed.
 - WordPress Coding Standards: 26 files passed.
@@ -61,7 +61,7 @@ The disposable `map_meta_cap` file was removed immediately after its pagination 
 
 ## Quality gates
 
-Executed on 2026-08-29 after implementation and documentation updates:
+Executed on 2026-08-31 after implementation and documentation updates:
 
 - `composer validate --strict`: passed.
 - `composer test`: passed; 93 tests and 514 assertions.

@@ -25,7 +25,7 @@ Output fields:
 
 ## Phase 1.2
 
-Phase 1.2 retains the implemented Phase 1.1 tool and adds seven read-only tools. All eight approved tools are implemented as of Phase 1.2.4. Full schemas, authorization rules, privacy behavior, and errors are frozen in `docs/PHASE_1_2_READ_TOOLS.md`.
+Phase 1.2 retains the implemented Phase 1.1 tool and adds seven read-only tools. All eight approved tools are implemented and their public contracts were audited in Phase 1.2.5. Full schemas, authorization rules, privacy behavior, and errors are frozen in `docs/PHASE_1_2_READ_TOOLS.md`.
 
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
