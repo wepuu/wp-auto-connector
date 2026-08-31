@@ -248,6 +248,8 @@ Neither ability can create, edit, assign, or delete terms.
 
 Both lists use one bounded `WP_Term_Query` through `get_terms()`. The taxonomy is fixed server-side, `number` is `per_page + 1`, and `hierarchical` is `false` so Core applies the SQL limit instead of loading an entire category hierarchy before slicing. Consequently, `hide_empty` uses each term's direct stored count and does not retain an empty parent solely because a descendant is non-empty. `pad_counts` and term-meta cache priming are disabled.
 
+Taxonomy pagination also has an internal 1,000-position query window that includes the requested offset and the `per_page + 1` rows used to establish `has_more`. A valid integer page outside this operational window returns `wp_auto_pagination_window_exceeded` with semantic status 400 before a Core term query or stable-order filter is created. The public schema remains unchanged: `page` still has a minimum of 1, but pathological deep pages are intentionally unsupported.
+
 For `name`, `count`, and `slug`, the requested primary order has a same-direction `term_id` tie-breaker scoped only to the WP-Auto query. `id` maps directly to `term_id`. This deterministic ordering prevents equal primary values from causing duplicates or gaps between pages. `count` is the value maintained by WordPress Core for the taxonomy; WP-Auto does not calculate a separate private-content or per-identity total.
 
 ## Authentication and authorization
@@ -266,6 +268,7 @@ Phase 1.2 validation must cover at least a published post, the caller's own draf
 - An authenticated identity lacking the transport `read` capability keeps the existing transport response: HTTP 403.
 - Missing, wrong-type, and inaccessible content lookups all use `wp_auto_content_not_found` with semantic status 404.
 - A content search page that cannot be established within the documented bounded authorization scan uses `wp_auto_pagination_window_exceeded` with semantic status 400.
+- A taxonomy page outside the internal safe query window uses `wp_auto_pagination_window_exceeded` with semantic status 400 before querying Core.
 - A fixed taxonomy query failure uses `wp_auto_taxonomy_query_failed` with semantic status 500 and a generic message that does not expose internal errors.
 - Input rejection is driven through WordPress Abilities API and official MCP Adapter schema validation; Phase 1.2 does not add a separate protocol implementation.
 - Any future application-specific error must use a documented `wp_auto_`-prefixed code.

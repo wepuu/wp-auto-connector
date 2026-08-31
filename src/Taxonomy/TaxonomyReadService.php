@@ -18,9 +18,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Provides strict, bounded category and tag list operations.
  */
 final class TaxonomyReadService {
-	private const MAX_SEARCH_LENGTH = 200;
-	private const MAX_PER_PAGE      = 50;
-	private const QUERY_MARKER      = 'wp_auto_connector_stable_terms_order';
+	private const MAX_SEARCH_LENGTH     = 200;
+	private const MAX_PER_PAGE          = 50;
+	private const MAX_TERM_QUERY_WINDOW = 1000;
+	private const QUERY_MARKER          = 'wp_auto_connector_stable_terms_order';
 
 	/**
 	 * List categories using the frozen Phase 1.2 contract.
@@ -59,6 +60,10 @@ final class TaxonomyReadService {
 		$offset = $this->calculate_offset( $parameters['page'], $parameters['per_page'] );
 		if ( is_wp_error( $offset ) ) {
 			return $offset;
+		}
+
+		if ( $offset > self::MAX_TERM_QUERY_WINDOW - $parameters['per_page'] - 1 ) {
+			return $this->pagination_window_exceeded();
 		}
 
 		$query_args = array(
@@ -218,7 +223,12 @@ final class TaxonomyReadService {
 			return $this->invalid_request();
 		}
 
-		return ( $page - 1 ) * $per_page;
+		$offset = ( $page - 1 ) * $per_page;
+		if ( $offset > PHP_INT_MAX - $per_page - 1 ) {
+			return $this->invalid_request();
+		}
+
+		return $offset;
 	}
 
 	/**
@@ -237,6 +247,17 @@ final class TaxonomyReadService {
 		return new WP_Error(
 			'wp_auto_invalid_request',
 			__( 'The request parameters are invalid.', 'wp-auto-connector' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	/**
+	 * Return the stable bounded-pagination error.
+	 */
+	private function pagination_window_exceeded(): WP_Error {
+		return new WP_Error(
+			'wp_auto_pagination_window_exceeded',
+			__( 'The requested page exceeds the supported search window.', 'wp-auto-connector' ),
 			array( 'status' => 400 )
 		);
 	}

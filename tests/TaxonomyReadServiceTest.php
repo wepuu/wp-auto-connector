@@ -160,6 +160,79 @@ final class TaxonomyReadServiceTest extends TestCase {
 	}
 
 	/**
+	 * Verify a pathological Category offset is rejected before query setup.
+	 */
+	public function test_rejects_deep_category_page_before_query_or_filter(): void {
+		$result = $this->service->list_categories(
+			array(
+				'page'     => 10000000,
+				'per_page' => 50,
+			)
+		);
+
+		self::assertInstanceOf( WP_Error::class, $result );
+		self::assertSame( 'wp_auto_pagination_window_exceeded', $result->get_error_code() );
+		self::assertSame( array( 'status' => 400 ), $result->get_error_data() );
+		self::assertSame( array(), $GLOBALS['wp_auto_test_term_query_history'] );
+		self::assertEmpty( $GLOBALS['wp_auto_test_filters'] );
+	}
+
+	/**
+	 * Verify Tags share the same pre-query deep-page protection.
+	 */
+	public function test_rejects_deep_tag_page_before_query_or_filter(): void {
+		$result = $this->service->list_tags(
+			array(
+				'page'     => 10000000,
+				'per_page' => 50,
+			)
+		);
+
+		self::assertInstanceOf( WP_Error::class, $result );
+		self::assertSame( 'wp_auto_pagination_window_exceeded', $result->get_error_code() );
+		self::assertSame( 'The requested page exceeds the supported search window.', $result->get_error_message() );
+		self::assertSame( array(), $GLOBALS['wp_auto_test_term_query_history'] );
+		self::assertEmpty( $GLOBALS['wp_auto_test_filters'] );
+	}
+
+	/**
+	 * Verify the highest exact one-item query window remains supported.
+	 */
+	public function test_allows_maximum_supported_term_query_window(): void {
+		$result = $this->service->list_categories(
+			array(
+				'page'     => 999,
+				'per_page' => 1,
+			)
+		);
+
+		self::assertIsArray( $result );
+		self::assertCount( 1, $GLOBALS['wp_auto_test_term_query_history'] );
+		self::assertSame( 998, $GLOBALS['wp_auto_test_last_term_query_args']['offset'] );
+		self::assertSame( 2, $GLOBALS['wp_auto_test_last_term_query_args']['number'] );
+		self::assertSame( 999, $result['page'] );
+		self::assertEmpty( $GLOBALS['wp_auto_test_filters']['terms_clauses'][10] );
+	}
+
+	/**
+	 * Verify the first one-item page beyond the window is rejected.
+	 */
+	public function test_rejects_first_unsupported_term_query_window(): void {
+		$result = $this->service->list_categories(
+			array(
+				'page'     => 1000,
+				'per_page' => 1,
+			)
+		);
+
+		self::assertInstanceOf( WP_Error::class, $result );
+		self::assertSame( 'wp_auto_pagination_window_exceeded', $result->get_error_code() );
+		self::assertSame( array( 'status' => 400 ), $result->get_error_data() );
+		self::assertSame( array(), $GLOBALS['wp_auto_test_term_query_history'] );
+		self::assertEmpty( $GLOBALS['wp_auto_test_filters'] );
+	}
+
+	/**
 	 * Verify search and direct-count hide-empty semantics stay inside the fixed query.
 	 */
 	public function test_search_and_hide_empty_filter_direct_term_counts(): void {
@@ -293,16 +366,18 @@ final class TaxonomyReadServiceTest extends TestCase {
 	 * Verify an offset that cannot be represented is rejected before querying.
 	 */
 	public function test_rejects_offset_overflow_before_query(): void {
-		$result = $this->service->list_tags(
-			array(
-				'page'     => PHP_INT_MAX,
-				'per_page' => 2,
-			)
-		);
+		foreach ( array( 1, 2 ) as $per_page ) {
+			$result = $this->service->list_tags(
+				array(
+					'page'     => PHP_INT_MAX,
+					'per_page' => $per_page,
+				)
+			);
 
-		self::assertInstanceOf( WP_Error::class, $result );
-		self::assertSame( 'wp_auto_invalid_request', $result->get_error_code() );
-		self::assertSame( array(), $GLOBALS['wp_auto_test_term_query_history'] );
+			self::assertInstanceOf( WP_Error::class, $result );
+			self::assertSame( 'wp_auto_invalid_request', $result->get_error_code() );
+			self::assertSame( array(), $GLOBALS['wp_auto_test_term_query_history'] );
+		}
 	}
 
 	/**

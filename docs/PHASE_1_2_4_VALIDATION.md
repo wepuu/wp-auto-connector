@@ -15,6 +15,8 @@ The dedicated server allowlist now contains exactly eight abilities: the existin
 
 The taxonomy abilities use a dedicated `TaxonomyReadService`; they do not reuse the content object's authorization scanner or accept arbitrary `WP_Term_Query` arguments. The service independently validates the six frozen inputs, fixes the taxonomy internally, rejects extra parameters, and issues one query with `number = per_page + 1`, `per_page <= 50`, and a safely calculated offset.
 
+Taxonomy queries use the internal `MAX_TERM_QUERY_WINDOW = 1000` bound. The window measures `offset + number`, including the extra lookahead row used for `has_more`, and limits pathological deep SQL `OFFSET` traversal while retaining ordinary interactive term browsing. Integer multiplication and lookahead addition are checked for representability first; invalid arithmetic returns `wp_auto_invalid_request`. Representable requests outside the operational window return `wp_auto_pagination_window_exceeded` with semantic status 400. Rejection occurs before the stable-order filter is installed or `get_terms()` is called, and the limit is not exposed as an MCP input.
+
 `hierarchical` is always false so WordPress applies the SQL limit even for Categories. `pad_counts` and term-meta cache priming are disabled. `hide_empty` therefore uses direct stored term counts rather than retaining an empty parent because of a non-empty descendant. `name`, `count`, and `slug` orderings receive a same-direction `term_id` tie-breaker through a query-scoped filter that is removed in `finally`; `id` maps directly to `term_id`.
 
 Category output contains exactly `id`, `name`, `slug`, `description`, `count`, and `parent_id`. Tag output omits `parent_id`. Neither result exposes term meta, taxonomy, links, totals, or total pages. WordPress query errors become the generic `wp_auto_taxonomy_query_failed` error with semantic status 500.
@@ -23,11 +25,11 @@ Category output contains exactly `id`, `name`, `slug`, `description`, `count`, a
 
 Executed on 2026-08-31:
 
-- PHPUnit: 128 tests, 695 assertions passed.
+- PHPUnit: 132 tests, 719 assertions passed.
 - WordPress Coding Standards: 34 files passed.
 - All 93 pre-Phase-1.2.4 tests passed as a regression gate.
 
-Coverage includes both canonical abilities, hooks, taxonomy category, strict schemas, annotations, baseline `read`, defaults/enums/bounds, search length, strict `hide_empty`, rejected extra/query-injection inputs, offset overflow, fixed taxonomy, one bounded query, direct-count hide-empty semantics, exact Category/Tag outputs, raw stored descriptions, no totals/meta, `per_page + 1` pagination, deterministic ID tie-breaking, filter cleanup, generic query errors, production loading, and the exact eight-ability allowlist.
+Coverage includes both canonical abilities, hooks, taxonomy category, strict schemas, annotations, baseline `read`, defaults/enums/bounds, search length, strict `hide_empty`, rejected extra/query-injection inputs, offset and lookahead overflow, pre-query deep-page rejection for Categories and Tags, exact supported/unsupported window boundaries, fixed taxonomy, one bounded query, direct-count hide-empty semantics, exact Category/Tag outputs, raw stored descriptions, no totals/meta, `per_page + 1` pagination, deterministic ID tie-breaking, filter cleanup, generic query errors, production loading, and the exact eight-ability allowlist.
 
 ## Live WordPress and MCP validation
 
@@ -51,6 +53,8 @@ Validated against a disposable WordPress 6.9 / PHP 8.1.34 / MariaDB 11 environme
 | Anonymous initialize | HTTP 401 |
 | Authenticated identity without `read` | HTTP 403 |
 
+A focused follow-up validation of the deep-pagination guard used the same disposable WordPress 6.9 / PHP 8.1.34 stack. With MCP protocol `2025-11-25`, `tools/list` still returned exactly eight tools, `wp-auto-categories-list` accepted the maximum supported request (`page=999`, `per_page=1`), and rejected the first unsupported request (`page=1000`, `per_page=1`) as an MCP application error. Both tool calls completed through the authenticated HTTP endpoint; the out-of-window request was rejected by the service before any term query.
+
 All containers, database and WordPress volumes, isolated network, fixtures, users, and Application Passwords were deleted after validation. No credential, temporary script, or Docker artifact remains in the repository.
 
 ## Quality gates
@@ -58,7 +62,7 @@ All containers, database and WordPress volumes, isolated network, fixtures, user
 Executed on 2026-08-31 after implementation and documentation updates:
 
 - `composer validate --strict`: passed.
-- `composer test`: passed; 128 tests and 695 assertions.
+- `composer test`: passed; 132 tests and 719 assertions.
 - `composer lint`: passed; 34 files checked.
 - `composer audit --locked`: passed; no security vulnerability advisories found.
 - `git diff --check`: passed.
