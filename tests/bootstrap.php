@@ -49,6 +49,7 @@ namespace {
 		public string $post_content;
 		public string $post_password;
 		public int $post_author;
+		public int $post_parent;
 		public string $post_date_gmt;
 		public string $post_modified_gmt;
 
@@ -62,6 +63,7 @@ namespace {
 			$this->post_content       = (string) ( $data['post_content'] ?? '' );
 			$this->post_password      = (string) ( $data['post_password'] ?? '' );
 			$this->post_author        = (int) ( $data['post_author'] ?? 1 );
+			$this->post_parent        = (int) ( $data['post_parent'] ?? 0 );
 			$this->post_date_gmt      = (string) ( $data['post_date_gmt'] ?? '2026-01-01 00:00:00' );
 			$this->post_modified_gmt  = (string) ( $data['post_modified_gmt'] ?? $this->post_date_gmt );
 		}
@@ -94,7 +96,11 @@ namespace {
 							return false;
 						}
 
-						if ( 'private' === $post->post_status && ! wp_auto_test_user_can( 'read_private_posts' ) ) {
+						$post_type = get_post_type_object( $post->post_type );
+						if (
+							'private' === $post->post_status
+							&& ( ! $post_type || ! wp_auto_test_user_can( $post_type->cap->read_private_posts ) )
+						) {
 							return $post->post_author === $GLOBALS['wp_auto_test_current_user_id'];
 						}
 
@@ -179,37 +185,39 @@ namespace {
 			return false;
 		}
 
+		$post_type = get_post_type_object( $post->post_type );
+		if ( ! $post_type || ! isset( $post_type->cap ) ) {
+			return false;
+		}
+		$cap = $post_type->cap;
+
 		if ( 'read_post' === $capability && ( 'publish' === $post->post_status || $post->post_author === $GLOBALS['wp_auto_test_current_user_id'] ) ) {
-			return wp_auto_test_user_can( 'read' );
+			return wp_auto_test_user_can( $cap->read );
 		}
 
 		if ( 'read_post' === $capability && 'private' === $post->post_status ) {
-			return wp_auto_test_user_can( 'read_private_posts' );
-		}
-
-		if ( 'read_post' === $capability && 'future' === $post->post_status ) {
-			return wp_auto_test_user_can( 'edit_others_posts' ) && wp_auto_test_user_can( 'edit_published_posts' );
+			return wp_auto_test_user_can( $cap->read_private_posts );
 		}
 
 		if ( 'read_post' === $capability ) {
-			return wp_auto_test_user_can( 'edit_others_posts' );
+			return wp_auto_test_user_can( 'edit_post', $object_id );
 		}
 
 		if ( $post->post_author === $GLOBALS['wp_auto_test_current_user_id'] ) {
 			return in_array( $post->post_status, array( 'publish', 'future' ), true )
-				? wp_auto_test_user_can( 'edit_published_posts' )
-				: wp_auto_test_user_can( 'edit_posts' );
+				? wp_auto_test_user_can( $cap->edit_published_posts )
+				: wp_auto_test_user_can( $cap->edit_posts );
 		}
 
-		if ( ! wp_auto_test_user_can( 'edit_others_posts' ) ) {
+		if ( ! wp_auto_test_user_can( $cap->edit_others_posts ) ) {
 			return false;
 		}
 
 		if ( in_array( $post->post_status, array( 'publish', 'future' ), true ) ) {
-			return wp_auto_test_user_can( 'edit_published_posts' );
+			return wp_auto_test_user_can( $cap->edit_published_posts );
 		}
 
-		return 'private' !== $post->post_status || wp_auto_test_user_can( 'edit_private_posts' );
+		return 'private' !== $post->post_status || wp_auto_test_user_can( $cap->edit_private_posts );
 	}
 
 	function get_post( int $post_id ) {
@@ -223,15 +231,20 @@ namespace {
 	}
 
 	function get_post_type_object( string $post_type ) {
-		if ( 'post' !== $post_type ) {
+		if ( ! in_array( $post_type, array( 'post', 'page' ), true ) ) {
 			return null;
 		}
 
+		$suffix = 'page' === $post_type ? 'pages' : 'posts';
+
 		return (object) array(
 			'cap' => (object) array(
-				'read_private_posts'  => 'read_private_posts',
-				'edit_others_posts'   => 'edit_others_posts',
-				'edit_published_posts' => 'edit_published_posts',
+				'read'                 => 'read',
+				'edit_posts'           => 'edit_' . $suffix,
+				'read_private_posts'   => 'read_private_' . $suffix,
+				'edit_private_posts'   => 'edit_private_' . $suffix,
+				'edit_others_posts'    => 'edit_others_' . $suffix,
+				'edit_published_posts' => 'edit_published_' . $suffix,
 			),
 		);
 	}
@@ -416,6 +429,8 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Abilities/Content/ContentAbilityCategory.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Content/PostsSearchAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Content/PostGetAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Content/PagesSearchAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Content/PageGetAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpAdapterLoader.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpServerRegistrar.php';
 }

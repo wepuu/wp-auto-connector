@@ -33,8 +33,8 @@ Phase 1.2 retains the implemented Phase 1.1 tool and adds seven planned read-onl
 | `wp-auto/site-info` | `wp-auto-site-info` | Read-only | `read` | Implemented |
 | `wp-auto/posts-search` | `wp-auto-posts-search` | Read-only | `read` plus final per-object eligibility; protected posts also require `edit_post` | Implemented |
 | `wp-auto/post-get` | `wp-auto-post-get` | Read-only | `read_post`; protected posts also require `edit_post` | Implemented |
-| `wp-auto/pages-search` | `wp-auto-pages-search` | Read-only | `read` plus per-object visibility enforcement | Planned |
-| `wp-auto/page-get` | `wp-auto-page-get` | Read-only | `read_post` for the target object | Planned |
+| `wp-auto/pages-search` | `wp-auto-pages-search` | Read-only | `read` plus final per-object eligibility; protected pages also require `edit_post` | Implemented |
+| `wp-auto/page-get` | `wp-auto-page-get` | Read-only | `read_post`; protected pages also require `edit_post` | Implemented |
 | `wp-auto/categories-list` | `wp-auto-categories-list` | Read-only | `read` | Planned |
 | `wp-auto/tags-list` | `wp-auto-tags-list` | Read-only | `read` | Planned |
 

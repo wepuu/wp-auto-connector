@@ -8,6 +8,8 @@
 namespace WPAuto\Connector;
 
 use WPAuto\Connector\Abilities\Content\ContentAbilityCategory;
+use WPAuto\Connector\Abilities\Content\PageGetAbility;
+use WPAuto\Connector\Abilities\Content\PagesSearchAbility;
 use WPAuto\Connector\Abilities\Content\PostGetAbility;
 use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
@@ -75,6 +77,8 @@ final class Plugin {
 		( new SiteInfoAbility() )->register();
 		( new PostsSearchAbility() )->register();
 		( new PostGetAbility() )->register();
+		( new PagesSearchAbility() )->register();
+		( new PageGetAbility() )->register();
 		( new McpServerRegistrar() )->register();
 		McpAdapterLoader::initialize();
 

@@ -12,6 +12,8 @@ use WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
 use WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
 use WP\MCP\Transport\HttpTransport;
 use WP_Error;
+use WPAuto\Connector\Abilities\Content\PageGetAbility;
+use WPAuto\Connector\Abilities\Content\PagesSearchAbility;
 use WPAuto\Connector\Abilities\Content\PostGetAbility;
 use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
@@ -79,10 +81,12 @@ final class McpServerRegistrarTest extends TestCase {
 				SiteInfoAbility::NAME,
 				PostsSearchAbility::NAME,
 				PostGetAbility::NAME,
+				PagesSearchAbility::NAME,
+				PageGetAbility::NAME,
 			),
 			$adapter->arguments[9]
 		);
-		self::assertCount( 4, $adapter->arguments[9] );
+		self::assertCount( 6, $adapter->arguments[9] );
 		self::assertSame( array(), $adapter->arguments[10] );
 		self::assertSame( array(), $adapter->arguments[11] );
 		self::assertIsCallable( $adapter->arguments[12] );

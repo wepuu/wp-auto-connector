@@ -46,8 +46,8 @@ Delivery checkpoints:
 1. **Phase 1.2.0 - Contract freeze (complete):** approved the exact ability/tool names, schemas, permission boundaries, privacy behavior, errors, and final allowlist.
 2. **Phase 1.2.1 - Site info (complete):** implemented and validated `wp-auto/site-info`.
 3. **Phase 1.2.2 - Posts search/get (complete):** implemented and validated bounded post discovery and object-authorized retrieval.
-4. **Phase 1.2.3 - Pages search/get (next):** implement and validate bounded page discovery and object-authorized retrieval.
-5. **Phase 1.2.4 - Categories/tags list:** implement and validate bounded taxonomy term lists.
+4. **Phase 1.2.3 - Pages search/get (complete):** implemented and validated bounded page discovery and object-authorized retrieval.
+5. **Phase 1.2.4 - Categories/tags list (next):** implement and validate bounded taxonomy term lists.
 6. **Phase 1.2.5 - Final MCP allowlist:** expose exactly the eight approved Phase 1.2 tools through the dedicated server.
 7. **Phase 1.2.6 - Integration/security validation:** complete automated and live MCP permission, privacy, schema, and compatibility checks.
 

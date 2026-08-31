@@ -32,6 +32,8 @@ require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Site/SiteInfoAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/ContentAbilityCategory.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/PostsSearchAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/PostGetAbility.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/PagesSearchAbility.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/PageGetAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Mcp/McpAdapterLoader.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Mcp/McpServerRegistrar.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Admin/AdminPage.php';

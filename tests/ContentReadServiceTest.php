@@ -529,6 +529,7 @@ final class ContentReadServiceTest extends TestCase {
 	 * @return array<string, array<int, mixed>>
 	 */
 	public function invalidGetInputProvider(): array {
+
 		return array(
 			'missing id'       => array( array() ),
 			'zero id'          => array( array( 'id' => 0 ) ),
@@ -550,6 +551,263 @@ final class ContentReadServiceTest extends TestCase {
 	}
 
 	/**
+	 * Verify pages reuse strict search validation and a fixed page query.
+	 *
+	 * @dataProvider invalidSearchInputProvider
+	 * @param mixed $input Invalid search input.
+	 */
+	public function test_page_search_rejects_invalid_input_and_uses_fixed_type( $input ): void {
+
+		$result = $this->service->search_pages( $input );
+
+		self::assertInstanceOf( WP_Error::class, $result );
+		self::assertSame( 'wp_auto_invalid_request', $result->get_error_code() );
+
+		$valid = $this->service->search_pages( array( 'per_page' => 50 ) );
+		self::assertIsArray( $valid );
+		self::assertSame( 'page', $GLOBALS['wp_auto_test_last_query_args']['post_type'] );
+		self::assertSame( 50, $valid['per_page'] );
+	}
+
+	/**
+	 * Verify Page search applies shared defaults and safe order mappings.
+	 */
+	public function test_page_search_accepts_defaults_and_frozen_ordering(): void {
+		$GLOBALS['wp_auto_test_posts'] = array( $this->post( 1, 'publish', 20, null, null, 'page' ) );
+
+		$defaults = $this->service->search_pages();
+		self::assertSame( 1, $defaults['page'] );
+		self::assertSame( 10, $defaults['per_page'] );
+		self::assertSame( 'publish', $GLOBALS['wp_auto_test_last_query_args']['post_status'] );
+		self::assertSame( '', $GLOBALS['wp_auto_test_last_query_args']['s'] );
+		self::assertSame(
+			array(
+				'modified' => 'DESC',
+				'ID'       => 'DESC',
+			),
+			$GLOBALS['wp_auto_test_last_query_args']['orderby']
+		);
+
+		foreach ( array( 'date', 'modified', 'title', 'id' ) as $orderby ) {
+			$result = $this->service->search_pages( array( 'orderby' => $orderby ) );
+			self::assertIsArray( $result );
+		}
+
+		foreach ( array(
+			'asc'  => 'ASC',
+			'desc' => 'DESC',
+		) as $order => $mapped ) {
+			$result = $this->service->search_pages( array( 'order' => $order ) );
+			self::assertIsArray( $result );
+			self::assertSame( $mapped, $GLOBALS['wp_auto_test_last_query_args']['order'] );
+		}
+	}
+
+	/**
+	 * Verify page searches use Page capability primitives for non-public scope.
+	 */
+	public function test_page_search_uses_page_capability_object(): void {
+
+		$GLOBALS['wp_auto_test_posts'] = array(
+			$this->post( 1, 'draft', 10, null, null, 'page' ),
+			$this->post( 2, 'draft', 20, null, null, 'page' ),
+			$this->post( 3, 'pending', 20, null, null, 'page' ),
+			$this->post( 4, 'future', 20, null, null, 'page' ),
+			$this->post( 5, 'private', 20, null, null, 'page' ),
+			$this->post( 6, 'pending', 10, null, null, 'page' ),
+			$this->post( 7, 'future', 10, null, null, 'page' ),
+			$this->post( 8, 'private', 10, null, null, 'page' ),
+		);
+
+		foreach ( array(
+			'draft'   => 1,
+			'pending' => 6,
+			'future'  => 7,
+			'private' => 8,
+		) as $status => $expected_id ) {
+			$own = $this->service->search_pages(
+				array(
+					'status'  => $status,
+					'orderby' => 'id',
+					'order'   => 'asc',
+				)
+			);
+			self::assertSame( array( $expected_id ), array_column( $own['items'], 'id' ) );
+			self::assertSame( 10, $GLOBALS['wp_auto_test_last_query_args']['author'] );
+		}
+
+		$GLOBALS['wp_auto_test_capabilities'] += array(
+			'edit_others_pages'    => true,
+			'edit_published_pages' => true,
+			'read_private_pages'   => true,
+		);
+
+		foreach ( array(
+			'draft'   => array( 1, 2 ),
+			'pending' => array( 3, 6 ),
+			'future'  => array( 4, 7 ),
+			'private' => array( 5, 8 ),
+		) as $status => $expected_ids ) {
+			$result = $this->service->search_pages(
+				array(
+					'status'  => $status,
+					'orderby' => 'id',
+					'order'   => 'asc',
+				)
+			);
+			self::assertSame( $expected_ids, array_column( $result['items'], 'id' ) );
+			self::assertArrayNotHasKey( 'author', $GLOBALS['wp_auto_test_last_query_args'] );
+		}
+	}
+
+	/**
+	 * Verify page output is exact, stored, hierarchical, and taxonomy-free.
+	 */
+	public function test_page_get_returns_exact_root_and_child_contracts(): void {
+
+		$GLOBALS['wp_auto_test_posts']             = array(
+			$this->post( 20, 'publish', 10, null, null, 'page' ),
+			$this->post( 21, 'publish', 10, null, null, 'page', '', 20 ),
+		);
+		$GLOBALS['wp_auto_test_thumbnail_ids'][21] = 91;
+
+		$root  = $this->service->get_page( array( 'id' => 20 ) );
+		$child = $this->service->get_page( array( 'id' => 21 ) );
+
+		self::assertSame(
+			array( 'id', 'type', 'status', 'slug', 'title', 'excerpt', 'content', 'link', 'author_id', 'date_gmt', 'modified_gmt', 'featured_media_id', 'parent_id' ),
+			array_keys( $child )
+		);
+		self::assertSame( 'page', $child['type'] );
+		self::assertSame( '<!-- wp:paragraph --><p>Stored 21</p><!-- /wp:paragraph -->', $child['content'] );
+		self::assertSame( 0, $root['parent_id'] );
+		self::assertSame( 20, $child['parent_id'] );
+		self::assertSame( 91, $child['featured_media_id'] );
+		self::assertArrayNotHasKey( 'categories', $child );
+		self::assertArrayNotHasKey( 'tags', $child );
+		self::assertArrayNotHasKey( 'meta', $child );
+	}
+
+	/**
+	 * Verify page search and get share final authorization and password policy.
+	 */
+	public function test_page_search_and_get_share_final_eligibility(): void {
+
+		$GLOBALS['wp_auto_test_posts']                               = array(
+			$this->post( 1, 'publish', 20, null, null, 'page' ),
+			$this->post( 2, 'publish', 20, null, null, 'page', 'secret' ),
+			$this->post( 3, 'publish', 20, null, null, 'page' ),
+		);
+		$GLOBALS['wp_auto_test_object_capabilities']['read_post'][3] = false;
+
+		$search = $this->service->search_pages(
+			array(
+				'orderby' => 'id',
+				'order'   => 'asc',
+			)
+		);
+		self::assertSame( array( 1 ), array_column( $search['items'], 'id' ) );
+
+		foreach ( array( 2, 3 ) as $page_id ) {
+			$error = $this->service->get_page( array( 'id' => $page_id ) );
+			self::assertInstanceOf( WP_Error::class, $error );
+			self::assertSame( 'wp_auto_content_not_found', $error->get_error_code() );
+		}
+
+		$GLOBALS['wp_auto_test_object_capabilities']['edit_post'][2] = true;
+		self::assertIsArray( $this->service->get_page( array( 'id' => 2 ) ) );
+	}
+
+	/**
+	 * Verify Page and Post get hide wrong types in both directions.
+	 */
+	public function test_get_hides_cross_type_and_missing_objects(): void {
+
+		$GLOBALS['wp_auto_test_posts'] = array(
+			$this->post( 1, 'publish', 10 ),
+			$this->post( 2, 'publish', 10, null, null, 'page' ),
+		);
+
+		foreach ( array(
+			$this->service->get_page( array( 'id' => 1 ) ),
+			$this->service->get_post( array( 'id' => 2 ) ),
+			$this->service->get_page( array( 'id' => 999 ) ),
+		) as $error ) {
+			self::assertInstanceOf( WP_Error::class, $error );
+			self::assertSame( 'wp_auto_content_not_found', $error->get_error_code() );
+		}
+	}
+
+	/**
+	 * Verify Page logical pagination ignores final-authorization failures.
+	 */
+	public function test_page_pagination_applies_offset_after_final_authorization(): void {
+
+		$GLOBALS['wp_auto_test_posts']                            = array_map(
+			fn ( int $id ): WP_Post => $this->post( $id, 'publish', 20, null, null, 'page' ),
+			range( 1, 7 )
+		);
+		$GLOBALS['wp_auto_test_object_capabilities']['read_post'] = array(
+			1 => false,
+			3 => false,
+			4 => false,
+			6 => false,
+		);
+
+		foreach ( array( 2, 5, 7 ) as $index => $expected_id ) {
+			$result = $this->service->search_pages(
+				array(
+					'page'     => $index + 1,
+					'per_page' => 1,
+					'orderby'  => 'id',
+					'order'    => 'asc',
+				)
+			);
+			self::assertSame( array( $expected_id ), array_column( $result['items'], 'id' ) );
+			self::assertSame( $index < 2, $result['has_more'] );
+		}
+	}
+
+	/**
+	 * Verify Pages share the bounded 100/1000 scanner and stable error.
+	 */
+	public function test_page_search_uses_shared_bounded_window(): void {
+
+		$deep = $this->service->search_pages(
+			array(
+				'page'     => 1000,
+				'per_page' => 1,
+			)
+		);
+		self::assertInstanceOf( WP_Error::class, $deep );
+		self::assertSame( 'wp_auto_pagination_window_exceeded', $deep->get_error_code() );
+		self::assertSame( array(), $GLOBALS['wp_auto_test_query_args_history'] );
+
+		$GLOBALS['wp_auto_test_posts']                            = array_map(
+			fn ( int $id ): WP_Post => $this->post( $id, 'publish', 20, null, null, 'page' ),
+			range( 1, 1000 )
+		);
+		$GLOBALS['wp_auto_test_object_capabilities']['read_post'] = array_fill_keys( range( 1, 1000 ), false );
+		$bounded = $this->service->search_pages( array( 'per_page' => 1 ) );
+		self::assertInstanceOf( WP_Error::class, $bounded );
+		self::assertSame( 'wp_auto_pagination_window_exceeded', $bounded->get_error_code() );
+		self::assertSame( 10, count( $GLOBALS['wp_auto_test_query_args_history'] ) );
+		self::assertSame( 900, $GLOBALS['wp_auto_test_last_query_args']['offset'] );
+	}
+
+	/**
+	 * Verify Page Get uses the shared strict ID validation.
+	 *
+	 * @dataProvider invalidGetInputProvider
+	 * @param mixed $input Invalid get input.
+	 */
+	public function test_page_get_rejects_invalid_input( $input ): void {
+
+		$result = $this->service->get_page( $input );
+		self::assertInstanceOf( WP_Error::class, $result );
+		self::assertSame( 'wp_auto_invalid_request', $result->get_error_code() );
+	}
+	/**
 	 * Build a deterministic Core-like post fixture.
 	 *
 	 * @param int         $id Post ID.
@@ -559,6 +817,7 @@ final class ContentReadServiceTest extends TestCase {
 	 * @param string|null $modified_gmt Stored GMT modification date.
 	 * @param string      $post_type Post type.
 	 * @param string      $password Stored post password.
+	 * @param int         $parent_id Parent post ID.
 	 */
 	private function post(
 		int $id,
@@ -567,7 +826,8 @@ final class ContentReadServiceTest extends TestCase {
 		?string $date_gmt = null,
 		?string $modified_gmt = null,
 		string $post_type = 'post',
-		string $password = ''
+		string $password = '',
+		int $parent_id = 0
 	): WP_Post {
 		return new WP_Post(
 			array(
@@ -580,6 +840,7 @@ final class ContentReadServiceTest extends TestCase {
 				'post_content'      => '<!-- wp:paragraph --><p>Stored ' . $id . '</p><!-- /wp:paragraph -->',
 				'post_password'     => $password,
 				'post_author'       => $author,
+				'post_parent'       => $parent_id,
 				'post_date_gmt'     => $date_gmt ?? sprintf( '2026-01-%02d 00:00:00', min( $id, 28 ) ),
 				'post_modified_gmt' => $modified_gmt ?? sprintf( '2026-02-%02d 00:00:00', min( $id, 28 ) ),
 			)
