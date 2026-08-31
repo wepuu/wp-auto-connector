@@ -53,6 +53,8 @@ final class PagesSearchAbilityTest extends TestCase {
 		self::assertSame( 'object', $input['type'] );
 		self::assertFalse( $input['additionalProperties'] );
 		self::assertSame( array( 'search', 'status', 'page', 'per_page', 'orderby', 'order' ), array_keys( $properties ) );
+		self::assertSame( array( 'string', 'string', 'integer', 'integer', 'string', 'string' ), array_column( $properties, 'type' ) );
+		self::assertArrayNotHasKey( 'required', $input );
 		self::assertSame( '', $properties['search']['default'] );
 		self::assertSame( 200, $properties['search']['maxLength'] );
 		self::assertSame( 'publish', $properties['status']['default'] );
@@ -64,14 +66,26 @@ final class PagesSearchAbilityTest extends TestCase {
 		self::assertSame( 'modified', $properties['orderby']['default'] );
 		self::assertSame( array( 'asc', 'desc' ), $properties['order']['enum'] );
 		self::assertSame( 'desc', $properties['order']['default'] );
+		self::assertSame( 'object', $output['type'] );
 		self::assertFalse( $output['additionalProperties'] );
+		self::assertSame( array( 'items', 'page', 'per_page', 'returned', 'has_more' ), array_keys( $output['properties'] ) );
 		self::assertSame( array( 'items', 'page', 'per_page', 'returned', 'has_more' ), $output['required'] );
+		self::assertSame(
+			array( 'id', 'title', 'slug', 'status', 'link', 'author_id', 'date_gmt', 'modified_gmt' ),
+			array_keys( $output['properties']['items']['items']['properties'] )
+		);
 		self::assertSame(
 			array( 'id', 'title', 'slug', 'status', 'link', 'author_id', 'date_gmt', 'modified_gmt' ),
 			$output['properties']['items']['items']['required']
 		);
+		self::assertSame(
+			array( 'integer', 'string', 'string', 'string', 'string', 'integer', 'string', 'string' ),
+			array_column( $output['properties']['items']['items']['properties'], 'type' )
+		);
 		self::assertFalse( $output['properties']['items']['items']['additionalProperties'] );
-		self::assertSame( array( true, false, true ), array_values( $args['meta']['annotations'] ) );
+		self::assertTrue( $args['meta']['annotations']['readonly'] );
+		self::assertFalse( $args['meta']['annotations']['destructive'] );
+		self::assertTrue( $args['meta']['annotations']['idempotent'] );
 	}
 
 	/**

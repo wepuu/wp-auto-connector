@@ -75,6 +75,10 @@ final class PostGetAbilityTest extends TestCase {
 		self::assertFalse( $output['additionalProperties'] );
 		self::assertSame( $fields, array_keys( $output['properties'] ) );
 		self::assertSame( $fields, $output['required'] );
+		self::assertSame(
+			array( 'integer', 'string', 'string', 'string', 'string', 'string', 'string', 'string', 'integer', 'string', 'string', 'integer', 'array', 'array' ),
+			array_column( $output['properties'], 'type' )
+		);
 		self::assertSame( array( 'post' ), $output['properties']['type']['enum'] );
 		self::assertSame( 'integer', $output['properties']['categories']['items']['type'] );
 		self::assertSame( 'integer', $output['properties']['tags']['items']['type'] );

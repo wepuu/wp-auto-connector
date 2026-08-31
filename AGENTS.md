@@ -10,7 +10,7 @@ Phase 1 - Direct WordPress MCP MVP.
 
 Phase 1.1 is complete: the direct MCP server foundation proves the authenticated end-to-end path with the read-only `wp-auto/site-health` ability.
 
-Phase 1.2 is active. Phase 1.2.0 through Phase 1.2.4 are complete. The next active task is Phase 1.2.5: audit and freeze the exact eight-tool MCP allowlist and its public schemas/security boundaries.
+Phase 1.2 is active. Phase 1.2.0 through Phase 1.2.5 are complete. The next active task is Phase 1.2.6: complete full read-only integration, permission, privacy, schema, security, and client validation.
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
@@ -56,7 +56,7 @@ Phase 1 is not complete until at least Claude Code and one additional standard M
 
 - WordPress 6.9+ Abilities API is the canonical domain capability layer.
 - The official `WordPress/mcp-adapter` project is the preferred MCP protocol adapter.
-- As of 2026-08-29, MCP Adapter is not available as a WordPress.org plugin dependency. Do not add `Requires Plugins: mcp-adapter` unless its directory status is re-verified and changed.
+- As of 2026-08-31, MCP Adapter is not available as a WordPress.org plugin dependency. Do not add `Requires Plugins: mcp-adapter` unless its directory status is re-verified and changed.
 - For the current development path, use the official Composer-library/bundling approach documented by MCP Adapter. Keep the integration replaceable so a future WordPress.org plugin dependency can be adopted without changing WP-Auto ability contracts.
 - Prefer an already active compatible MCP Adapter instance when present; do not initialize a second conflicting copy.
 - Direct MCP and future cloud MCP must invoke the same WP-Auto abilities.

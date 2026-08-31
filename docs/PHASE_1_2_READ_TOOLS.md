@@ -83,6 +83,28 @@ Search results never include full content, excerpts, arbitrary post meta, or cus
 
 Category and tag lists use the same exact envelope fields and semantics: `items`, `page`, `per_page`, `returned`, and `has_more`. Their default `per_page` is 20 and their enforced maximum is 50. They do not return `total` or `total_pages`.
 
+## `wp-auto/site-health`
+
+- MCP tool: `wp-auto-site-health`
+- Type: read-only
+- Permission baseline: `read`
+- Input: an empty strict object with `properties: {}`
+
+The output contains exactly:
+
+| Field | Type |
+| --- | --- |
+| `wordpress_version` | string |
+| `php_version` | string |
+| `connector_version` | string |
+| `abilities_api_available` | boolean |
+| `mcp_adapter_available` | boolean |
+| `mcp_adapter_version` | string |
+| `rest_api_available` | boolean |
+| `https` | boolean |
+
+It must not return administrator email addresses, usernames, credentials, database information, filesystem paths, configuration values, or environment secrets.
+
 ## `wp-auto/site-info`
 
 - MCP tool: `wp-auto-site-info`
@@ -270,12 +292,12 @@ Phase 1.2 validation must cover at least a published post, the caller's own draf
 - A content search page that cannot be established within the documented bounded authorization scan uses `wp_auto_pagination_window_exceeded` with semantic status 400.
 - A taxonomy page outside the internal safe query window uses `wp_auto_pagination_window_exceeded` with semantic status 400 before querying Core.
 - A fixed taxonomy query failure uses `wp_auto_taxonomy_query_failed` with semantic status 500 and a generic message that does not expose internal errors.
-- Input rejection is driven through WordPress Abilities API and official MCP Adapter schema validation; Phase 1.2 does not add a separate protocol implementation.
+- Input rejection is driven through WordPress Abilities API and official MCP Adapter schema validation; Adapter protocol errors are distinct from the documented WP-Auto service error codes and Phase 1.2 does not add a separate protocol implementation.
 - Any future application-specific error must use a documented `wp_auto_`-prefixed code.
 
 ## Read-only annotations
 
-The intended semantics for all Phase 1.2 abilities are read-only `true`, destructive `false`, and idempotent `true`. Implementation must verify the exact annotation fields supported by the pinned official MCP Adapter API before coding; this contract does not assert Adapter metadata fields beyond that verified API.
+All Phase 1.2 abilities register WordPress Ability annotations `readonly=true`, `destructive=false`, and `idempotent=true`. Pinned MCP Adapter 0.6.1 maps these to the MCP wire annotations `readOnlyHint=true`, `destructiveHint=false`, and `idempotentHint=true`; the Ability keys and MCP keys are separate representations of the same frozen semantics.
 
 ## Implementation checkpoints
 
@@ -313,4 +335,4 @@ Phase 1.2 does not implement or design in detail post creation, post update, pag
 
 ## Next implementation checkpoint
 
-Phase 1.2.5 only: audit and freeze the exact eight-tool allowlist, public schemas, authentication/authorization boundaries, and regression evidence. Do not add tools or begin Phase 1.2.6 integration/security validation in that task.
+Phase 1.2.6 only: complete the full read-only integration, permission, privacy, schema, security, and client validation required to close Phase 1.2. Do not add tools or begin Phase 1.3 mutation work in that task.

@@ -13,7 +13,7 @@ This is an engineering checklist, not legal advice.
 
 ## MCP Adapter dependency
 
-Current initialization fact (2026-08-29): official MCP Adapter documentation says it is not yet available as a WordPress.org plugin dependency.
+Current re-verified fact (2026-08-31): official MCP Adapter documentation says it is not yet available as a WordPress.org plugin dependency.
 
 Before release:
 - [ ] Re-check whether `mcp-adapter` is now listed on WordPress.org.

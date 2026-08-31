@@ -54,6 +54,7 @@ final class CategoriesListAbilityTest extends TestCase {
 		self::assertFalse( $input['additionalProperties'] );
 		self::assertSame( array( 'search', 'page', 'per_page', 'orderby', 'order', 'hide_empty' ), array_keys( $properties ) );
 		self::assertSame( array( 'string', 'integer', 'integer', 'string', 'string', 'boolean' ), array_column( $properties, 'type' ) );
+		self::assertArrayNotHasKey( 'required', $input );
 		self::assertSame( '', $properties['search']['default'] );
 		self::assertSame( 200, $properties['search']['maxLength'] );
 		self::assertSame( 1, $properties['page']['default'] );
@@ -66,12 +67,22 @@ final class CategoriesListAbilityTest extends TestCase {
 		self::assertSame( 'asc', $properties['order']['default'] );
 		self::assertSame( array( 'asc', 'desc' ), $properties['order']['enum'] );
 		self::assertFalse( $properties['hide_empty']['default'] );
+		self::assertSame( 'object', $output['type'] );
 		self::assertFalse( $output['additionalProperties'] );
+		self::assertSame( array( 'items', 'page', 'per_page', 'returned', 'has_more' ), array_keys( $output['properties'] ) );
 		self::assertSame( array( 'items', 'page', 'per_page', 'returned', 'has_more' ), $output['required'] );
 		self::assertFalse( $output['properties']['items']['items']['additionalProperties'] );
 		self::assertSame(
 			array( 'id', 'name', 'slug', 'description', 'count', 'parent_id' ),
+			array_keys( $output['properties']['items']['items']['properties'] )
+		);
+		self::assertSame(
+			array( 'id', 'name', 'slug', 'description', 'count', 'parent_id' ),
 			$output['properties']['items']['items']['required']
+		);
+		self::assertSame(
+			array( 'integer', 'string', 'string', 'string', 'integer', 'integer' ),
+			array_column( $output['properties']['items']['items']['properties'], 'type' )
 		);
 		self::assertTrue( $args['meta']['annotations']['readonly'] );
 		self::assertFalse( $args['meta']['annotations']['destructive'] );
