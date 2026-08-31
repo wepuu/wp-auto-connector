@@ -31,7 +31,7 @@ Acceptance target:
 - unauthenticated/unauthorized invocation is rejected;
 - no content mutation exists yet.
 
-### Phase 1.2 - Read-only site/content tools (active)
+### Phase 1.2 - Read-only site/content tools (complete)
 
 Scope:
 - site info/health;
@@ -49,11 +49,15 @@ Delivery checkpoints:
 4. **Phase 1.2.3 - Pages search/get (complete):** implemented and validated bounded page discovery and object-authorized retrieval.
 5. **Phase 1.2.4 - Categories/tags list (complete):** implemented and validated bounded taxonomy term lists and extended the dedicated server to all eight approved tools.
 6. **Phase 1.2.5 - Final MCP allowlist audit (complete):** audited and froze the exact eight-tool allowlist, public schemas, annotations, errors, and security/resource boundaries without adding tools.
-7. **Phase 1.2.6 - Integration/security validation (next):** complete automated and live MCP permission, privacy, schema, and compatibility checks.
+7. **Phase 1.2.6 - Integration/security validation (complete):** completed automated and live MCP permission, privacy, schema, bounded-query, state-integrity, and compatibility checks.
 
-Phase 1.2 is complete only when `tools/list` returns exactly eight approved tools and all seven new abilities pass live MCP invocation plus the documented permission and security scenarios. The authoritative contract is `docs/PHASE_1_2_READ_TOOLS.md`.
+Phase 1.2 passed its Definition of Done: `tools/list` returned exactly eight approved tools and all seven new abilities passed live MCP invocation plus the documented permission and security scenarios. The authoritative contract is `docs/PHASE_1_2_READ_TOOLS.md`; the completion seal is `docs/PHASE_1_2_VALIDATION.md`.
 
 ### Phase 1.3 - Safe draft/content mutation
+
+Next checkpoint:
+
+- **Phase 1.3.0 - Mutation Contract Freeze:** define and review exact mutation names, schemas, capability checks, idempotency, optimistic concurrency, error semantics, and allowlist changes before implementation begins.
 
 Scope:
 - post create draft;

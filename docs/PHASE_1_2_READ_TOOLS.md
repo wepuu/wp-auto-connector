@@ -2,7 +2,7 @@
 
 ## Status and authority
 
-Status: Phase 1.2.0 contract frozen.
+Status: frozen, implemented, and fully validated through Phase 1.2.6.
 
 This document is the authoritative public contract for Phase 1.2 read-only abilities and their MCP representations. Implementations, tests, and validation evidence must conform to it. A contract change requires an explicit documentation review before the affected implementation checkpoint proceeds.
 
@@ -335,4 +335,4 @@ Phase 1.2 does not implement or design in detail post creation, post update, pag
 
 ## Next implementation checkpoint
 
-Phase 1.2.6 only: complete the full read-only integration, permission, privacy, schema, security, and client validation required to close Phase 1.2. Do not add tools or begin Phase 1.3 mutation work in that task.
+Phase 1.2 is complete. The next checkpoint is Phase 1.3.0 - Mutation Contract Freeze. Define and approve mutation contracts before implementing or exposing any Phase 1.3 tool.

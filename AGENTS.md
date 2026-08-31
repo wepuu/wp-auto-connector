@@ -10,7 +10,7 @@ Phase 1 - Direct WordPress MCP MVP.
 
 Phase 1.1 is complete: the direct MCP server foundation proves the authenticated end-to-end path with the read-only `wp-auto/site-health` ability.
 
-Phase 1.2 is active. Phase 1.2.0 through Phase 1.2.5 are complete. The next active task is Phase 1.2.6: complete full read-only integration, permission, privacy, schema, security, and client validation.
+Phase 1.2 is complete: all eight read-only tools passed the frozen contract, permission, privacy, schema, bounded-query, and live MCP validation gates. The next active task is Phase 1.3.0 - Mutation Contract Freeze. Do not implement mutation abilities until that contract checkpoint is approved.
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
