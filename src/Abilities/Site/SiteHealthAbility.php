@@ -40,6 +40,7 @@ final class SiteHealthAbility {
 				'label'               => __( 'WP-Auto Site Health', 'wp-auto-connector' ),
 				'description'         => __( 'Returns a safe, read-only connector and WordPress runtime status summary.', 'wp-auto-connector' ),
 				'category'            => 'site',
+				'input_schema'        => $this->input_schema(),
 				'output_schema'       => $this->output_schema(),
 				'execute_callback'    => array( $this, 'execute' ),
 				'permission_callback' => array( $this, 'check_permission' ),
@@ -68,6 +69,19 @@ final class SiteHealthAbility {
 	 */
 	public function check_permission(): bool {
 		return current_user_can( 'read' );
+	}
+
+	/**
+	 * Return the strict empty input contract.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function input_schema(): array {
+		return array(
+			'type'                 => 'object',
+			'additionalProperties' => false,
+			'properties'           => array(),
+		);
 	}
 
 	/**
