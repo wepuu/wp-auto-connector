@@ -6,7 +6,7 @@ Development repository for the free WordPress.org WP-Auto Connector.
 
 Phase 1 is Direct WordPress MCP. The plugin should let compatible AI agents connect directly to a WordPress site and invoke explicitly exposed, permission-aware WordPress abilities.
 
-Phase 1.2.5 freezes the audited public contract for eight read-only site, content, and taxonomy abilities. The dedicated endpoint is `/wp-json/wp-auto/mcp`, and the exposed MCP tools are `wp-auto-site-health`, `wp-auto-site-info`, `wp-auto-posts-search`, `wp-auto-post-get`, `wp-auto-pages-search`, `wp-auto-page-get`, `wp-auto-categories-list`, and `wp-auto-tags-list`. Phase 1.2.6 full integration/security validation is next.
+Phase 1.2 is complete: eight read-only site, content, and taxonomy abilities passed the frozen contract and full integration/security validation. The dedicated endpoint is `/wp-json/wp-auto/mcp`, and the exposed MCP tools are `wp-auto-site-health`, `wp-auto-site-info`, `wp-auto-posts-search`, `wp-auto-post-get`, `wp-auto-pages-search`, `wp-auto-page-get`, `wp-auto-categories-list`, and `wp-auto-tags-list`. Phase 1.3.0 Mutation Contract Freeze is next; no mutation tool has been implemented.
 
 Start with:
 
@@ -43,7 +43,7 @@ composer test
 composer lint
 ```
 
-See `docs/PHASE_1_1_VALIDATION.md`, `docs/PHASE_1_2_1_VALIDATION.md`, and the checkpoint-specific Phase 1.2 validation records for authenticated Streamable HTTP validation with a WordPress Application Password.
+See `docs/PHASE_1_1_VALIDATION.md` and `docs/PHASE_1_2_VALIDATION.md` for authenticated Streamable HTTP validation with a WordPress Application Password and the checkpoint evidence index.
 Runtime package versions, licenses, and distribution handling are documented in `docs/DEPENDENCIES.md`.
 
 Production plugin builds must install Composer dependencies without development packages and include the resulting `vendor/` directory:

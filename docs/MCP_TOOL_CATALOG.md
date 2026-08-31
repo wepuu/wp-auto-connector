@@ -25,22 +25,24 @@ Output fields:
 
 ## Phase 1.2
 
-Phase 1.2 retains the implemented Phase 1.1 tool and adds seven read-only tools. All eight approved tools are implemented and their public contracts were audited in Phase 1.2.5. Full schemas, authorization rules, privacy behavior, and errors are frozen in `docs/PHASE_1_2_READ_TOOLS.md`.
+Phase 1.2 retains the implemented Phase 1.1 tool and adds seven read-only tools. All eight approved tools are implemented, contract-audited, and integration/security validated. Full schemas, authorization rules, privacy behavior, and errors are frozen in `docs/PHASE_1_2_READ_TOOLS.md`; completion evidence is indexed in `docs/PHASE_1_2_VALIDATION.md`.
 
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
-| `wp-auto/site-health` | `wp-auto-site-health` | Read-only | `read` | Implemented |
-| `wp-auto/site-info` | `wp-auto-site-info` | Read-only | `read` | Implemented |
-| `wp-auto/posts-search` | `wp-auto-posts-search` | Read-only | `read` plus final per-object eligibility; protected posts also require `edit_post` | Implemented |
-| `wp-auto/post-get` | `wp-auto-post-get` | Read-only | `read_post`; protected posts also require `edit_post` | Implemented |
-| `wp-auto/pages-search` | `wp-auto-pages-search` | Read-only | `read` plus final per-object eligibility; protected pages also require `edit_post` | Implemented |
-| `wp-auto/page-get` | `wp-auto-page-get` | Read-only | `read_post`; protected pages also require `edit_post` | Implemented |
-| `wp-auto/categories-list` | `wp-auto-categories-list` | Read-only | `read` | Implemented |
-| `wp-auto/tags-list` | `wp-auto-tags-list` | Read-only | `read` | Implemented |
+| `wp-auto/site-health` | `wp-auto-site-health` | Read-only | `read` | Implemented and validated |
+| `wp-auto/site-info` | `wp-auto-site-info` | Read-only | `read` | Implemented and validated |
+| `wp-auto/posts-search` | `wp-auto-posts-search` | Read-only | `read` plus final per-object eligibility; protected posts also require `edit_post` | Implemented and validated |
+| `wp-auto/post-get` | `wp-auto-post-get` | Read-only | `read_post`; protected posts also require `edit_post` | Implemented and validated |
+| `wp-auto/pages-search` | `wp-auto-pages-search` | Read-only | `read` plus final per-object eligibility; protected pages also require `edit_post` | Implemented and validated |
+| `wp-auto/page-get` | `wp-auto-page-get` | Read-only | `read_post`; protected pages also require `edit_post` | Implemented and validated |
+| `wp-auto/categories-list` | `wp-auto-categories-list` | Read-only | `read` | Implemented and validated |
+| `wp-auto/tags-list` | `wp-auto-tags-list` | Read-only | `read` | Implemented and validated |
 
 The dedicated server must explicitly allowlist only these abilities. It must not expose third-party/default abilities, generic WordPress REST routes, or any mutation tool.
 
 ## Phase 1.3
+
+Phase 1.3.0 Mutation Contract Freeze must be approved before any ability in this section is implemented or exposed.
 
 | Ability | Type | WordPress capability baseline |
 | --- | --- | --- |

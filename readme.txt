@@ -16,7 +16,7 @@ WP-Auto Connector is the free WordPress-side connector for WP-Auto.
 
 The project is designed to expose carefully scoped WordPress capabilities to compatible AI clients while preserving WordPress permissions and providing a path to optional WP-Auto cloud automation services.
 
-Phase 1.2.5 provides an audited authenticated direct MCP endpoint at `/wp-json/wp-auto/mcp` with read-only site-health, site-info, posts-search, post-get, pages-search, page-get, categories-list, and tags-list tools. It uses normal WordPress authentication and requires the authenticated user to have the `read` capability. Non-public posts and pages also require WordPress object-level authorization. Application Passwords over HTTPS are the remote access baseline.
+Phase 1.2 provides a validated authenticated direct MCP endpoint at `/wp-json/wp-auto/mcp` with read-only site-health, site-info, posts-search, post-get, pages-search, page-get, categories-list, and tags-list tools. It uses normal WordPress authentication and requires the authenticated user to have the `read` capability. Non-public posts and pages also require WordPress object-level authorization. Application Passwords over HTTPS are the remote access baseline.
 
 No content write, publish, delete, cloud, telemetry, or automation operation is included in this version.
 
