@@ -44,11 +44,31 @@ final class SiteHealthAbilityTest extends TestCase {
 
 		$registration = $GLOBALS['wp_auto_test_registered_ability'];
 		$args         = $registration['args'];
+		$fields       = array(
+			'wordpress_version',
+			'php_version',
+			'connector_version',
+			'abilities_api_available',
+			'mcp_adapter_available',
+			'mcp_adapter_version',
+			'rest_api_available',
+			'https',
+		);
 
 		self::assertSame( SiteHealthAbility::NAME, $registration['name'] );
 		self::assertSame( 'site', $args['category'] );
+		self::assertSame( 'object', $args['input_schema']['type'] );
+		self::assertFalse( $args['input_schema']['additionalProperties'] );
+		self::assertSame( array(), $args['input_schema']['properties'] );
+		self::assertArrayNotHasKey( 'required', $args['input_schema'] );
+		self::assertSame( 'object', $args['output_schema']['type'] );
 		self::assertFalse( $args['output_schema']['additionalProperties'] );
-		self::assertSame( array_keys( $args['output_schema']['properties'] ), $args['output_schema']['required'] );
+		self::assertSame( $fields, array_keys( $args['output_schema']['properties'] ) );
+		self::assertSame( $fields, $args['output_schema']['required'] );
+		self::assertSame(
+			array( 'string', 'string', 'string', 'boolean', 'boolean', 'string', 'boolean', 'boolean' ),
+			array_column( $args['output_schema']['properties'], 'type' )
+		);
 		self::assertTrue( $args['meta']['annotations']['readonly'] );
 		self::assertFalse( $args['meta']['annotations']['destructive'] );
 		self::assertTrue( $args['meta']['annotations']['idempotent'] );
