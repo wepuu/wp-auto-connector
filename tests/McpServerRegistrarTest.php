@@ -14,9 +14,11 @@ use WP\MCP\Transport\HttpTransport;
 use WP_Error;
 use WPAuto\Connector\Abilities\Content\PageGetAbility;
 use WPAuto\Connector\Abilities\Content\PageCreateDraftAbility;
+use WPAuto\Connector\Abilities\Content\PageUpdateAbility;
 use WPAuto\Connector\Abilities\Content\PagesSearchAbility;
 use WPAuto\Connector\Abilities\Content\PostGetAbility;
 use WPAuto\Connector\Abilities\Content\PostCreateDraftAbility;
+use WPAuto\Connector\Abilities\Content\PostUpdateAbility;
 use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
@@ -91,10 +93,12 @@ final class McpServerRegistrarTest extends TestCase {
 				TagsListAbility::NAME,
 				PostCreateDraftAbility::NAME,
 				PageCreateDraftAbility::NAME,
+				PostUpdateAbility::NAME,
+				PageUpdateAbility::NAME,
 			),
 			$adapter->arguments[9]
 		);
-		self::assertCount( 10, $adapter->arguments[9] );
+		self::assertCount( 12, $adapter->arguments[9] );
 		self::assertSame( array(), $adapter->arguments[10] );
 		self::assertSame( array(), $adapter->arguments[11] );
 		self::assertIsCallable( $adapter->arguments[12] );
