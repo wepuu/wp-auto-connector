@@ -42,6 +42,23 @@ This is a best-effort optimistic concurrency precondition. `post_modified_gmt` h
 
 Phase 1.3 intentionally remains on the WordPress Core mutation path so hooks, revisions, sanitization, cache invalidation, capability handling, and plugin interoperability remain intact. It does not introduce direct `$wpdb` conditional updates, `SELECT ... FOR UPDATE`, or custom transaction locking solely to simulate CAS. A stronger revision/version/atomic-CAS model requires a future contract revision; Phase 1.2 Get is not changed for it.
 
+## Phase 1.3.2.0 amendment — Core `modified_gmt` sentinel
+
+- Status: Approved — pending merge/seal
+- Scope: semantic compatibility only; no Update runtime or MCP tool is introduced.
+
+WordPress Core can legitimately expose `0000-00-00 00:00:00` for a newly created draft. Create and Get already return the raw Core value, so the Update precondition must round-trip that exact opaque token. The amendment accepts only that exact sentinel or a strictly valid real GMT calendar datetime. It keeps exact raw-string comparison and the existing `wp_auto_invalid_request` (400) and `wp_auto_content_conflict` (409) semantics.
+
+The sentinel is not unique and does not strengthen stale-write detection. Second-level precision, same-second ambiguity, and the check-to-write race remain unchanged. No normalization, timestamp synthesis, REST presentation shim, ETag, revision token, SQL CAS, transaction, or locking model is introduced.
+
+Rejected alternatives for this amendment:
+
+- convert the sentinel to current time, `post_date_gmt`, or another fabricated value;
+- hide or normalize the sentinel in Create/Get;
+- add an ETag, revision, version, or new public token field;
+- reject the sentinel outright, which would make a valid Core draft token impossible to round-trip;
+- replace the Core path with direct SQL CAS, row locks, or custom transactions.
+
 ### Bounded local attribution audit
 
 Each mutated content object stores up to its own 20 most recent events in private `_wp_auto_connector_mutation_audit` metadata. This is per object, not site-wide. Events contain attribution and timing, plus a Create fingerprint or Update timestamp pair, but never content, raw idempotency keys, request bodies, or credentials. A safe replay adds no event.
@@ -92,4 +109,4 @@ Mutation behavior belongs in a small WP-Auto domain service behind WordPress Abi
 
 ## Follow-up
 
-Phase 1.3.1 may implement only the frozen Post/Page Create Draft contracts. Any material change to names, schemas, capability paths, idempotency state, error semantics, audit fields, or Core side-effect policy requires an explicit contract and ADR review before code is exposed.
+Phase 1.3.1 may implement only the frozen Post/Page Create Draft contracts. The Phase 1.3.2.0 sentinel amendment is approved pending merge/seal; Phase 1.3.2 Update implementation remains blocked until it is merged and formally sealed. Any material change to names, schemas, capability paths, idempotency state, error semantics, audit fields, or Core side-effect policy requires an explicit contract and ADR review before code is exposed.
