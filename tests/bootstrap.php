@@ -35,11 +35,14 @@ namespace {
 	$GLOBALS['wp_auto_test_options']              = array();
 	$GLOBALS['wp_auto_test_option_autoload']      = array();
 	$GLOBALS['wp_auto_test_post_meta']            = array();
+	$GLOBALS['wp_auto_test_post_meta_values']     = array();
 	$GLOBALS['wp_auto_test_next_post_id']         = 1000;
 	$GLOBALS['wp_auto_test_last_insert_args']     = array();
 	$GLOBALS['wp_auto_test_insert_result']        = null;
 	$GLOBALS['wp_auto_test_insert_exception']     = null;
 	$GLOBALS['wp_auto_test_fail_update_option']   = false;
+	$GLOBALS['wp_auto_test_fail_update_option_on_call'] = null;
+	$GLOBALS['wp_auto_test_update_option_calls']   = 0;
 	$GLOBALS['wp_auto_test_fail_update_meta']     = false;
 	$GLOBALS['wp_auto_test_before_update_meta']   = null;
 	$GLOBALS['wp_auto_test_update_meta_calls']    = 0;
@@ -341,6 +344,11 @@ namespace {
 	}
 
 	function get_post_meta( int $post_id, string $meta_key, bool $single = false ) {
+		if ( isset( $GLOBALS['wp_auto_test_post_meta_values'][ $post_id ][ $meta_key ] ) ) {
+			$values = $GLOBALS['wp_auto_test_post_meta_values'][ $post_id ][ $meta_key ];
+			return $single ? ( $values[0] ?? array() ) : $values;
+		}
+
 		$value = $GLOBALS['wp_auto_test_post_meta'][ $post_id ][ $meta_key ] ?? array();
 		return $single ? $value : array( $value );
 	}
@@ -380,7 +388,8 @@ namespace {
 
 	function update_option( string $option, $value, $autoload = null ): bool {
 		unset( $autoload );
-		if ( $GLOBALS['wp_auto_test_fail_update_option'] ) {
+		++$GLOBALS['wp_auto_test_update_option_calls'];
+		if ( $GLOBALS['wp_auto_test_fail_update_option'] || $GLOBALS['wp_auto_test_update_option_calls'] === $GLOBALS['wp_auto_test_fail_update_option_on_call'] ) {
 			return false;
 		}
 

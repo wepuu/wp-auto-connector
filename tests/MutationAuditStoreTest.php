@@ -19,6 +19,7 @@ final class MutationAuditStoreTest extends TestCase {
 	 */
 	protected function setUp(): void {
 		$GLOBALS['wp_auto_test_post_meta']         = array();
+		$GLOBALS['wp_auto_test_post_meta_values']  = array();
 		$GLOBALS['wp_auto_test_fail_update_meta']  = false;
 		$GLOBALS['wp_auto_test_update_meta_calls'] = 0;
 	}
@@ -47,11 +48,11 @@ final class MutationAuditStoreTest extends TestCase {
 	}
 
 	/**
-	 * Repeated logical Create finalization does not rewrite or duplicate the event.
+	 * Matching logical Create events can be verified without metadata mutation.
 	 */
-	public function test_append_create_once_deduplicates_without_metadata_write(): void {
-		$store                   = new MutationAuditStore();
-		$first                   = array(
+	public function test_has_create_event_is_read_only_and_strict(): void {
+		$store = new MutationAuditStore();
+		$event = array(
 			'version'          => 1,
 			'operation'        => 'create',
 			'ability'          => 'wp-auto/post-create-draft',
@@ -60,14 +61,29 @@ final class MutationAuditStoreTest extends TestCase {
 			'timestamp_gmt'    => '2026-09-01 00:00:00',
 			'fingerprint'      => 'fingerprint-a',
 		);
-		$second                  = $first;
-		$second['timestamp_gmt'] = '2026-09-01 00:00:01';
+		$GLOBALS['wp_auto_test_post_meta'][11][ MutationAuditStore::meta_key() ] = array( $event );
 
-		self::assertTrue( $store->append_create_once( 11, $first ) );
-		self::assertTrue( $store->append_create_once( 11, $second ) );
-		$events = get_post_meta( 11, MutationAuditStore::meta_key(), true );
-		self::assertCount( 1, $events );
-		self::assertSame( $first, $events[0] );
-		self::assertSame( 1, $GLOBALS['wp_auto_test_update_meta_calls'] );
+		self::assertTrue( $store->has_create_event( 11, 'wp-auto/post-create-draft', 7, 'fingerprint-a' ) );
+		self::assertFalse( $store->has_create_event( 11, 'wp-auto/post-create-draft', 8, 'fingerprint-a' ) );
+		self::assertSame( 0, $GLOBALS['wp_auto_test_update_meta_calls'] );
+	}
+
+	/**
+	 * Multiple physical private audit values fail closed.
+	 */
+	public function test_rejects_multiple_physical_audit_containers(): void {
+		$event = array(
+			'operation'        => 'create',
+			'ability'          => 'wp-auto/post-create-draft',
+			'actor_user_id'    => 7,
+			'target_object_id' => 11,
+			'fingerprint'      => 'fingerprint-a',
+		);
+		$GLOBALS['wp_auto_test_post_meta_values'][11][ MutationAuditStore::meta_key() ] = array( array( $event ), array( $event ) );
+		$store = new MutationAuditStore();
+
+		self::assertFalse( $store->has_create_event( 11, 'wp-auto/post-create-draft', 7, 'fingerprint-a' ) );
+		self::assertFalse( $store->append( 11, $event ) );
+		self::assertSame( 0, $GLOBALS['wp_auto_test_update_meta_calls'] );
 	}
 }

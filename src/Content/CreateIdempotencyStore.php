@@ -65,15 +65,36 @@ final class CreateIdempotencyStore {
 	}
 
 	/**
-	 * Persist the known target ID while keeping the claim unresolved.
+	 * Persist the known target ID while retaining finalization ownership.
 	 *
 	 * @param string               $option_name Option name.
 	 * @param array<string, mixed> $record Existing record.
 	 * @param int                  $target_id Created object ID.
 	 */
-	public function record_target( string $option_name, array $record, int $target_id ): bool {
-		$record['state']       = 'target_recorded';
+	public function record_target_in_progress( string $option_name, array $record, int $target_id ): bool {
+		if ( $target_id < 1 || 'in_progress' !== ( $record['state'] ?? null ) ) {
+			return false;
+		}
+
+		$record['state']       = 'in_progress';
 		$record['target_id']   = $target_id;
+		$record['updated_gmt'] = current_time( 'mysql', true );
+
+		return $this->update_and_verify( $option_name, $record );
+	}
+
+	/**
+	 * Mark a target as audited before completing the claim.
+	 *
+	 * @param string               $option_name Option name.
+	 * @param array<string, mixed> $record Existing record.
+	 */
+	public function mark_audit_recorded( string $option_name, array $record ): bool {
+		if ( 'in_progress' !== ( $record['state'] ?? null ) || ! isset( $record['target_id'] ) || ! is_int( $record['target_id'] ) || $record['target_id'] < 1 ) {
+			return false;
+		}
+
+		$record['state']       = 'audit_recorded';
 		$record['updated_gmt'] = current_time( 'mysql', true );
 
 		return $this->update_and_verify( $option_name, $record );
@@ -86,6 +107,10 @@ final class CreateIdempotencyStore {
 	 * @param array<string, mixed> $record Existing record.
 	 */
 	public function complete( string $option_name, array $record ): bool {
+		if ( ! in_array( $record['state'] ?? null, array( 'audit_recorded', 'completed' ), true ) || ! isset( $record['target_id'] ) || ! is_int( $record['target_id'] ) || $record['target_id'] < 1 ) {
+			return false;
+		}
+
 		$record['state']       = 'completed';
 		$record['updated_gmt'] = current_time( 'mysql', true );
 

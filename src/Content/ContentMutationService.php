@@ -147,10 +147,10 @@ final class ContentMutationService {
 			return $this->create_failed();
 		}
 
-		if ( ! $this->idempotency->record_target( $option_name, $record, $post_id ) ) {
+		if ( ! $this->idempotency->record_target_in_progress( $option_name, $record, $post_id ) ) {
 			return $this->uncertain();
 		}
-		$record['state']     = 'target_recorded';
+		$record['state']     = 'in_progress';
 		$record['target_id'] = $post_id;
 
 		$post = get_post( $post_id );
@@ -172,9 +172,13 @@ final class ContentMutationService {
 			'timestamp_gmt'    => current_time( 'mysql', true ),
 			'fingerprint'      => $fingerprint,
 		);
-		if ( ! $this->audit->append_create_once( $post_id, $event ) ) {
+		if ( ! $this->audit->append( $post_id, $event ) ) {
 			return $this->uncertain();
 		}
+		if ( ! $this->idempotency->mark_audit_recorded( $option_name, $record ) ) {
+			return $this->uncertain();
+		}
+		$record['state'] = 'audit_recorded';
 
 		if ( ! $this->idempotency->complete( $option_name, $record ) ) {
 			return $this->uncertain();
@@ -336,20 +340,11 @@ final class ContentMutationService {
 			return $this->output( $post, $post_type, true );
 		}
 
-		if ( ! $post instanceof WP_Post || ! $this->verify_invariants( $post, $post_type, (int) $record['actor_user_id'] ) || ! current_user_can( 'edit_post', $post->ID ) ) {
+		if ( 'audit_recorded' !== $record['state'] ) {
 			return $this->uncertain();
 		}
 
-		$event = array(
-			'version'          => 1,
-			'operation'        => 'create',
-			'ability'          => $ability,
-			'actor_user_id'    => $actor_id,
-			'target_object_id' => $post->ID,
-			'timestamp_gmt'    => current_time( 'mysql', true ),
-			'fingerprint'      => $fingerprint,
-		);
-		if ( ! $this->audit->append_create_once( $post->ID, $event ) ) {
+		if ( ! $post instanceof WP_Post || ! $this->verify_invariants( $post, $post_type, (int) $record['actor_user_id'] ) || ! current_user_can( 'edit_post', $post->ID ) || ! $this->audit->has_create_event( $post->ID, $ability, $actor_id, $fingerprint ) ) {
 			return $this->uncertain();
 		}
 
@@ -374,8 +369,10 @@ final class ContentMutationService {
 			&& is_int( $record['actor_user_id'] )
 			&& is_string( $record['ability'] )
 			&& is_string( $record['fingerprint'] )
-			&& in_array( $record['state'], array( 'in_progress', 'target_recorded', 'completed' ), true )
+			&& in_array( $record['state'], array( 'in_progress', 'audit_recorded', 'completed' ), true )
 			&& is_int( $record['target_id'] )
+			&& $record['target_id'] >= 0
+			&& ( 'in_progress' === $record['state'] || $record['target_id'] > 0 )
 			&& is_string( $record['created_gmt'] )
 			&& is_string( $record['updated_gmt'] );
 	}

@@ -18,13 +18,14 @@ The Direct MCP server now exposes exactly ten tools: the eight Phase 1.2 read-on
 
 ## Automated evidence
 
-- PHPUnit: **160 tests / 906 assertions** — pass.
+- PHPUnit: **165 tests / 944 assertions** — pass.
 - `composer validate --strict` — pass.
 - `composer lint` — pass (45 PHP files).
 - Focused Create Draft, idempotency, audit, Ability, bootstrap, and registrar tests — pass.
 - `git diff --check` — pass.
 - Service tests cover strict input validation, title semantics, fixed type/status/author/parent, capability mapping, allowlisted Core arguments, operation-scoped guard cleanup (including an unrelated nested insert), persistent atomic claim states, replay/conflict/in-progress behavior, uncertain-state fail-closed handling, audit retention/privacy, and exact schemas/annotations.
-- Merge-gate remediation narrowed the final guard so only Page Create enforces `post_parent=0`; Post parent remains Core/plugin-controlled. Create audit finalization now uses a logical once-only identity across normal and known-target recovery paths, including a deterministic re-entrant interleaving test.
+- Merge-gate remediation narrowed the final guard so only Page Create enforces `post_parent=0`; Post parent remains Core/plugin-controlled. Create audit finalization is serialized by the authoritative idempotency state: target correlation remains `in_progress`, matching retries are blocked, and only the original claim owner writes the first audit event.
+- Audit success transitions the claim to `audit_recorded` and then `completed`. Automatic recovery is permitted only from `audit_recorded`; it verifies the target and existing logical audit event read-only and never appends audit metadata. An interrupted `in_progress` operation may remain blocking and require operator remediation rather than risk duplicate attribution or creation.
 
 The existing Phase 1.2 regression suite remains green in the full PHPUnit run. No Composer, lockfile, CI, Adapter, or plugin-version changes were made.
 
@@ -61,7 +62,7 @@ Live WordPress 6.9 validation confirmed that a newly created draft may legitimat
 
 The frozen Phase 1.3 Update contract currently requires `expected_modified_gmt` to pass real GMT calendar validation. Because the Core sentinel is not a valid calendar datetime, Phase 1.3.2 must not begin implementation until a narrow compatibility amendment defines sentinel handling. No Update contract change is made in Phase 1.3.1.
 
-Unit tests provide the deterministic failure, concurrent-claim, known-target recovery, replay, audit-failure, and post-write invariant coverage that is not practical to manufacture in a disposable live site.
+Unit tests provide the deterministic failure, concurrent-claim, known-target recovery, replay, audit-failure, audit-recorded completion recovery, in-progress retry blocking, physical-container consistency, and post-write invariant coverage that is not practical to manufacture in a disposable live site. The test bootstrap triggers a second matching service call during the first audit write and verifies `wp_auto_idempotency_in_progress`, one audit write, one event, and a completed claim.
 
 ## State and secret cleanup
 
@@ -69,7 +70,7 @@ Temporary Application Passwords, users, draft fixtures, idempotency options, aud
 
 ## Runtime boundary
 
-Production changes are limited to the two Create Draft abilities, their shared mutation/idempotency/audit services, explicit ten-tool registration, and test bootstrap support. No Update Ability is registered. Create fixes post type, draft status, and authenticated author; Page Create additionally fixes parent `0`. Post parent is not client-exposed but is not overwritten as a WP-Auto invariant. Only contract fields reach WordPress Core, and final objects are re-read and invariant-checked before completion.
+Production changes are limited to the two Create Draft abilities, their shared mutation/idempotency/audit services, explicit ten-tool registration, and test bootstrap support. No Update Ability is registered. Create fixes post type, draft status, and authenticated author; Page Create additionally fixes parent `0`. Post parent is not client-exposed but is not overwritten as a WP-Auto invariant. Only contract fields reach WordPress Core, and final objects are re-read and invariant-checked before completion. Cross-request serialization comes from the persistent `add_option()` claim; the audit store is attribution only and is not atomic, transactional, or a cross-process lock.
 
 ## Next checkpoint
 

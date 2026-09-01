@@ -20,23 +20,27 @@ final class ContentMutationServiceTest extends TestCase {
 	 * Reset mutation fixtures.
 	 */
 	protected function setUp(): void {
-		$GLOBALS['wp_auto_test_posts']              = array();
-		$GLOBALS['wp_auto_test_options']            = array();
-		$GLOBALS['wp_auto_test_post_meta']          = array();
-		$GLOBALS['wp_auto_test_capabilities']       = array(
+		$GLOBALS['wp_auto_test_posts']                      = array();
+		$GLOBALS['wp_auto_test_options']                    = array();
+		$GLOBALS['wp_auto_test_post_meta']                  = array();
+		$GLOBALS['wp_auto_test_post_meta_values']           = array();
+		$GLOBALS['wp_auto_test_capabilities']               = array(
 			'edit_posts' => true,
 			'edit_pages' => true,
 		);
-		$GLOBALS['wp_auto_test_current_user_id']    = 7;
-		$GLOBALS['wp_auto_test_next_post_id']       = 1000;
-		$GLOBALS['wp_auto_test_last_insert_args']   = array();
-		$GLOBALS['wp_auto_test_insert_result']      = null;
-		$GLOBALS['wp_auto_test_insert_exception']   = null;
-		$GLOBALS['wp_auto_test_fail_update_option'] = false;
-		$GLOBALS['wp_auto_test_fail_update_meta']   = false;
-		$GLOBALS['wp_auto_test_before_update_meta'] = null;
-		$GLOBALS['wp_auto_test_nested_recovery']    = null;
-		$GLOBALS['wp_auto_test_filters']            = array();
+		$GLOBALS['wp_auto_test_current_user_id']            = 7;
+		$GLOBALS['wp_auto_test_next_post_id']               = 1000;
+		$GLOBALS['wp_auto_test_last_insert_args']           = array();
+		$GLOBALS['wp_auto_test_insert_result']              = null;
+		$GLOBALS['wp_auto_test_insert_exception']           = null;
+		$GLOBALS['wp_auto_test_fail_update_option']         = false;
+		$GLOBALS['wp_auto_test_fail_update_option_on_call'] = null;
+		$GLOBALS['wp_auto_test_update_option_calls']        = 0;
+		$GLOBALS['wp_auto_test_fail_update_meta']           = false;
+		$GLOBALS['wp_auto_test_before_update_meta']         = null;
+		$GLOBALS['wp_auto_test_nested_recovery']            = null;
+		$GLOBALS['wp_auto_test_update_meta_calls']          = 0;
+		$GLOBALS['wp_auto_test_filters']                    = array();
 	}
 
 	/**
@@ -180,9 +184,9 @@ final class ContentMutationServiceTest extends TestCase {
 	}
 
 	/**
-	 * A known target is recovered without a duplicate when audit finalization was interrupted.
+	 * An audit-recorded target is recovered without a duplicate audit event.
 	 */
-	public function test_known_target_recovery_completes_without_duplicate(): void {
+	public function test_audit_recorded_recovery_completes_without_duplicate(): void {
 		$service = new ContentMutationService();
 		$first   = $service->create_post_draft(
 			array(
@@ -191,10 +195,9 @@ final class ContentMutationServiceTest extends TestCase {
 			)
 		);
 		foreach ( $GLOBALS['wp_auto_test_options'] as &$record ) {
-			$record['state'] = 'target_recorded';
+			$record['state'] = 'audit_recorded';
 		}
 		unset( $record );
-		$GLOBALS['wp_auto_test_post_meta'][ $first['id'] ][ MutationAuditStore::meta_key() ] = array();
 		$result = $service->create_post_draft(
 			array(
 				'title'           => 'Original',
@@ -207,12 +210,13 @@ final class ContentMutationServiceTest extends TestCase {
 		self::assertTrue( $result['idempotency_replayed'] );
 		self::assertCount( 1, get_post_meta( $first['id'], MutationAuditStore::meta_key(), true ) );
 		self::assertCount( 1, $GLOBALS['wp_auto_test_posts'] );
+		self::assertSame( 'completed', array_values( $GLOBALS['wp_auto_test_options'] )[0]['state'] );
 	}
 
 	/**
-	 * Known-target recovery does not append a duplicate audit event.
+	 * A target-correlated in-progress claim remains blocked without audit access.
 	 */
-	public function test_known_target_recovery_reuses_existing_audit_event(): void {
+	public function test_in_progress_known_target_does_not_recover(): void {
 		$service = new ContentMutationService();
 		$first   = $service->create_post_draft(
 			array(
@@ -221,9 +225,11 @@ final class ContentMutationServiceTest extends TestCase {
 			)
 		);
 		foreach ( $GLOBALS['wp_auto_test_options'] as &$record ) {
-			$record['state'] = 'target_recorded';
+			$record['state']     = 'in_progress';
+			$record['target_id'] = $first['id'];
 		}
 		unset( $record );
+		$GLOBALS['wp_auto_test_post_meta'][ $first['id'] ][ MutationAuditStore::meta_key() ] = array();
 
 		$result = $service->create_post_draft(
 			array(
@@ -232,13 +238,71 @@ final class ContentMutationServiceTest extends TestCase {
 			)
 		);
 
-		self::assertIsArray( $result );
-		self::assertTrue( $result['idempotency_replayed'] );
-		self::assertCount( 1, get_post_meta( $first['id'], MutationAuditStore::meta_key(), true ) );
+		self::assertInstanceOf( WP_Error::class, $result );
+		self::assertSame( 'wp_auto_idempotency_in_progress', $result->get_error_code() );
+		self::assertSame( array(), get_post_meta( $first['id'], MutationAuditStore::meta_key(), true ) );
+		self::assertCount( 1, $GLOBALS['wp_auto_test_posts'] );
 	}
 
 	/**
-	 * Re-entrant recovery during the first audit write cannot append twice.
+	 * An audit-recorded claim with missing audit metadata fails closed.
+	 */
+	public function test_audit_recorded_missing_audit_fails_closed_without_recovery_write(): void {
+		$service = new ContentMutationService();
+		$first   = $service->create_post_draft(
+			array(
+				'title'           => 'Missing audit',
+				'idempotency_key' => 'missing01',
+			)
+		);
+		foreach ( $GLOBALS['wp_auto_test_options'] as &$record ) {
+			$record['state'] = 'audit_recorded';
+		}
+		unset( $record );
+		$GLOBALS['wp_auto_test_post_meta'][ $first['id'] ][ MutationAuditStore::meta_key() ] = array();
+		$GLOBALS['wp_auto_test_update_meta_calls'] = 0;
+
+		$result = $service->create_post_draft(
+			array(
+				'title'           => 'Missing audit',
+				'idempotency_key' => 'missing01',
+			)
+		);
+
+		self::assertSame( 'wp_auto_mutation_state_uncertain', $result->get_error_code() );
+		self::assertSame( 0, $GLOBALS['wp_auto_test_update_meta_calls'] );
+		self::assertSame( 'audit_recorded', array_values( $GLOBALS['wp_auto_test_options'] )[0]['state'] );
+	}
+
+	/**
+	 * A completion failure after audit recording can be replayed safely.
+	 */
+	public function test_audit_recorded_completion_failure_recovers_without_new_audit(): void {
+		$GLOBALS['wp_auto_test_fail_update_option_on_call'] = 3;
+		$input = array(
+			'title'           => 'Completion retry',
+			'idempotency_key' => 'complete1',
+		);
+		$first = ( new ContentMutationService() )->create_post_draft( $input );
+
+		self::assertSame( 'wp_auto_mutation_state_uncertain', $first->get_error_code() );
+		self::assertCount( 1, $GLOBALS['wp_auto_test_posts'] );
+		$target_id = $GLOBALS['wp_auto_test_posts'][0]->ID;
+		self::assertSame( 'audit_recorded', array_values( $GLOBALS['wp_auto_test_options'] )[0]['state'] );
+		self::assertCount( 1, get_post_meta( $target_id, MutationAuditStore::meta_key(), true ) );
+
+		$GLOBALS['wp_auto_test_fail_update_option_on_call'] = null;
+		$replay = ( new ContentMutationService() )->create_post_draft( $input );
+
+		self::assertIsArray( $replay );
+		self::assertTrue( $replay['idempotency_replayed'] );
+		self::assertCount( 1, $GLOBALS['wp_auto_test_posts'] );
+		self::assertCount( 1, get_post_meta( $target_id, MutationAuditStore::meta_key(), true ) );
+		self::assertSame( 'completed', array_values( $GLOBALS['wp_auto_test_options'] )[0]['state'] );
+	}
+
+	/**
+	 * Re-entrant retry during the first audit write is blocked by in-progress state.
 	 */
 	public function test_reentrant_recovery_keeps_one_logical_create_event(): void {
 		$input                                      = array(
@@ -253,15 +317,17 @@ final class ContentMutationServiceTest extends TestCase {
 
 		self::assertIsArray( $result );
 		self::assertInstanceOf( WP_Error::class, $GLOBALS['wp_auto_test_nested_recovery'] );
-		self::assertSame( 'wp_auto_mutation_state_uncertain', $GLOBALS['wp_auto_test_nested_recovery']->get_error_code() );
+		self::assertSame( 'wp_auto_idempotency_in_progress', $GLOBALS['wp_auto_test_nested_recovery']->get_error_code() );
 		self::assertCount( 1, get_post_meta( $result['id'], MutationAuditStore::meta_key(), true ) );
 		self::assertSame( 'create', get_post_meta( $result['id'], MutationAuditStore::meta_key(), true )[0]['operation'] );
+		self::assertSame( 'completed', array_values( $GLOBALS['wp_auto_test_options'] )[0]['state'] );
+		self::assertSame( 1, $GLOBALS['wp_auto_test_update_meta_calls'] );
 	}
 
 	/**
-	 * A known target that cannot be verified remains uncertain.
+	 * An in-progress claim remains blocked even when its target cannot be verified.
 	 */
-	public function test_invalid_known_target_fails_closed(): void {
+	public function test_in_progress_invalid_target_remains_blocked(): void {
 		$service = new ContentMutationService();
 		$service->create_post_draft(
 			array(
@@ -270,7 +336,7 @@ final class ContentMutationServiceTest extends TestCase {
 			)
 		);
 		foreach ( $GLOBALS['wp_auto_test_options'] as &$record ) {
-			$record['state']     = 'target_recorded';
+			$record['state']     = 'in_progress';
 			$record['target_id'] = 99999;
 		}
 		unset( $record );
@@ -283,7 +349,7 @@ final class ContentMutationServiceTest extends TestCase {
 		);
 
 		self::assertInstanceOf( WP_Error::class, $result );
-		self::assertSame( 'wp_auto_mutation_state_uncertain', $result->get_error_code() );
+		self::assertSame( 'wp_auto_idempotency_in_progress', $result->get_error_code() );
 		self::assertCount( 1, $GLOBALS['wp_auto_test_posts'] );
 	}
 
@@ -410,7 +476,7 @@ final class ContentMutationServiceTest extends TestCase {
 	/**
 	 * Audit failure leaves a recorded target in an uncertain state.
 	 */
-	public function test_audit_failure_returns_uncertain_after_target_is_recorded(): void {
+	public function test_audit_failure_returns_uncertain_while_target_remains_in_progress(): void {
 		$GLOBALS['wp_auto_test_fail_update_meta'] = true;
 		$result                                   = ( new ContentMutationService() )->create_post_draft(
 			array(
@@ -422,6 +488,37 @@ final class ContentMutationServiceTest extends TestCase {
 		self::assertSame( 'wp_auto_mutation_state_uncertain', $result->get_error_code() );
 		self::assertCount( 1, $GLOBALS['wp_auto_test_posts'] );
 		$record = array_values( $GLOBALS['wp_auto_test_options'] )[0];
-		self::assertSame( 'target_recorded', $record['state'] );
+		self::assertSame( 'in_progress', $record['state'] );
+		self::assertSame( 1001, $record['target_id'] );
+
+		$retry = ( new ContentMutationService() )->create_post_draft(
+			array(
+				'title'           => 'Audit fails',
+				'idempotency_key' => 'audit001',
+			)
+		);
+		self::assertSame( 'wp_auto_idempotency_in_progress', $retry->get_error_code() );
+	}
+
+	/**
+	 * Target correlation failure keeps the claim blocking after Core creation.
+	 */
+	public function test_target_correlation_failure_keeps_claim_blocking(): void {
+		$GLOBALS['wp_auto_test_fail_update_option_on_call'] = 1;
+		$input  = array(
+			'title'           => 'Correlation fails',
+			'idempotency_key' => 'correlate1',
+		);
+		$result = ( new ContentMutationService() )->create_post_draft( $input );
+
+		self::assertSame( 'wp_auto_mutation_state_uncertain', $result->get_error_code() );
+		self::assertCount( 1, $GLOBALS['wp_auto_test_posts'] );
+		self::assertSame( 'in_progress', array_values( $GLOBALS['wp_auto_test_options'] )[0]['state'] );
+		self::assertSame( 0, array_values( $GLOBALS['wp_auto_test_options'] )[0]['target_id'] );
+
+		$GLOBALS['wp_auto_test_fail_update_option_on_call'] = null;
+		$retry = ( new ContentMutationService() )->create_post_draft( $input );
+		self::assertSame( 'wp_auto_idempotency_in_progress', $retry->get_error_code() );
+		self::assertCount( 1, $GLOBALS['wp_auto_test_posts'] );
 	}
 }
