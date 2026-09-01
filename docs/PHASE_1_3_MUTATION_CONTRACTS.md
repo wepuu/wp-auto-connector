@@ -6,7 +6,9 @@ Contract draft: 2026-08-31
 
 Remediation review: 2026-09-01
 
-This document is the authoritative public contract for the Phase 1.3 draft mutation abilities. Phase 1.3.1 implemented and validated the two Create Draft abilities; the dedicated Direct MCP server now exposes exactly ten tools (the eight Phase 1.2 read-only tools plus the two Create Draft tools). Update abilities remain frozen but unimplemented.
+Phase 1.3.2.0 amendment status: **Approved — pending merge/seal**
+
+This document is the authoritative public contract for the Phase 1.3 draft mutation abilities. Phase 1.3.1 implemented and validated the two Create Draft abilities; the dedicated Direct MCP server now exposes exactly ten tools (the eight Phase 1.2 read-only tools plus the two Create Draft tools). The base Update contracts remain frozen but unimplemented; the narrow Phase 1.3.2.0 sentinel amendment below is approved pending merge/seal.
 
 ## Contract goals
 
@@ -29,8 +31,8 @@ Direct MCP and a future explicitly enabled Cloud MCP integration must call the s
 | --- | --- | --- | --- |
 | `wp-auto/post-create-draft` | `wp-auto-post-create-draft` | Phase 1.3.1 | Implemented and validated |
 | `wp-auto/page-create-draft` | `wp-auto-page-create-draft` | Phase 1.3.1 | Implemented and validated |
-| `wp-auto/post-update` | `wp-auto-post-update` | Phase 1.3.2 | Contract frozen; not implemented |
-| `wp-auto/page-update` | `wp-auto-page-update` | Phase 1.3.2 | Contract frozen; not implemented |
+| `wp-auto/post-update` | `wp-auto-post-update` | Phase 1.3.2 | Base contract frozen; sentinel amendment approved pending merge/seal; not implemented |
+| `wp-auto/page-update` | `wp-auto-page-update` | Phase 1.3.2 | Base contract frozen; sentinel amendment approved pending merge/seal; not implemented |
 
 Publishing, status transitions, deletion, taxonomy assignment, media mutation, SEO mutation, arbitrary metadata, arbitrary query arguments, and generic REST proxying are not part of these contracts.
 
@@ -96,7 +98,7 @@ Every field is required and no additional field is returned:
 | `slug` | string | final Core-stored slug |
 | `link` | string | final Core-generated permalink |
 | `edit_url` | string | Core-generated edit URL without a nonce |
-| `modified_gmt` | string | final Core `post_modified_gmt`, `YYYY-MM-DD HH:MM:SS` |
+| `modified_gmt` | string | final raw Core `post_modified_gmt`; may be `0000-00-00 00:00:00` or a normal GMT datetime |
 | `idempotency_replayed` | boolean | `false` for the creating execution; `true` for a safe completed replay |
 
 Ability annotations:
@@ -174,7 +176,7 @@ Required fields:
 | Field | Type | Contract |
 | --- | --- | --- |
 | `id` | integer | minimum 1 |
-| `expected_modified_gmt` | string | exactly 19 characters matching `^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$`; service also performs real GMT calendar validation |
+| `expected_modified_gmt` | string | exactly 19 characters matching `^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$`; semantic validation accepts either the exact Core sentinel `0000-00-00 00:00:00` or a real GMT calendar datetime |
 
 Optional mutable fields:
 
@@ -209,6 +211,16 @@ The service executes these steps in order:
 
 Phase 1.3 uses `expected_modified_gmt` as a best-effort optimistic concurrency precondition. If it already differs from the current WordPress `post_modified_gmt` at the final comparison, no WP-Auto update is attempted, `wp_auto_content_conflict` is returned with semantic status 409, and current content is not returned. The client must call the matching Get ability before retrying.
 
+### Phase 1.3.2.0 `modified_gmt` sentinel compatibility amendment
+
+Status: **Approved — pending merge/seal**. This is a documentation-only amendment; no Update Ability or MCP tool is currently registered, and the planned JSON Schema remains unchanged.
+
+The exact WordPress Core sentinel `0000-00-00 00:00:00` is a valid opaque concurrency token when returned by Core for a draft. It is the only zero-date exception. Every other value must remain a real GMT calendar datetime in the existing `YYYY-MM-DD HH:MM:SS` shape. The sentinel is not interpreted as a date and is not a stronger version token.
+
+The service must compare the client's token and the latest raw Core `post_modified_gmt` as exact strings. It must not normalize, parse-and-reformat, convert, shim, or synthesize either value. A sentinel/current-sentinel pair matches; a sentinel/current-real or real/current-sentinel pair conflicts; equal real timestamps match; different real timestamps conflict. A mismatch continues to use `wp_auto_content_conflict` with semantic status 409. Malformed or impossible non-sentinel input continues to use `wp_auto_invalid_request` with semantic status 400. No new error code is introduced.
+
+Mutation outputs continue to return the final raw Core `post_modified_gmt`, so `modified_gmt` may contain the exact sentinel or a normal GMT datetime. The second-level precision, same-second ambiguity, and check-to-write race remain unchanged; this amendment does not provide CAS, transactions, locks, revisions, ETags, or stronger lost-update prevention.
+
 This final comparison is not an atomic compare-and-swap guarantee. A concurrent browser, background process, plugin, or other external writer can update the object after WP-Auto compares the timestamp but before WordPress completes the update. Phase 1.3 therefore does not guarantee prevention of every lost-update race under arbitrary concurrent external writers and never claims that stale writes are always prevented.
 
 WordPress `post_modified_gmt` is the Phase 1.3 MVP concurrency token and has second-level timestamp granularity. Multiple updates within the same second may not be distinguishable by `modified_gmt` alone. A stronger revision, version, or atomic CAS model would require an explicit future contract revision and is outside Phase 1.3. Phase 1.2 Get output is not changed to add an ETag, revision, or version field.
@@ -226,7 +238,7 @@ status          fixed string enum: draft
 slug            string
 link            string
 edit_url        string, no nonce
-modified_gmt    string, YYYY-MM-DD HH:MM:SS
+modified_gmt    string, final raw Core value; exact sentinel or normal GMT datetime
 ```
 
 Ability annotations:
@@ -332,14 +344,15 @@ wp-auto/post-update
 wp-auto/page-update
 ```
 
-Phase 1.3.0 is complete and Phase 1.3.1 has exposed the two validated Create Draft tools for a total of ten. Phase 1.3.2 may expose the two Update Draft tools for a total of twelve only after implementation and validation.
+Phase 1.3.0 is complete and Phase 1.3.1 has exposed the two validated Create Draft tools for a total of ten. The Phase 1.3.2.0 sentinel amendment must be separately reviewed and frozen before Phase 1.3.2 may expose the two Update Draft tools for a total of twelve.
 
 ## Phase checkpoints
 
 1. **Phase 1.3.0 — Mutation Contract Freeze:** freeze this contract and the safety ADR without runtime changes.
 2. **Phase 1.3.1 — Post/Page Create Draft:** implemented and validated only the two Create Draft abilities; the current runtime is ten tools.
-3. **Phase 1.3.2 — Draft Update + Best-effort Optimistic Concurrency:** implement and validate only the two Update Draft abilities.
-4. **Phase 1.3.3 — Mutation Security / Contract Audit:** audit exact schemas, capability paths, idempotency, invariant guards, error privacy, resource use, and allowlist.
-5. **Phase 1.3.4 — Full Mutation Integration Validation:** verify that each request changes only its intended target plus documented Core/plugin lifecycle effects; confirm no published/status-promoted or unrelated content changes and no WP-Auto taxonomy, media, featured-image, SEO, arbitrary-meta, user, setting, plugin, theme, Cloud, or telemetry mutation. Validation must not require a byte-for-byte unchanged database, then seal Phase 1.3.
+3. **Phase 1.3.2.0 — modified_gmt Sentinel Compatibility Amendment:** review this narrow semantic amendment before any Update runtime work; no tool is exposed.
+4. **Phase 1.3.2 — Draft Update + Best-effort Optimistic Concurrency:** after Phase 1.3.2.0 is separately reviewed and frozen, implement and validate only the two Update Draft abilities.
+5. **Phase 1.3.3 — Mutation Security / Contract Audit:** audit exact schemas, capability paths, idempotency, invariant guards, error privacy, resource use, and allowlist.
+6. **Phase 1.3.4 — Full Mutation Integration Validation:** verify that each request changes only its intended target plus documented Core/plugin lifecycle effects; confirm no published/status-promoted or unrelated content changes and no WP-Auto taxonomy, media, featured-image, SEO, arbitrary-meta, user, setting, plugin, theme, Cloud, or telemetry mutation. Validation must not require a byte-for-byte unchanged database, then seal Phase 1.3.
 
 Phase 1.3.0 does not authorize placeholder abilities, skipped mutation tests, production services, registrar changes, publishing, deletion, media, taxonomy mutation, SEO, Cloud MCP, Skills, automation, telemetry, or external WP-Auto requests.
