@@ -1,6 +1,6 @@
 # Phase 1.3 Mutation Contracts
 
-Status: **Phase 1.3.0 remediation complete; ready for final review/freeze**
+Status: **Phase 1.3.0 contract frozen**
 
 Contract draft: 2026-08-31
 
@@ -27,10 +27,10 @@ Direct MCP and a future explicitly enabled Cloud MCP integration must call the s
 
 | Ability | MCP tool | Planned implementation | Runtime status |
 | --- | --- | --- | --- |
-| `wp-auto/post-create-draft` | `wp-auto-post-create-draft` | Phase 1.3.1 | Remediated contract candidate; not implemented |
-| `wp-auto/page-create-draft` | `wp-auto-page-create-draft` | Phase 1.3.1 | Remediated contract candidate; not implemented |
-| `wp-auto/post-update` | `wp-auto-post-update` | Phase 1.3.2 | Remediated contract candidate; not implemented |
-| `wp-auto/page-update` | `wp-auto-page-update` | Phase 1.3.2 | Remediated contract candidate; not implemented |
+| `wp-auto/post-create-draft` | `wp-auto-post-create-draft` | Phase 1.3.1 | Contract frozen; not implemented |
+| `wp-auto/page-create-draft` | `wp-auto-page-create-draft` | Phase 1.3.1 | Contract frozen; not implemented |
+| `wp-auto/post-update` | `wp-auto-post-update` | Phase 1.3.2 | Contract frozen; not implemented |
+| `wp-auto/page-update` | `wp-auto-page-update` | Phase 1.3.2 | Contract frozen; not implemented |
 
 Publishing, status transitions, deletion, taxonomy assignment, media mutation, SEO mutation, arbitrary metadata, arbitrary query arguments, and generic REST proxying are not part of these contracts.
 

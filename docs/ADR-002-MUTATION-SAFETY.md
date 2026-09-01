@@ -1,6 +1,6 @@
 # ADR-002: Draft Mutation Safety Model
 
-- Status: Proposed — remediation complete; pending final review/freeze
+- Status: Accepted — Phase 1.3.0 Mutation Contract Freeze
 - Date: 2026-08-31
 - Decision scope: Phase 1.3 draft content mutation
 
@@ -92,4 +92,4 @@ Mutation behavior belongs in a small WP-Auto domain service behind WordPress Abi
 
 ## Follow-up
 
-After formal approval, Phase 1.3.1 may implement only the frozen Post/Page Create Draft contracts. Any material change to names, schemas, capability paths, idempotency state, error semantics, audit fields, or Core side-effect policy requires an explicit contract and ADR review before code is exposed.
+Phase 1.3.1 may implement only the frozen Post/Page Create Draft contracts. Any material change to names, schemas, capability paths, idempotency state, error semantics, audit fields, or Core side-effect policy requires an explicit contract and ADR review before code is exposed.

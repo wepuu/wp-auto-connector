@@ -12,7 +12,7 @@ Phase 1.1 is complete: the direct MCP server foundation proves the authenticated
 
 Phase 1.2 is complete: all eight read-only tools passed the frozen contract, permission, privacy, schema, bounded-query, and live MCP validation gates.
 
-Phase 1.3.0 contract remediation is complete: the four draft mutation contracts and safety ADR are ready for final review/freeze, but no mutation Ability is registered or exposed. Do not begin the planned Phase 1.3.1 Post/Page Create Draft implementation until the freeze is formally approved. Phase 1.3.1 must not implement Update, publishing, or any later Phase 1.3 work.
+Phase 1.3.0 is complete and frozen: the four draft mutation contracts and safety ADR are approved, but no mutation Ability is registered or exposed. The next active task is Phase 1.3.1 - Post/Page Create Draft. Phase 1.3.1 may implement only `wp-auto/post-create-draft` and `wp-auto/page-create-draft`; it must not implement Update, publishing, or any later Phase 1.3 work.
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
