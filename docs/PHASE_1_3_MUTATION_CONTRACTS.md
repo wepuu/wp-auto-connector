@@ -344,14 +344,14 @@ wp-auto/post-update
 wp-auto/page-update
 ```
 
-Phase 1.3.0 is complete and Phase 1.3.1 has exposed the two validated Create Draft tools for a total of ten. The Phase 1.3.2.0 sentinel amendment must be separately reviewed and frozen before Phase 1.3.2 may expose the two Update Draft tools for a total of twelve.
+Phase 1.3.0 is complete and Phase 1.3.1 has exposed the two validated Create Draft tools for a total of ten. The Phase 1.3.2.0 sentinel amendment has passed contract review and must be merged and formally sealed before Phase 1.3.2 may expose the two Update Draft tools for a total of twelve.
 
 ## Phase checkpoints
 
 1. **Phase 1.3.0 — Mutation Contract Freeze:** freeze this contract and the safety ADR without runtime changes.
 2. **Phase 1.3.1 — Post/Page Create Draft:** implemented and validated only the two Create Draft abilities; the current runtime is ten tools.
-3. **Phase 1.3.2.0 — modified_gmt Sentinel Compatibility Amendment:** review this narrow semantic amendment before any Update runtime work; no tool is exposed.
-4. **Phase 1.3.2 — Draft Update + Best-effort Optimistic Concurrency:** after Phase 1.3.2.0 is separately reviewed and frozen, implement and validate only the two Update Draft abilities.
+3. **Phase 1.3.2.0 — modified_gmt Sentinel Compatibility Amendment:** contract review approved; merge and formally seal this narrow semantic amendment before any Update runtime work; no tool is exposed.
+4. **Phase 1.3.2 — Draft Update + Best-effort Optimistic Concurrency:** after Phase 1.3.2.0 is merged and formally sealed, implement and validate only the two Update Draft abilities.
 5. **Phase 1.3.3 — Mutation Security / Contract Audit:** audit exact schemas, capability paths, idempotency, invariant guards, error privacy, resource use, and allowlist.
 6. **Phase 1.3.4 — Full Mutation Integration Validation:** verify that each request changes only its intended target plus documented Core/plugin lifecycle effects; confirm no published/status-promoted or unrelated content changes and no WP-Auto taxonomy, media, featured-image, SEO, arbitrary-meta, user, setting, plugin, theme, Cloud, or telemetry mutation. Validation must not require a byte-for-byte unchanged database, then seal Phase 1.3.
 

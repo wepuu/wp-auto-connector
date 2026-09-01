@@ -148,4 +148,6 @@ The approved amendment is pending merge/seal on `main`. It is not formally seale
 
 ## Next checkpoint
 
-`Phase 1.3.2.0 Contract Review`
+Merge/seal Phase 1.3.2.0 on `main`.
+
+After PR #9 is merged and the main PHP Quality run passes, Phase 1.3.2 - Draft Update + Best-effort Optimistic Concurrency becomes the next implementation checkpoint.
