@@ -18,12 +18,13 @@ The Direct MCP server now exposes exactly ten tools: the eight Phase 1.2 read-on
 
 ## Automated evidence
 
-- PHPUnit: **158 tests / 896 assertions** — pass.
+- PHPUnit: **160 tests / 906 assertions** — pass.
 - `composer validate --strict` — pass.
 - `composer lint` — pass (45 PHP files).
 - Focused Create Draft, idempotency, audit, Ability, bootstrap, and registrar tests — pass.
 - `git diff --check` — pass.
 - Service tests cover strict input validation, title semantics, fixed type/status/author/parent, capability mapping, allowlisted Core arguments, operation-scoped guard cleanup (including an unrelated nested insert), persistent atomic claim states, replay/conflict/in-progress behavior, uncertain-state fail-closed handling, audit retention/privacy, and exact schemas/annotations.
+- Merge-gate remediation narrowed the final guard so only Page Create enforces `post_parent=0`; Post parent remains Core/plugin-controlled. Create audit finalization now uses a logical once-only identity across normal and known-target recovery paths, including a deterministic re-entrant interleaving test.
 
 The existing Phase 1.2 regression suite remains green in the full PHPUnit run. No Composer, lockfile, CI, Adapter, or plugin-version changes were made.
 
@@ -43,14 +44,14 @@ Observed lifecycle and contract evidence:
 - authenticated `initialize` returned HTTP 200 and a session header;
 - `notifications/initialized` returned HTTP 202;
 - `tools/list` returned the exact ten-tool set (no wildcard/default/third-party abilities);
-- Post Create returned a draft owned by the authenticated user with `type=post`, `status=draft`, `parent=0`, `edit_url`, and final Core values;
-- Page Create returned a root draft with `type=page`, `status=draft`, `parent=0`, and the exact output fields;
+- Post Create returned a draft owned by the authenticated user with the frozen Post invariants (`type=post`, `status=draft`, authenticated author), `edit_url`, and final Core values. The live object happened to have Core's normal parent value `0`; WP-Auto does not define Post parent as a Create invariant;
+- Page Create returned a root draft with the enforced Page invariants (`type=page`, `status=draft`, authenticated author, `parent=0`) and the exact output fields;
 - replaying a completed key returned the same object with `idempotency_replayed=true`;
 - reusing a completed key with a different payload returned an idempotency conflict and did not create another object;
 - an unknown `status` input was rejected by the Adapter schema (`additionalProperties=false`);
 - a subscriber-like identity without the fixed `create_posts` capability was denied by the Ability permission layer;
 - anonymous transport returned HTTP 401; an authenticated identity without `read` returned HTTP 403;
-- a temporary `wp_insert_post_data` filter attempted to change type, status, author, and parent; the operation-scoped final guard restored `post`, `draft`, the authenticated author, and parent `0` before the object was persisted;
+- a temporary `wp_insert_post_data` filter attempted to change type, status, author, and parent; the operation-scoped final guard restored Post type/status/author while leaving the simulated Core parent behavior intact, and Page Create continued to enforce parent `0`;
 - `wp-auto-post-get` confirmed Core-managed post behavior (including the default category) and the final stored content;
 - MCP session DELETE returned HTTP 200.
 
@@ -68,7 +69,7 @@ Temporary Application Passwords, users, draft fixtures, idempotency options, aud
 
 ## Runtime boundary
 
-Production changes are limited to the two Create Draft abilities, their shared mutation/idempotency/audit services, explicit ten-tool registration, and test bootstrap support. No Update Ability is registered. Create always fixes the post type, draft status, authenticated author, and root parent; only contract fields reach WordPress Core, and final objects are re-read and invariant-checked before completion.
+Production changes are limited to the two Create Draft abilities, their shared mutation/idempotency/audit services, explicit ten-tool registration, and test bootstrap support. No Update Ability is registered. Create fixes post type, draft status, and authenticated author; Page Create additionally fixes parent `0`. Post parent is not client-exposed but is not overwritten as a WP-Auto invariant. Only contract fields reach WordPress Core, and final objects are re-read and invariant-checked before completion.
 
 ## Next checkpoint
 

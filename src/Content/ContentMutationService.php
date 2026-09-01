@@ -172,7 +172,7 @@ final class ContentMutationService {
 			'timestamp_gmt'    => current_time( 'mysql', true ),
 			'fingerprint'      => $fingerprint,
 		);
-		if ( ! $this->audit->append( $post_id, $event ) ) {
+		if ( ! $this->audit->append_create_once( $post_id, $event ) ) {
 			return $this->uncertain();
 		}
 
@@ -278,10 +278,11 @@ final class ContentMutationService {
 			$data['post_type']   = $post_type;
 			$data['post_status'] = 'draft';
 			$data['post_author'] = $actor_id;
-			// Client input and third-party filters may not attach a parent to a
-			// Create operation. Pages require a root parent by contract; forcing
-			// zero for Posts as well keeps the allowlisted mutation surface closed.
-			$data['post_parent'] = 0;
+			if ( 'page' === $post_type ) {
+				// Pages require a root parent by contract. Post parent behavior
+				// remains under Core/plugin control and is not client-exposed.
+				$data['post_parent'] = 0;
+			}
 
 			return $data;
 		};
@@ -339,19 +340,17 @@ final class ContentMutationService {
 			return $this->uncertain();
 		}
 
-		if ( ! $this->audit->has_create_event( $post->ID, $ability, $actor_id, $fingerprint ) ) {
-			$event = array(
-				'version'          => 1,
-				'operation'        => 'create',
-				'ability'          => $ability,
-				'actor_user_id'    => $actor_id,
-				'target_object_id' => $post->ID,
-				'timestamp_gmt'    => current_time( 'mysql', true ),
-				'fingerprint'      => $fingerprint,
-			);
-			if ( ! $this->audit->append( $post->ID, $event ) ) {
-				return $this->uncertain();
-			}
+		$event = array(
+			'version'          => 1,
+			'operation'        => 'create',
+			'ability'          => $ability,
+			'actor_user_id'    => $actor_id,
+			'target_object_id' => $post->ID,
+			'timestamp_gmt'    => current_time( 'mysql', true ),
+			'fingerprint'      => $fingerprint,
+		);
+		if ( ! $this->audit->append_create_once( $post->ID, $event ) ) {
+			return $this->uncertain();
 		}
 
 		if ( ! $this->idempotency->complete( $option_name, $record ) ) {

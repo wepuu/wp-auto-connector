@@ -34,6 +34,8 @@ final class ContentMutationServiceTest extends TestCase {
 		$GLOBALS['wp_auto_test_insert_exception']   = null;
 		$GLOBALS['wp_auto_test_fail_update_option'] = false;
 		$GLOBALS['wp_auto_test_fail_update_meta']   = false;
+		$GLOBALS['wp_auto_test_before_update_meta'] = null;
+		$GLOBALS['wp_auto_test_nested_recovery']    = null;
 		$GLOBALS['wp_auto_test_filters']            = array();
 	}
 
@@ -236,6 +238,27 @@ final class ContentMutationServiceTest extends TestCase {
 	}
 
 	/**
+	 * Re-entrant recovery during the first audit write cannot append twice.
+	 */
+	public function test_reentrant_recovery_keeps_one_logical_create_event(): void {
+		$input                                      = array(
+			'title'           => 'Interleaved audit',
+			'idempotency_key' => 'interleave1',
+		);
+		$GLOBALS['wp_auto_test_before_update_meta'] = static function () use ( $input ): void {
+			$GLOBALS['wp_auto_test_nested_recovery'] = ( new ContentMutationService() )->create_post_draft( $input );
+		};
+
+		$result = ( new ContentMutationService() )->create_post_draft( $input );
+
+		self::assertIsArray( $result );
+		self::assertInstanceOf( WP_Error::class, $GLOBALS['wp_auto_test_nested_recovery'] );
+		self::assertSame( 'wp_auto_mutation_state_uncertain', $GLOBALS['wp_auto_test_nested_recovery']->get_error_code() );
+		self::assertCount( 1, get_post_meta( $result['id'], MutationAuditStore::meta_key(), true ) );
+		self::assertSame( 'create', get_post_meta( $result['id'], MutationAuditStore::meta_key(), true )[0]['operation'] );
+	}
+
+	/**
 	 * A known target that cannot be verified remains uncertain.
 	 */
 	public function test_invalid_known_target_fails_closed(): void {
@@ -330,7 +353,7 @@ final class ContentMutationServiceTest extends TestCase {
 		self::assertSame( 'post', $GLOBALS['wp_auto_test_posts'][0]->post_type );
 		self::assertSame( 'draft', $GLOBALS['wp_auto_test_posts'][0]->post_status );
 		self::assertSame( 7, $GLOBALS['wp_auto_test_posts'][0]->post_author );
-		self::assertSame( 0, $GLOBALS['wp_auto_test_posts'][0]->post_parent );
+		self::assertSame( 42, $GLOBALS['wp_auto_test_posts'][0]->post_parent );
 	}
 
 	/**
@@ -381,7 +404,7 @@ final class ContentMutationServiceTest extends TestCase {
 		self::assertSame( 'post', $GLOBALS['wp_auto_test_posts'][1]->post_type );
 		self::assertSame( 'draft', $GLOBALS['wp_auto_test_posts'][1]->post_status );
 		self::assertSame( 7, $GLOBALS['wp_auto_test_posts'][1]->post_author );
-		self::assertSame( 0, $GLOBALS['wp_auto_test_posts'][1]->post_parent );
+		self::assertSame( 42, $GLOBALS['wp_auto_test_posts'][1]->post_parent );
 	}
 
 	/**

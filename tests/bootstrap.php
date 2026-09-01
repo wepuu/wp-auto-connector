@@ -41,6 +41,8 @@ namespace {
 	$GLOBALS['wp_auto_test_insert_exception']     = null;
 	$GLOBALS['wp_auto_test_fail_update_option']   = false;
 	$GLOBALS['wp_auto_test_fail_update_meta']     = false;
+	$GLOBALS['wp_auto_test_before_update_meta']   = null;
+	$GLOBALS['wp_auto_test_update_meta_calls']    = 0;
 	$GLOBALS['wp_auto_test_site_info']            = array(
 		'name'                => 'WP-Auto Test Site',
 		'description'         => 'A safe connector test site.',
@@ -344,6 +346,13 @@ namespace {
 	}
 
 	function update_post_meta( int $post_id, string $meta_key, $value ) {
+		++$GLOBALS['wp_auto_test_update_meta_calls'];
+		if ( is_callable( $GLOBALS['wp_auto_test_before_update_meta'] ) ) {
+			$callback = $GLOBALS['wp_auto_test_before_update_meta'];
+			$GLOBALS['wp_auto_test_before_update_meta'] = null;
+			$callback( $post_id, $meta_key, $value );
+		}
+
 		if ( $GLOBALS['wp_auto_test_fail_update_meta'] ) {
 			return false;
 		}

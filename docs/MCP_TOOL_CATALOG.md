@@ -42,16 +42,16 @@ The dedicated server explicitly allowlists only these eight read-only abilities 
 
 ## Phase 1.3
 
-Phase 1.3.0 froze the contracts in `docs/PHASE_1_3_MUTATION_CONTRACTS.md`. Phase 1.3.1 implemented and validated the two Create Draft abilities; the dedicated server now contains exactly ten tools. Update abilities remain contract-frozen and are not exposed.
+Phase 1.3.0 froze the contracts in `docs/PHASE_1_3_MUTATION_CONTRACTS.md`. Phase 1.3.1 implemented and validated the two Create Draft abilities; the dedicated server now contains exactly ten tools. Update abilities remain contract-frozen and are not exposed, and their implementation is blocked pending the narrow Phase 1.3.2.0 `modified_gmt` sentinel compatibility amendment.
 
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
 | `wp-auto/post-create-draft` | `wp-auto-post-create-draft` | Draft mutation | fixed Post type object's `cap->create_posts` | Implemented and validated — Phase 1.3.1 |
 | `wp-auto/page-create-draft` | `wp-auto-page-create-draft` | Draft mutation | fixed Page type object's `cap->create_posts` | Implemented and validated — Phase 1.3.1 |
-| `wp-auto/post-update` | `wp-auto-post-update` | Draft mutation | fixed Post type object's `cap->edit_posts`, then `edit_post` for the target | Contract frozen; not implemented — Phase 1.3.2 |
-| `wp-auto/page-update` | `wp-auto-page-update` | Draft mutation | fixed Page type object's `cap->edit_posts`, then `edit_post` for the target | Contract frozen; not implemented — Phase 1.3.2 |
+| `wp-auto/post-update` | `wp-auto-post-update` | Draft mutation | fixed Post type object's `cap->edit_posts`, then `edit_post` for the target | Contract frozen; not implemented — Phase 1.3.2 (blocked pending 1.3.2.0) |
+| `wp-auto/page-update` | `wp-auto-page-update` | Draft mutation | fixed Page type object's `cap->edit_posts`, then `edit_post` for the target | Contract frozen; not implemented — Phase 1.3.2 (blocked pending 1.3.2.0) |
 
-Publishing, deletion, arbitrary status changes, and generic WordPress mutation are intentionally not part of these abilities. Phase 1.3.2 may expand the explicit allowlist to twelve only after the two Update abilities pass the same gate.
+Publishing, deletion, arbitrary status changes, and generic WordPress mutation are intentionally not part of these abilities. Phase 1.3.2.0 must be reviewed and frozen before the two Update abilities can be implemented or expand the explicit allowlist to twelve.
 
 ## Phase 1.4
 
