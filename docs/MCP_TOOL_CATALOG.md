@@ -42,16 +42,16 @@ The dedicated server explicitly allowlists only these eight read-only abilities 
 
 ## Phase 1.3
 
-Phase 1.3.0 froze the contracts in `docs/PHASE_1_3_MUTATION_CONTRACTS.md`. Phase 1.3.1 implemented and validated the two Create Draft abilities; the dedicated server now contains exactly ten tools. Phase 1.3.2.0 contract review is approved; Update abilities remain contract-frozen, unimplemented, and blocked until the amendment is merged and formally sealed on `main`.
+Phase 1.3.0 froze the contracts in `docs/PHASE_1_3_MUTATION_CONTRACTS.md`. Phase 1.3.1 implemented and validated the two Create Draft abilities; the dedicated server now contains exactly ten tools. Phase 1.3.2.0 is formally sealed on `main`; Update abilities remain contract-frozen and unimplemented, with implementation next in Phase 1.3.2.
 
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
 | `wp-auto/post-create-draft` | `wp-auto-post-create-draft` | Draft mutation | fixed Post type object's `cap->create_posts` | Implemented and validated — Phase 1.3.1 |
 | `wp-auto/page-create-draft` | `wp-auto-page-create-draft` | Draft mutation | fixed Page type object's `cap->create_posts` | Implemented and validated — Phase 1.3.1 |
-| `wp-auto/post-update` | `wp-auto-post-update` | Draft mutation | fixed Post type object's `cap->edit_posts`, then `edit_post` for the target | Base contract frozen; sentinel amendment approved pending merge/seal; not implemented — Phase 1.3.2 |
-| `wp-auto/page-update` | `wp-auto-page-update` | Draft mutation | fixed Page type object's `cap->edit_posts`, then `edit_post` for the target | Base contract frozen; sentinel amendment approved pending merge/seal; not implemented — Phase 1.3.2 |
+| `wp-auto/post-update` | `wp-auto-post-update` | Draft mutation | fixed Post type object's `cap->edit_posts`, then `edit_post` for the target | Contract frozen and Phase 1.3.2.0 sealed; not implemented — Phase 1.3.2 |
+| `wp-auto/page-update` | `wp-auto-page-update` | Draft mutation | fixed Page type object's `cap->edit_posts`, then `edit_post` for the target | Contract frozen and Phase 1.3.2.0 sealed; not implemented — Phase 1.3.2 |
 
-Publishing, deletion, arbitrary status changes, and generic WordPress mutation are intentionally not part of these abilities. The two Update abilities remain blocked until Phase 1.3.2.0 is merged and formally sealed on `main`; only then may they be implemented or expand the explicit allowlist to twelve.
+Publishing, deletion, arbitrary status changes, and generic WordPress mutation are intentionally not part of these abilities. Phase 1.3.2 is the next implementation checkpoint for the two Update abilities; only after implementation and validation may the explicit allowlist expand to twelve.
 
 ## Phase 1.4
 

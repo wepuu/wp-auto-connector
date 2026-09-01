@@ -1,9 +1,12 @@
 # Phase 1.3.2.0 Validation — `modified_gmt` Sentinel Compatibility Amendment
 
 Date: 2026-09-01
-Branch: `chore/phase-1-3-2-0-modified-gmt-sentinel`
+Original branch: `chore/phase-1-3-2-0-modified-gmt-sentinel`
 Baseline: `main@6fdb6ea4f3ba176029e9e64aab65305b0d047a9b`
-Status: **Approved — pending merge/seal**
+Status: **FORMALLY SEALED ON MAIN**
+Sealed baseline: `main@22f67bf453e6b5ab0c3a2d506f464b0c4bfc5962`
+Merge PR: `#9`
+Main PHP Quality: Run `33478948259` — PASS
 
 ## Baseline and problem discovered
 
@@ -142,12 +145,12 @@ Static review must show no diff under `src/`, `tests/`, `wp-auto-connector.php`,
 
 ## Review verdict
 
-`PASS — Phase 1.3.2.0 contract review approved; ready for commit / PR / merge gate`
+`PASS — Phase 1.3.2.0 formally sealed on main; Phase 1.3.2 is the next active implementation checkpoint`
 
-The approved amendment is pending merge/seal on `main`. It is not formally sealed on `main` and does not unlock Update implementation until the PR is merged and main CI passes.
+PR #9 is merged to `main`, and the main PHP Quality run passed. The amendment is formally sealed on `main` and unlocks the next implementation checkpoint; no Update runtime is included in this document-only seal.
 
 ## Next checkpoint
 
-Merge/seal Phase 1.3.2.0 on `main`.
+Phase 1.3.2 — Draft Update + Best-effort Optimistic Concurrency
 
-After PR #9 is merged and the main PHP Quality run passes, Phase 1.3.2 - Draft Update + Best-effort Optimistic Concurrency becomes the next implementation checkpoint.
+Phase 1.3.2 may implement only the two frozen Draft Update abilities.

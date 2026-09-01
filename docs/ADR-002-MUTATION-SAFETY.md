@@ -44,7 +44,7 @@ Phase 1.3 intentionally remains on the WordPress Core mutation path so hooks, re
 
 ## Phase 1.3.2.0 amendment — Core `modified_gmt` sentinel
 
-- Status: Approved — pending merge/seal
+- Status: Formally sealed on main
 - Scope: semantic compatibility only; no Update runtime or MCP tool is introduced.
 
 WordPress Core can legitimately expose `0000-00-00 00:00:00` for a newly created draft. Create and Get already return the raw Core value, so the Update precondition must round-trip that exact opaque token. The amendment accepts only that exact sentinel or a strictly valid real GMT calendar datetime. It keeps exact raw-string comparison and the existing `wp_auto_invalid_request` (400) and `wp_auto_content_conflict` (409) semantics.
@@ -109,4 +109,4 @@ Mutation behavior belongs in a small WP-Auto domain service behind WordPress Abi
 
 ## Follow-up
 
-Phase 1.3.1 may implement only the frozen Post/Page Create Draft contracts. The Phase 1.3.2.0 sentinel amendment is approved pending merge/seal; Phase 1.3.2 Update implementation remains blocked until it is merged and formally sealed. Any material change to names, schemas, capability paths, idempotency state, error semantics, audit fields, or Core side-effect policy requires an explicit contract and ADR review before code is exposed.
+Phase 1.3.1 may implement only the frozen Post/Page Create Draft contracts. The Phase 1.3.2.0 sentinel amendment is formally sealed on `main`; Phase 1.3.2 may now implement only the two Update abilities. Any material change to names, schemas, capability paths, idempotency state, error semantics, audit fields, or Core side-effect policy requires an explicit contract and ADR review before code is exposed.
