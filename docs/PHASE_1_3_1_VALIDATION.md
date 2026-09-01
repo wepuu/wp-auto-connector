@@ -56,17 +56,35 @@ Observed lifecycle and contract evidence:
 - `wp-auto-post-get` confirmed Core-managed post behavior (including the default category) and the final stored content;
 - MCP session DELETE returned HTTP 200.
 
+## Live cross-request Create finalization validation
+
+A dedicated disposable WordPress 6.9 environment was used to validate genuinely overlapping Create requests across independent HTTP requests, rather than only same-process re-entrancy.
+
+A temporary validation-only WordPress metadata hook delayed Request A during the first write of the private WP-Auto mutation audit metadata. The hook existed only in the disposable validation environment and was never added to production plugin code.
+
+While Request A retained the authoritative Create claim in `in_progress` state with its target ID already correlated, Request B submitted the same Ability, authenticated actor, idempotency key, and payload from a separate Streamable HTTP client. Request B returned an MCP application error with the WP-Auto semantic error `wp_auto_idempotency_in_progress`; it did not enter Create or audit mutation. After the temporary delay was released, Request A completed successfully.
+
+Validation confirmed:
+
+- exactly one draft object existed;
+- exactly one physical `_wp_auto_connector_mutation_audit` metadata value existed for the target when inspected through the multi-value metadata API equivalent to `get_post_meta( $post_id, '_wp_auto_connector_mutation_audit', false )`;
+- that private container contained exactly one matching logical Create audit event, identified by operation, Ability, actor user ID, target object ID, and fingerprint (the timestamp is not part of identity);
+- the authoritative idempotency record finished in `completed` state with the target ID of that single draft;
+- no second Create occurred and no second audit write occurred.
+
+A subsequent Request C reused the same Ability, actor, idempotency key, and payload after completion. It returned the same target with `idempotency_replayed=true`, while the draft object count, physical audit-container count, and logical audit-event count remained one.
+
 ## WordPress draft `modified_gmt` sentinel
 
 Live WordPress 6.9 validation confirmed that a newly created draft may legitimately expose Core `post_modified_gmt` as `0000-00-00 00:00:00`. Phase 1.3.1 preserves and returns the final Core value instead of synthesizing or normalizing a timestamp. This does not block the Create Draft contract.
 
 The frozen Phase 1.3 Update contract currently requires `expected_modified_gmt` to pass real GMT calendar validation. Because the Core sentinel is not a valid calendar datetime, Phase 1.3.2 must not begin implementation until a narrow compatibility amendment defines sentinel handling. No Update contract change is made in Phase 1.3.1.
 
-Unit tests provide the deterministic failure, concurrent-claim, known-target recovery, replay, audit-failure, audit-recorded completion recovery, in-progress retry blocking, physical-container consistency, and post-write invariant coverage that is not practical to manufacture in a disposable live site. The test bootstrap triggers a second matching service call during the first audit write and verifies `wp_auto_idempotency_in_progress`, one audit write, one event, and a completed claim.
+Unit tests supplement the live cross-request validation with deterministic failure-point, malformed-state, audit-recorded completion-recovery, audit-failure, physical-container consistency, and post-write invariant coverage. The test bootstrap also triggers a same-process re-entrant matching service call during the first audit write and verifies `wp_auto_idempotency_in_progress`, one audit write, one event, and a completed claim.
 
 ## State and secret cleanup
 
-Temporary Application Passwords, users, draft fixtures, idempotency options, audit metadata, and the operation guard MU-plugin were removed. The WordPress and database containers, anonymous volumes, network, and temporary scripts were deleted. No credentials or live fixture data were added to the repository.
+The temporary delay hook/MU-plugin, Application Passwords, test users, draft fixtures, idempotency options, audit metadata, and request/response temporary files were removed. The WordPress and database containers, anonymous volumes, network, and temporary scripts were deleted. No credentials or live fixture data were added to the repository.
 
 ## Runtime boundary
 
