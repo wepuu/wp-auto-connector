@@ -6,7 +6,9 @@ Development repository for the free WordPress.org WP-Auto Connector.
 
 Phase 1 is Direct WordPress MCP. The plugin should let compatible AI agents connect directly to a WordPress site and invoke explicitly exposed, permission-aware WordPress abilities.
 
-Phase 1.2 is complete: eight read-only site, content, and taxonomy abilities passed the frozen contract and full integration/security validation. The dedicated endpoint is `/wp-json/wp-auto/mcp`, and the exposed MCP tools are `wp-auto-site-health`, `wp-auto-site-info`, `wp-auto-posts-search`, `wp-auto-post-get`, `wp-auto-pages-search`, `wp-auto-page-get`, `wp-auto-categories-list`, and `wp-auto-tags-list`. Phase 1.3.0 Mutation Contract Freeze is next; no mutation tool has been implemented.
+Phase 1.2 is complete: eight read-only site, content, and taxonomy abilities passed the frozen contract and full integration/security validation. The dedicated endpoint is `/wp-json/wp-auto/mcp`, and the exposed MCP tools are `wp-auto-site-health`, `wp-auto-site-info`, `wp-auto-posts-search`, `wp-auto-post-get`, `wp-auto-pages-search`, `wp-auto-page-get`, `wp-auto-categories-list`, and `wp-auto-tags-list`.
+
+Phase 1.3.0 contract remediation is complete and ready for final review/freeze. The future Post/Page Create Draft and Update contracts are documented in `docs/PHASE_1_3_MUTATION_CONTRACTS.md`, but no mutation tool has been implemented or exposed. Phase 1.3.1 Post/Page Create Draft is planned only after formal contract approval.
 
 Start with:
 
@@ -15,7 +17,9 @@ Start with:
 - `docs/PHASE_1_DIRECT_MCP.md`
 - `docs/ARCHITECTURE.md`
 - `docs/ADR-001-MCP-ADAPTER-DEPENDENCY.md`
+- `docs/ADR-002-MUTATION-SAFETY.md`
 - `docs/MCP_TOOL_CATALOG.md`
+- `docs/PHASE_1_3_MUTATION_CONTRACTS.md`
 - `docs/WORDPRESS_ORG_COMPLIANCE.md`
 - `docs/CODEX_FIRST_PROMPT.md`
 

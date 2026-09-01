@@ -10,7 +10,9 @@ Phase 1 - Direct WordPress MCP MVP.
 
 Phase 1.1 is complete: the direct MCP server foundation proves the authenticated end-to-end path with the read-only `wp-auto/site-health` ability.
 
-Phase 1.2 is complete: all eight read-only tools passed the frozen contract, permission, privacy, schema, bounded-query, and live MCP validation gates. The next active task is Phase 1.3.0 - Mutation Contract Freeze. Do not implement mutation abilities until that contract checkpoint is approved.
+Phase 1.2 is complete: all eight read-only tools passed the frozen contract, permission, privacy, schema, bounded-query, and live MCP validation gates.
+
+Phase 1.3.0 contract remediation is complete: the four draft mutation contracts and safety ADR are ready for final review/freeze, but no mutation Ability is registered or exposed. Do not begin the planned Phase 1.3.1 Post/Page Create Draft implementation until the freeze is formally approved. Phase 1.3.1 must not implement Update, publishing, or any later Phase 1.3 work.
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
@@ -83,6 +85,20 @@ Phase 1 is not complete until at least Claude Code and one additional standard M
 - Search results are lightweight discovery records. Full stored content is returned only by a get ability after target-object authorization.
 - Do not expose arbitrary post meta, custom fields, query arguments, REST routes, or registered abilities.
 - Only the explicitly approved WP-Auto abilities may enter the dedicated MCP server allowlist.
+
+## Phase 1.3 mutation invariants
+
+- `docs/PHASE_1_3_MUTATION_CONTRACTS.md` is the authoritative contract; `docs/ADR-002-MUTATION-SAFETY.md` records the safety decisions.
+- Phase 1.3.1 may implement only `wp-auto/post-create-draft` and `wp-auto/page-create-draft`; the current runtime remains at eight tools until those abilities pass their implementation gates.
+- Create fixes the actual post type, `draft` status, current authenticated author, and root Page parent. Clients cannot provide status, author, dates, taxonomy, media, meta, template, parent, menu order, comments, or pings.
+- Create permission uses the fixed post type object's actual `cap->create_posts` capability and repeats the check in the service.
+- Create uses concurrent-safe persistent idempotency with an atomic `add_option()` claim scoped to site, actor, Ability, and key. Atomic claim acquisition is not unconditional exactly-once creation; never release an uncertain claim before deterministic resolution proves that doing so cannot duplicate an object.
+- Update remains deferred to Phase 1.3.2. It will require the post type edit baseline, final `edit_post`, draft status, and best-effort `expected_modified_gmt` stale-write detection immediately before the Core update path.
+- `modified_gmt` has second-level precision and is not an atomic compare-and-swap token.
+- Mutation services must pass only allowlisted fields, use an operation-scoped invariant guard with `try/finally`, re-read the object, and verify fixed invariants after Core writes.
+- Core-managed default category assignment, revisions, hooks, KSES, slashing, and slug canonicalization are allowed; the client does not gain control of those fields or mechanisms.
+- Private local mutation attribution is bounded to the most recent 20 events per object and must never contain content, raw idempotency keys, request bodies, or credentials. Audit retention is not authoritative idempotency state, and pruning it must never weaken an idempotency guarantee.
+- Publishing, deletion, arbitrary status changes, arbitrary metadata/query arguments, Cloud, telemetry, and external WP-Auto requests remain out of scope.
 
 ## Architecture rules
 
