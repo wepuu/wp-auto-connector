@@ -32,6 +32,15 @@ namespace {
 	$GLOBALS['wp_auto_test_last_term_query_args'] = array();
 	$GLOBALS['wp_auto_test_term_query_history']   = array();
 	$GLOBALS['wp_auto_test_last_term_clauses']    = array();
+	$GLOBALS['wp_auto_test_options']              = array();
+	$GLOBALS['wp_auto_test_option_autoload']      = array();
+	$GLOBALS['wp_auto_test_post_meta']            = array();
+	$GLOBALS['wp_auto_test_next_post_id']         = 1000;
+	$GLOBALS['wp_auto_test_last_insert_args']     = array();
+	$GLOBALS['wp_auto_test_insert_result']        = null;
+	$GLOBALS['wp_auto_test_insert_exception']     = null;
+	$GLOBALS['wp_auto_test_fail_update_option']   = false;
+	$GLOBALS['wp_auto_test_fail_update_meta']     = false;
 	$GLOBALS['wp_auto_test_site_info']            = array(
 		'name'                => 'WP-Auto Test Site',
 		'description'         => 'A safe connector test site.',
@@ -187,6 +196,38 @@ namespace {
 	function wp_register_ability(): void {}
 	function wp_register_ability_category(): void {}
 	function rest_get_server(): void {}
+	function get_current_blog_id(): int {
+		return 1;
+	}
+
+	function current_time( string $type, bool $gmt = false ): string {
+		unset( $type, $gmt );
+		return '2026-09-01 12:00:00';
+	}
+
+	function wp_slash( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( 'wp_slash', $value );
+		}
+
+		return is_string( $value ) ? addslashes( $value ) : $value;
+	}
+
+	function wp_unslash( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( 'wp_unslash', $value );
+		}
+
+		return is_string( $value ) ? stripslashes( $value ) : $value;
+	}
+
+	function wp_json_encode( $value, int $flags = 0 ) {
+		return json_encode( $value, $flags );
+	}
+
+	function wp_rand(): int {
+		return 123456;
+	}
 
 	function add_filter( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		$GLOBALS['wp_auto_test_filters'][ $hook ][ $priority ][] = array(
@@ -297,6 +338,100 @@ namespace {
 		return null;
 	}
 
+	function get_post_meta( int $post_id, string $meta_key, bool $single = false ) {
+		$value = $GLOBALS['wp_auto_test_post_meta'][ $post_id ][ $meta_key ] ?? array();
+		return $single ? $value : array( $value );
+	}
+
+	function update_post_meta( int $post_id, string $meta_key, $value ) {
+		if ( $GLOBALS['wp_auto_test_fail_update_meta'] ) {
+			return false;
+		}
+
+		$GLOBALS['wp_auto_test_post_meta'][ $post_id ][ $meta_key ] = $value;
+		return true;
+	}
+
+	function add_option( string $option, $value = '', string $deprecated = '', $autoload = null ): bool {
+		unset( $deprecated );
+		if ( array_key_exists( $option, $GLOBALS['wp_auto_test_options'] ) ) {
+			return false;
+		}
+
+		$GLOBALS['wp_auto_test_options'][ $option ] = $value;
+		$GLOBALS['wp_auto_test_option_autoload'][ $option ] = $autoload;
+		return true;
+	}
+
+	function get_option( string $option, $default = false ) {
+		return array_key_exists( $option, $GLOBALS['wp_auto_test_options'] )
+			? $GLOBALS['wp_auto_test_options'][ $option ]
+			: ( 'permalink_structure' === $option ? $GLOBALS['wp_auto_test_site_info']['permalink_structure'] : $default );
+	}
+
+	function update_option( string $option, $value, $autoload = null ): bool {
+		unset( $autoload );
+		if ( $GLOBALS['wp_auto_test_fail_update_option'] ) {
+			return false;
+		}
+
+		$GLOBALS['wp_auto_test_options'][ $option ] = $value;
+		return true;
+	}
+
+	function delete_option( string $option ): bool {
+		unset( $GLOBALS['wp_auto_test_options'][ $option ] );
+		return true;
+	}
+
+	function get_edit_post_link( $post, string $context = 'display' ): ?string {
+		unset( $context );
+		$post_id = $post instanceof WP_Post ? $post->ID : (int) $post;
+		return 'https://example.test/wp-admin/post.php?post=' . $post_id . '&action=edit';
+	}
+
+	function wp_insert_post( array $postarr, bool $wp_error = false, bool $fire_after_hooks = true ) {
+		unset( $wp_error, $fire_after_hooks );
+		$GLOBALS['wp_auto_test_last_insert_args'] = $postarr;
+
+		if ( $GLOBALS['wp_auto_test_insert_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_insert_exception'];
+			$GLOBALS['wp_auto_test_insert_exception'] = null;
+			throw $exception;
+		}
+
+		if ( $GLOBALS['wp_auto_test_insert_result'] instanceof WP_Error || 0 === $GLOBALS['wp_auto_test_insert_result'] ) {
+			$result = $GLOBALS['wp_auto_test_insert_result'];
+			$GLOBALS['wp_auto_test_insert_result'] = null;
+			return $result;
+		}
+
+		$id = ++$GLOBALS['wp_auto_test_next_post_id'];
+		$data = array(
+			'ID'           => $id,
+			'post_type'    => $postarr['post_type'] ?? 'post',
+			'post_status'  => $postarr['post_status'] ?? 'draft',
+			'post_author'  => $postarr['post_author'] ?? get_current_user_id(),
+			'post_parent'  => $postarr['post_parent'] ?? 0,
+			'post_title'   => wp_unslash( $postarr['post_title'] ?? '' ),
+			'post_content' => wp_unslash( $postarr['post_content'] ?? '' ),
+			'post_excerpt' => wp_unslash( $postarr['post_excerpt'] ?? '' ),
+			'post_name'    => wp_unslash( $postarr['post_name'] ?? 'draft-' . $id ),
+			'post_date_gmt' => '2026-09-01 12:00:00',
+			'post_modified_gmt' => '2026-09-01 12:00:00',
+		);
+		$data = apply_filters( 'wp_insert_post_data', $data, $postarr, $postarr, false );
+		$GLOBALS['wp_auto_test_posts'][] = new WP_Post( $data );
+
+		if ( $GLOBALS['wp_auto_test_insert_result'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_insert_result'];
+			$GLOBALS['wp_auto_test_insert_result'] = null;
+			throw $exception;
+		}
+
+		return $id;
+	}
+
 	function get_post_type_object( string $post_type ) {
 		if ( ! in_array( $post_type, array( 'post', 'page' ), true ) ) {
 			return null;
@@ -308,6 +443,7 @@ namespace {
 			'cap' => (object) array(
 				'read'                 => 'read',
 				'edit_posts'           => 'edit_' . $suffix,
+				'create_posts'         => 'edit_' . $suffix,
 				'read_private_posts'   => 'read_private_' . $suffix,
 				'edit_private_posts'   => 'edit_private_' . $suffix,
 				'edit_others_posts'    => 'edit_others_' . $suffix,
@@ -607,6 +743,10 @@ namespace WPAuto\Connector\Mcp {
 namespace {
 	require_once dirname( __DIR__ ) . '/src/Diagnostics/EnvironmentDiagnostics.php';
 	require_once dirname( __DIR__ ) . '/src/Content/ContentReadService.php';
+	require_once dirname( __DIR__ ) . '/src/Content/CreateDraftContract.php';
+	require_once dirname( __DIR__ ) . '/src/Content/CreateIdempotencyStore.php';
+	require_once dirname( __DIR__ ) . '/src/Content/MutationAuditStore.php';
+	require_once dirname( __DIR__ ) . '/src/Content/ContentMutationService.php';
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyReadService.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteHealthAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteInfoAbility.php';
@@ -615,6 +755,8 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Abilities/Content/PostGetAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Content/PagesSearchAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Content/PageGetAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Content/PostCreateDraftAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Content/PageCreateDraftAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TaxonomyAbilityCategory.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/CategoriesListAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TagsListAbility.php';

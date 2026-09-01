@@ -9,8 +9,10 @@ namespace WPAuto\Connector;
 
 use WPAuto\Connector\Abilities\Content\ContentAbilityCategory;
 use WPAuto\Connector\Abilities\Content\PageGetAbility;
+use WPAuto\Connector\Abilities\Content\PageCreateDraftAbility;
 use WPAuto\Connector\Abilities\Content\PagesSearchAbility;
 use WPAuto\Connector\Abilities\Content\PostGetAbility;
+use WPAuto\Connector\Abilities\Content\PostCreateDraftAbility;
 use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
@@ -83,6 +85,8 @@ final class Plugin {
 		( new PostGetAbility() )->register();
 		( new PagesSearchAbility() )->register();
 		( new PageGetAbility() )->register();
+		( new PostCreateDraftAbility() )->register();
+		( new PageCreateDraftAbility() )->register();
 		( new CategoriesListAbility() )->register();
 		( new TagsListAbility() )->register();
 		( new McpServerRegistrar() )->register();

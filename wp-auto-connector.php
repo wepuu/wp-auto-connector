@@ -27,6 +27,10 @@ define( 'WP_AUTO_CONNECTOR_URL', plugin_dir_url( __FILE__ ) );
 
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Diagnostics/EnvironmentDiagnostics.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/ContentReadService.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/CreateDraftContract.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/CreateIdempotencyStore.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/MutationAuditStore.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/ContentMutationService.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Taxonomy/TaxonomyReadService.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Site/SiteHealthAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Site/SiteInfoAbility.php';
@@ -35,6 +39,8 @@ require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/PostsSearchAbility.p
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/PostGetAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/PagesSearchAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/PageGetAbility.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/PostCreateDraftAbility.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/PageCreateDraftAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Taxonomy/TaxonomyAbilityCategory.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Taxonomy/CategoriesListAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Taxonomy/TagsListAbility.php';

@@ -8,8 +8,10 @@
 namespace WPAuto\Connector\Mcp;
 
 use WPAuto\Connector\Abilities\Content\PageGetAbility;
+use WPAuto\Connector\Abilities\Content\PageCreateDraftAbility;
 use WPAuto\Connector\Abilities\Content\PagesSearchAbility;
 use WPAuto\Connector\Abilities\Content\PostGetAbility;
+use WPAuto\Connector\Abilities\Content\PostCreateDraftAbility;
 use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
@@ -68,6 +70,8 @@ final class McpServerRegistrar {
 				PageGetAbility::NAME,
 				CategoriesListAbility::NAME,
 				TagsListAbility::NAME,
+				PostCreateDraftAbility::NAME,
+				PageCreateDraftAbility::NAME,
 			),
 			array(),
 			array(),

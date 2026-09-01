@@ -6,7 +6,7 @@ Contract draft: 2026-08-31
 
 Remediation review: 2026-09-01
 
-This document is the authoritative public contract for the Phase 1.3 draft mutation abilities. Phase 1.3.0 changes documentation only: none of the abilities below is registered or exposed yet, and the dedicated Direct MCP server still exposes exactly the eight Phase 1.2 read-only tools.
+This document is the authoritative public contract for the Phase 1.3 draft mutation abilities. Phase 1.3.1 implemented and validated the two Create Draft abilities; the dedicated Direct MCP server now exposes exactly ten tools (the eight Phase 1.2 read-only tools plus the two Create Draft tools). Update abilities remain frozen but unimplemented.
 
 ## Contract goals
 
@@ -27,8 +27,8 @@ Direct MCP and a future explicitly enabled Cloud MCP integration must call the s
 
 | Ability | MCP tool | Planned implementation | Runtime status |
 | --- | --- | --- | --- |
-| `wp-auto/post-create-draft` | `wp-auto-post-create-draft` | Phase 1.3.1 | Contract frozen; not implemented |
-| `wp-auto/page-create-draft` | `wp-auto-page-create-draft` | Phase 1.3.1 | Contract frozen; not implemented |
+| `wp-auto/post-create-draft` | `wp-auto-post-create-draft` | Phase 1.3.1 | Implemented and validated |
+| `wp-auto/page-create-draft` | `wp-auto-page-create-draft` | Phase 1.3.1 | Implemented and validated |
 | `wp-auto/post-update` | `wp-auto-post-update` | Phase 1.3.2 | Contract frozen; not implemented |
 | `wp-auto/page-update` | `wp-auto-page-update` | Phase 1.3.2 | Contract frozen; not implemented |
 
@@ -332,12 +332,12 @@ wp-auto/post-update
 wp-auto/page-update
 ```
 
-Phase 1.3.0 and the current runtime remain at eight tools. Phase 1.3.1 may expose the two Create Draft tools for a total of ten only after implementation and validation. Phase 1.3.2 may expose the two Update Draft tools for a total of twelve only after implementation and validation.
+Phase 1.3.0 is complete and Phase 1.3.1 has exposed the two validated Create Draft tools for a total of ten. Phase 1.3.2 may expose the two Update Draft tools for a total of twelve only after implementation and validation.
 
 ## Phase checkpoints
 
 1. **Phase 1.3.0 — Mutation Contract Freeze:** freeze this contract and the safety ADR without runtime changes.
-2. **Phase 1.3.1 — Post/Page Create Draft:** implement and validate only the two Create Draft abilities.
+2. **Phase 1.3.1 — Post/Page Create Draft:** implemented and validated only the two Create Draft abilities; the current runtime is ten tools.
 3. **Phase 1.3.2 — Draft Update + Best-effort Optimistic Concurrency:** implement and validate only the two Update Draft abilities.
 4. **Phase 1.3.3 — Mutation Security / Contract Audit:** audit exact schemas, capability paths, idempotency, invariant guards, error privacy, resource use, and allowlist.
 5. **Phase 1.3.4 — Full Mutation Integration Validation:** verify that each request changes only its intended target plus documented Core/plugin lifecycle effects; confirm no published/status-promoted or unrelated content changes and no WP-Auto taxonomy, media, featured-image, SEO, arbitrary-meta, user, setting, plugin, theme, Cloud, or telemetry mutation. Validation must not require a byte-for-byte unchanged database, then seal Phase 1.3.

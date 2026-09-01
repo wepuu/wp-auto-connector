@@ -68,12 +68,12 @@ Scope:
 Delivery checkpoints:
 
 1. **Phase 1.3.0 - Mutation Contract Freeze (complete):** froze the four future Ability/tool names, strict schemas, capability paths, concurrent-safe persistent Create idempotency, best-effort non-atomic Update concurrency limits, invariant guard, bounded local audit, error semantics, Core side effects, and allowlist progression. No runtime tool was added.
-2. **Phase 1.3.1 - Post/Page Create Draft (next):** implement and validate only `wp-auto/post-create-draft` and `wp-auto/page-create-draft`, including the persistent atomic claim and post-write invariant checks. The explicit allowlist may grow from eight to ten only after validation.
+2. **Phase 1.3.1 - Post/Page Create Draft (complete):** implemented and validated only `wp-auto/post-create-draft` and `wp-auto/page-create-draft`, including the persistent atomic claim, post-write invariant checks, and a ten-tool explicit allowlist.
 3. **Phase 1.3.2 - Draft Update + Best-effort Optimistic Concurrency:** implement and validate only `wp-auto/post-update` and `wp-auto/page-update`, including object authorization and the documented best-effort final timestamp check. The explicit allowlist may then grow from ten to twelve.
 4. **Phase 1.3.3 - Mutation Security / Contract Audit:** audit exact schemas, capabilities, existence privacy, idempotency, concurrency, error handling, audit privacy, Core side effects, and the twelve-tool allowlist.
 5. **Phase 1.3.4 - Full Mutation Integration Validation:** prove that each request changes only its intended target plus documented Core/plugin lifecycle effects; reject publish/status promotion and unrelated WP-Auto content, taxonomy, media, featured-image, SEO, arbitrary-meta, user, setting, plugin, theme, Cloud, or telemetry mutation. Do not require byte-for-byte database identity. Complete real WordPress/MCP/client validation and seal Phase 1.3.
 
-The authoritative frozen contract is `docs/PHASE_1_3_MUTATION_CONTRACTS.md`; the accepted mutation safety decision is `docs/ADR-002-MUTATION-SAFETY.md`. Phase 1.3.0 is complete, Phase 1.3.1 is the next approved implementation checkpoint, Phase 1.3 is not complete, and no mutation tool is currently exposed.
+The authoritative frozen contract is `docs/PHASE_1_3_MUTATION_CONTRACTS.md`; the accepted mutation safety decision is `docs/ADR-002-MUTATION-SAFETY.md`. Phase 1.3.0 and Phase 1.3.1 are complete, Phase 1.3.2 is the next approved implementation checkpoint, Phase 1.3 is not complete, and only the two validated Create Draft tools are currently exposed.
 
 ### Phase 1.4 - Media
 

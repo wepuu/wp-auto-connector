@@ -36,7 +36,7 @@ final class ContentAbilityCategory {
 			self::SLUG,
 			array(
 				'label'       => __( 'WP-Auto Content', 'wp-auto-connector' ),
-				'description' => __( 'Read-only WP-Auto abilities for WordPress content.', 'wp-auto-connector' ),
+				'description' => __( 'WP-Auto abilities for WordPress content.', 'wp-auto-connector' ),
 			)
 		);
 	}

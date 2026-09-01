@@ -10,7 +10,7 @@ This file is the public contract catalog for Phase 1. Canonical WordPress abilit
 
 Dedicated server endpoint: `/wp-json/wp-auto/mcp`.
 
-The server explicitly allowlists this ability. It does not expose other registered abilities or proxy WordPress REST routes. The ability is not marked public for the MCP Adapter default server.
+The server explicitly allowlists WP-Auto abilities. It does not expose other registered abilities or proxy WordPress REST routes. The ability is not marked public for the MCP Adapter default server.
 
 Output fields:
 
@@ -38,20 +38,20 @@ Phase 1.2 retains the implemented Phase 1.1 tool and adds seven read-only tools.
 | `wp-auto/categories-list` | `wp-auto-categories-list` | Read-only | `read` | Implemented and validated |
 | `wp-auto/tags-list` | `wp-auto-tags-list` | Read-only | `read` | Implemented and validated |
 
-The dedicated server must explicitly allowlist only these abilities. It must not expose third-party/default abilities, generic WordPress REST routes, or any mutation tool.
+The dedicated server explicitly allowlists only these eight read-only abilities in the Phase 1.2 baseline; Phase 1.3 adds only the two validated Create Draft abilities below.
 
 ## Phase 1.3
 
-Phase 1.3.0 froze the contracts below in `docs/PHASE_1_3_MUTATION_CONTRACTS.md`. They are not implemented or exposed. The dedicated server still contains exactly the eight Phase 1.2 read-only tools.
+Phase 1.3.0 froze the contracts in `docs/PHASE_1_3_MUTATION_CONTRACTS.md`. Phase 1.3.1 implemented and validated the two Create Draft abilities; the dedicated server now contains exactly ten tools. Update abilities remain contract-frozen and are not exposed.
 
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
-| `wp-auto/post-create-draft` | `wp-auto-post-create-draft` | Draft mutation | fixed Post type object's `cap->create_posts` | Contract frozen; not implemented — Phase 1.3.1 |
-| `wp-auto/page-create-draft` | `wp-auto-page-create-draft` | Draft mutation | fixed Page type object's `cap->create_posts` | Contract frozen; not implemented — Phase 1.3.1 |
+| `wp-auto/post-create-draft` | `wp-auto-post-create-draft` | Draft mutation | fixed Post type object's `cap->create_posts` | Implemented and validated — Phase 1.3.1 |
+| `wp-auto/page-create-draft` | `wp-auto-page-create-draft` | Draft mutation | fixed Page type object's `cap->create_posts` | Implemented and validated — Phase 1.3.1 |
 | `wp-auto/post-update` | `wp-auto-post-update` | Draft mutation | fixed Post type object's `cap->edit_posts`, then `edit_post` for the target | Contract frozen; not implemented — Phase 1.3.2 |
 | `wp-auto/page-update` | `wp-auto-page-update` | Draft mutation | fixed Page type object's `cap->edit_posts`, then `edit_post` for the target | Contract frozen; not implemented — Phase 1.3.2 |
 
-Publishing, deletion, arbitrary status changes, and generic WordPress mutation are intentionally not part of these abilities. Phase 1.3.1 may expand the explicit allowlist to ten tools only after the two Create Draft abilities are implemented and validated; Phase 1.3.2 may expand it to twelve only after the two Update abilities pass the same gate.
+Publishing, deletion, arbitrary status changes, and generic WordPress mutation are intentionally not part of these abilities. Phase 1.3.2 may expand the explicit allowlist to twelve only after the two Update abilities pass the same gate.
 
 ## Phase 1.4
 

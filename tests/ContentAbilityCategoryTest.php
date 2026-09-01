@@ -43,5 +43,6 @@ final class ContentAbilityCategoryTest extends TestCase {
 		self::assertSame( ContentAbilityCategory::SLUG, $GLOBALS['wp_auto_test_registered_category']['slug'] );
 		self::assertSame( 'WP-Auto Content', $GLOBALS['wp_auto_test_registered_category']['args']['label'] );
 		self::assertNotSame( '', $GLOBALS['wp_auto_test_registered_category']['args']['description'] );
+		self::assertSame( 'WP-Auto abilities for WordPress content.', $GLOBALS['wp_auto_test_registered_category']['args']['description'] );
 	}
 }
