@@ -3,7 +3,11 @@
 Date: 2026-09-01
 Branch: `feat/phase-1-3-2-draft-update`
 Baseline: `main@6c80d5b879ce072ee8d5ef66c5ae9f430a6e3a48` (clean and synchronized with `origin/main`)
-Status: **IMPLEMENTATION REVIEW APPROVED — PENDING PR / CI / MERGE / MAIN SEAL**
+Status: **FORMALLY SEALED ON MAIN**
+Merged PR: `#10`
+Merge method: rebase merge
+Merged runtime baseline: `main@b37cf3d80bf97fff5e01305f125b4f9b2ff7711b`
+Post-merge main PHP Quality: Run `33575020188` — completed / success
 
 ## Scope
 
@@ -117,14 +121,18 @@ The canonical endpoint remains `/wp-json/wp-auto/mcp`. The disposable install us
 
 All temporary users, roles, Application Passwords, Posts, Pages, audit metadata, and database state were removed with the disposable environment. The uniquely named WordPress, WP-CLI, and MariaDB containers, named database volume, and Docker network were deleted. No credentials, response files, validation scripts, containers, volumes, or generated artifacts remain in the repository.
 
-## Review gate and next checkpoint
+## Formal seal
 
 Local verdict:
 
 ```text
-PASS — Phase 1.3.2 Implementation Review Gate approved
+PASS — Phase 1.3.2 formally sealed on main
 ```
 
-This is not the formal Phase 1.3.2 seal. The next gate is the Phase 1.3.2 PR Merge Gate: the branch must pass final diff review, repository quality gates, PR CI, merge, and main-seal verification before Phase 1.3.2 can be marked complete on `main`.
+PR #10 passed its Implementation Review and Merge Gates and was merged by rebase. The merged runtime baseline is `main@b37cf3d80bf97fff5e01305f125b4f9b2ff7711b`; the exact post-merge main `PHP Quality` Run `33575020188` completed successfully. This baseline contains the validated twelve-tool runtime before the documentation-only seal-normalization commit.
 
-`Phase 1.3.3 — Mutation Security / Contract Audit` remains blocked and must not begin until Phase 1.3.2 is merged and formally sealed.
+## Next checkpoint
+
+Phase 1.3.3 — Mutation Security / Audit Freeze
+
+Phase 1.3.3 implementation is not started by this seal-normalization task.

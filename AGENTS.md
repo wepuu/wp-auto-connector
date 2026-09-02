@@ -12,7 +12,7 @@ Phase 1.1 is complete: the direct MCP server foundation proves the authenticated
 
 Phase 1.2 is complete: all eight read-only tools passed the frozen contract, permission, privacy, schema, bounded-query, and live MCP validation gates.
 
-Phase 1.3.0 is complete and frozen: the four draft mutation contracts and safety ADR are approved. Phase 1.3.1 is complete and formally sealed. Phase 1.3.2.0 is formally sealed on `main`. The Phase 1.3.2 twelve-tool Draft Update implementation has passed its Implementation Review Gate and is pending PR, CI, merge, and formal sealing on `main`. Do not start Phase 1.3.3, publishing, deletion, or later Phase 1.3 work until that gate passes.
+Phase 1.3.0, Phase 1.3.1, and Phase 1.3.2.0 are formally sealed. Phase 1.3.2 is implemented, merged, validated on `main`, and formally sealed with an exact twelve-tool Direct MCP runtime. The next active checkpoint is Phase 1.3.3 — Mutation Security / Audit Freeze. Do not implement publishing, deletion, media, taxonomy mutation, SEO, Cloud, or later roadmap work unless an explicit later task authorizes it.
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
@@ -89,7 +89,7 @@ Phase 1 is not complete until at least Claude Code and one additional standard M
 ## Phase 1.3 mutation invariants
 
 - `docs/PHASE_1_3_MUTATION_CONTRACTS.md` is the authoritative contract; `docs/ADR-002-MUTATION-SAFETY.md` records the safety decisions.
-- Phase 1.3.1 is complete and Phase 1.3.2.0 is formally sealed on `main`. The Phase 1.3.2 implementation adds only `wp-auto/post-update` and `wp-auto/page-update`, producing an exact twelve-tool feature-branch allowlist that has passed Implementation Review and remains pending PR, CI, merge, and formal sealing.
+- Phase 1.3.1, Phase 1.3.2.0, and Phase 1.3.2 are formally sealed on `main`. Phase 1.3.2 added only `wp-auto/post-update` and `wp-auto/page-update`, producing the exact twelve-tool runtime baseline.
 - Create fixes the actual post type, `draft` status, current authenticated author, and root Page parent. Clients cannot provide status, author, dates, taxonomy, media, meta, template, parent, menu order, comments, or pings.
 - Create permission uses the fixed post type object's actual `cap->create_posts` capability and repeats the check in the service.
 - Create uses concurrent-safe persistent idempotency with an atomic `add_option()` claim scoped to site, actor, Ability, and key. Atomic claim acquisition is not unconditional exactly-once creation; never release an uncertain claim before deterministic resolution proves that doing so cannot duplicate an object.

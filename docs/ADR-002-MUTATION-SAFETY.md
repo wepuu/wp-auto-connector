@@ -109,4 +109,4 @@ Mutation behavior belongs in a small WP-Auto domain service behind WordPress Abi
 
 ## Follow-up
 
-Phase 1.3.1 may implement only the frozen Post/Page Create Draft contracts. The Phase 1.3.2.0 sentinel amendment is formally sealed on `main`; Phase 1.3.2 may now implement only the two Update abilities. Any material change to names, schemas, capability paths, idempotency state, error semantics, audit fields, or Core side-effect policy requires an explicit contract and ADR review before code is exposed.
+Phase 1.3.1 implemented the frozen Post/Page Create Draft contracts, and Phase 1.3.2 implemented the two Update abilities after the Phase 1.3.2.0 sentinel amendment was formally sealed. All are now formally sealed on `main`. Any material change to names, schemas, capability paths, idempotency state, error semantics, audit fields, or Core side-effect policy requires an explicit contract and ADR review before code is exposed.

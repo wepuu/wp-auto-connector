@@ -42,16 +42,16 @@ The dedicated server explicitly allowlists only these eight read-only abilities 
 
 ## Phase 1.3
 
-Phase 1.3.0 froze the contracts in `docs/PHASE_1_3_MUTATION_CONTRACTS.md`. Phase 1.3.1 implemented and validated the two Create Draft abilities. Phase 1.3.2.0 is formally sealed on `main`. The locally validated twelve-tool Phase 1.3.2 implementation has passed its Implementation Review Gate and remains pending PR, CI, merge, and formal sealing on `main`.
+Phase 1.3.0 froze the contracts in `docs/PHASE_1_3_MUTATION_CONTRACTS.md`. Phase 1.3.1 implemented and validated the two Create Draft abilities. Phase 1.3.2.0 and Phase 1.3.2 are formally sealed on `main`. The Direct MCP runtime explicitly allowlists exactly twelve tools.
 
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
 | `wp-auto/post-create-draft` | `wp-auto-post-create-draft` | Draft mutation | fixed Post type object's `cap->create_posts` | Implemented and validated — Phase 1.3.1 |
 | `wp-auto/page-create-draft` | `wp-auto-page-create-draft` | Draft mutation | fixed Page type object's `cap->create_posts` | Implemented and validated — Phase 1.3.1 |
-| `wp-auto/post-update` | `wp-auto-post-update` | Draft mutation | fixed Post type object's `cap->edit_posts`, then `edit_post` for the target | Implementation Review approved; pending merge/seal — Phase 1.3.2 |
-| `wp-auto/page-update` | `wp-auto-page-update` | Draft mutation | fixed Page type object's `cap->edit_posts`, then `edit_post` for the target | Implementation Review approved; pending merge/seal — Phase 1.3.2 |
+| `wp-auto/post-update` | `wp-auto-post-update` | Draft mutation | fixed Post type object's `cap->edit_posts`, then `edit_post` for the target | Implemented and formally sealed — Phase 1.3.2 |
+| `wp-auto/page-update` | `wp-auto-page-update` | Draft mutation | fixed Page type object's `cap->edit_posts`, then `edit_post` for the target | Implemented and formally sealed — Phase 1.3.2 |
 
-Publishing, deletion, arbitrary status changes, and generic WordPress mutation are intentionally not part of these abilities. The reviewed feature-branch allowlist is exactly twelve; the sealed `main` status remains unchanged until the Phase 1.3.2 PR Merge Gate passes.
+Publishing, deletion, arbitrary status changes, and generic WordPress mutation are intentionally not part of these abilities. The sealed `main` allowlist is exactly twelve, with no resources, prompts, wildcard discovery, or third-party tools.
 
 ## Phase 1.4
 
