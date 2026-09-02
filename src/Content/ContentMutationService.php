@@ -129,12 +129,16 @@ final class ContentMutationService {
 		}
 
 		$fingerprint = $this->fingerprint( $normalized );
-		$claim       = $this->idempotency->claim(
-			$ability,
-			$actor_id,
-			$normalized['idempotency_key'],
-			$fingerprint
-		);
+		try {
+			$claim = $this->idempotency->claim(
+				$ability,
+				$actor_id,
+				$normalized['idempotency_key'],
+				$fingerprint
+			);
+		} catch ( \Throwable ) {
+			return $this->uncertain();
+		}
 		if ( ! isset( $claim['status'] ) || ! in_array( $claim['status'], array( 'claimed', 'existing', 'unresolved' ), true ) ) {
 			return $this->uncertain();
 		}
@@ -144,7 +148,11 @@ final class ContentMutationService {
 				return $this->uncertain();
 			}
 
-			return $this->handle_existing_claim( $claim['name'], $claim['record'], $post_type, $ability, $actor_id, $fingerprint );
+			try {
+				return $this->handle_existing_claim( $claim['name'], $claim['record'], $post_type, $ability, $actor_id, $fingerprint );
+			} catch ( \Throwable ) {
+				return $this->uncertain();
+			}
 		}
 
 		if ( 'unresolved' === $claim['status'] ) {
@@ -154,70 +162,79 @@ final class ContentMutationService {
 			return $this->uncertain();
 		}
 
-		$option_name = $claim['name'];
-		$record      = $claim['record'];
-		$token       = hash( 'sha256', $option_name . '|' . microtime( true ) . '|' . wp_rand() );
-		$insert      = $this->build_insert_args( $post_type, $actor_id, $normalized, $token );
-		$guard       = $this->build_invariant_guard( $post_type, $actor_id, $token );
-		$post_id     = 0;
-
-		add_filter( 'wp_insert_post_data', $guard, PHP_INT_MAX, 4 );
 		try {
+			$option_name = $claim['name'];
+			$record      = $claim['record'];
+			$token       = hash( 'sha256', $option_name . '|' . microtime( true ) . '|' . wp_rand() );
+			$insert      = $this->build_insert_args( $post_type, $actor_id, $normalized, $token );
+			$guard       = $this->build_invariant_guard( $post_type, $actor_id, $token );
+			$post_id     = 0;
+
+			add_filter( 'wp_insert_post_data', $guard, PHP_INT_MAX, 4 );
 			try {
 				$post_id = wp_insert_post( $insert, true, true );
-			} catch ( \Throwable ) {
-				return $this->uncertain();
+			} finally {
+				remove_filter( 'wp_insert_post_data', $guard, PHP_INT_MAX );
 			}
-		} finally {
-			remove_filter( 'wp_insert_post_data', $guard, PHP_INT_MAX );
+		} catch ( \Throwable ) {
+			return $this->uncertain();
 		}
 
 		if ( is_wp_error( $post_id ) || ! is_int( $post_id ) || $post_id < 1 ) {
-			if ( ! $this->idempotency->release( $option_name ) ) {
+			try {
+				$released = $this->idempotency->release( $option_name );
+			} catch ( \Throwable ) {
+				return $this->uncertain();
+			}
+			if ( ! $released ) {
 				return $this->uncertain();
 			}
 
 			return $this->create_failed();
 		}
 
-		if ( ! $this->idempotency->record_target_in_progress( $option_name, $record, $post_id ) ) {
-			return $this->uncertain();
-		}
-		$record['state']     = 'in_progress';
-		$record['target_id'] = $post_id;
+		try {
+			if ( ! $this->idempotency->record_target_in_progress( $option_name, $record, $post_id ) ) {
+				return $this->uncertain();
+			}
+			$record['state']     = 'in_progress';
+			$record['target_id'] = $post_id;
 
-		$post = get_post( $post_id );
-		if ( ! $post instanceof WP_Post || ! $this->verify_invariants( $post, $post_type, $actor_id ) ) {
-			return $this->uncertain();
-		}
+			$post = get_post( $post_id );
+			if ( ! $post instanceof WP_Post || ! $this->verify_invariants( $post, $post_type, $actor_id ) ) {
+				return $this->uncertain();
+			}
 
-		$output = $this->output( $post, $post_type, false );
-		if ( is_wp_error( $output ) ) {
+			$output = $this->output( $post, $post_type, false );
+			if ( is_wp_error( $output ) ) {
+				return $output;
+			}
+
+			$event = array(
+				'version'          => 1,
+				'operation'        => 'create',
+				'ability'          => $ability,
+				'actor_user_id'    => $actor_id,
+				'target_object_id' => $post_id,
+				'timestamp_gmt'    => current_time( 'mysql', true ),
+				'fingerprint'      => $fingerprint,
+			);
+			if ( ! $this->audit->append( $post_id, $event ) ) {
+				return $this->uncertain();
+			}
+			if ( ! $this->idempotency->mark_audit_recorded( $option_name, $record ) ) {
+				return $this->uncertain();
+			}
+			$record['state'] = 'audit_recorded';
+
+			if ( ! $this->idempotency->complete( $option_name, $record ) ) {
+				return $this->uncertain();
+			}
+
 			return $output;
-		}
-
-		$event = array(
-			'version'          => 1,
-			'operation'        => 'create',
-			'ability'          => $ability,
-			'actor_user_id'    => $actor_id,
-			'target_object_id' => $post_id,
-			'timestamp_gmt'    => current_time( 'mysql', true ),
-			'fingerprint'      => $fingerprint,
-		);
-		if ( ! $this->audit->append( $post_id, $event ) ) {
+		} catch ( \Throwable ) {
 			return $this->uncertain();
 		}
-		if ( ! $this->idempotency->mark_audit_recorded( $option_name, $record ) ) {
-			return $this->uncertain();
-		}
-		$record['state'] = 'audit_recorded';
-
-		if ( ! $this->idempotency->complete( $option_name, $record ) ) {
-			return $this->uncertain();
-		}
-
-		return $output;
 	}
 
 	/**
