@@ -28,6 +28,28 @@ Claude Code / WorkBuddy / standards-compliant MCP client
 
 The WordPress ability layer is the single source of domain operations. MCP is an adapter over abilities, not a second implementation of WordPress CRUD.
 
+Mutation content writes remain WordPress Core API driven. The only approved
+database exception is a future, private ownership service for internal
+serialization:
+
+```text
+ContentMutationService
+      |
+      +-> WordPress Core content APIs
+      |
+      +-> AtomicOwnershipStore
+             |
+             +-> narrowly scoped $wpdb->options
+               acquire/release only
+```
+
+`AtomicOwnershipStore` is internal infrastructure, not an Ability, MCP tool,
+public API, or generic database layer. Its `$wpdb->options` SQL exception is
+limited to atomic acquisition and conditional release of private,
+non-autoloaded WP-Auto ownership rows. Posts, postmeta audit history,
+taxonomies, users, media, SEO, settings, and all client-selected or arbitrary
+SQL remain prohibited. See `docs/ADR-003-ATOMIC-OWNERSHIP.md`.
+
 ## Direct MCP endpoint target
 
 The WP-Auto custom server should target a stable endpoint in the form:
