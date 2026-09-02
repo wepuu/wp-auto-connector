@@ -127,7 +127,7 @@ Idempotency scope is:
 site + actor user ID + Ability name + idempotency_key
 ```
 
-The implementation derives a scope hash and stores the private, non-autoloaded site option `wp_auto_connector_idempotency_<scope-hash>`. It uses the uniqueness of `add_option()` as the atomic claim. A transient, process-local lock, or post meta alone is insufficient.
+The implementation derives a scope hash and stores the private, non-autoloaded site option `wp_auto_connector_idempotency_<scope-hash>`. The atomic claim is a strict database insert-if-absent operation against that private option; the database unique key, not a PHP pre-check or `add_option()` upsert, arbitrates ownership. A transient, process-local lock, or post meta alone is insufficient. The narrow ownership mechanism is defined by ADR-003.
 
 The option never stores the raw idempotency key, content fields, or complete request. Its fixed record contains only:
 
@@ -164,6 +164,43 @@ Required behavior:
 A claim may be released or made retryable only when the implementation can prove that Core created no object. The exact Phase 1.3.1 correlation and recovery mechanism remains an implementation detail, but it must satisfy the non-duplicating outcomes above and be covered by crash-point tests before exposure.
 
 The authoritative idempotency record is persistent local WordPress state and must survive HTTP retries, PHP process restarts, and ordinary request failure. Request memory, static PHP variables, process-local caches, transients alone, and the bounded audit history are not authoritative idempotency state.
+
+## Phase 1.3.3 Atomic Ownership Security Amendment
+
+**Status: Accepted - Phase 1.3.3 security amendment.**
+
+The prior assumption that `add_option()` uniqueness is an atomic Create
+claim is superseded. WordPress 6.9's option write path uses an upsert and can
+report success to concurrent contenders. A future implementation must use
+the ADR-003 `AtomicOwnershipStore` strict insert-if-absent primitive against
+the private, non-autoloaded active-site option row. Acquisition succeeds only
+when the database reports `affected rows === 1`; all other outcomes fail
+closed. When Core proves that no object was created, claim release is a
+conditional delete matching the canonical option name and the exact
+serialized initial record **byte-for-byte**, using a binary-safe comparison
+independent of the table collation and also requiring `affected rows === 1`.
+It must not substitute a hash-only comparison for the persisted value bytes.
+
+Database acquisition/release success is not by itself Store-level success.
+The ownership API reports success only after required WordPress option-cache
+coherence work has completed. If an insert succeeds but cache finalization
+fails, the request does not enter Core Create or the protected critical
+section as a normal owner; the persisted row remains authoritative and the
+existing fail-closed uncertain/unresolved semantics apply. If a conditional
+delete succeeds but cache cleanup fails, release remains uncertain and no
+blind second delete is attempted. An authoritative read after failed
+acquisition must refresh stale local or persistent absence caches before an
+existing record is classified.
+
+This amendment authorizes no direct SQL for content CRUD or audit event
+storage, no transactions/row locks/advisory locks, and no generic database
+layer. WordPress-compatible serialization, option-cache coherence,
+`autoload=false`, active-site scoping, and no hook emulation are mandatory
+implementation requirements. Create idempotency state, public outcomes,
+error codes, input/output schemas, audit event fields, Update concurrency,
+and the twelve-tool runtime surface are unchanged. Only the internal
+acquisition and ownership-safe release primitive changes; no mutation runtime
+remediation is included in this checkpoint.
 
 ## Update Draft contracts
 

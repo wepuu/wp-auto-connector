@@ -110,3 +110,24 @@ Mutation behavior belongs in a small WP-Auto domain service behind WordPress Abi
 ## Follow-up
 
 Phase 1.3.1 implemented the frozen Post/Page Create Draft contracts, and Phase 1.3.2 implemented the two Update abilities after the Phase 1.3.2.0 sentinel amendment was formally sealed. All are now formally sealed on `main`. Any material change to names, schemas, capability paths, idempotency state, error semantics, audit fields, or Core side-effect policy requires an explicit contract and ADR review before code is exposed.
+
+## Phase 1.3.3 security amendment (2026-09-02)
+
+The `add_option()` atomic-uniqueness assumption for internal ownership was
+invalidated by SEC-3.
+
+ADR-003 supersedes only:
+
+- atomic Create ownership acquisition mechanism;
+- internal audit serialization ownership mechanism;
+- blanket prohibition on direct SQL insofar as it applies to those narrowly
+  scoped ownership rows.
+
+ADR-002 remains authoritative for:
+
+- public mutation contracts;
+- Core content mutation path;
+- authorization;
+- Update concurrency;
+- audit event schema;
+- side-effect policy.
