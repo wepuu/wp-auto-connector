@@ -41,6 +41,7 @@ namespace {
 	$GLOBALS['wp_auto_test_last_insert_args']     = array();
 	$GLOBALS['wp_auto_test_insert_result']        = null;
 	$GLOBALS['wp_auto_test_insert_exception']     = null;
+	$GLOBALS['wp_auto_test_insert_calls']         = 0;
 	$GLOBALS['wp_auto_test_last_update_args']     = array();
 	$GLOBALS['wp_auto_test_update_result']        = null;
 	$GLOBALS['wp_auto_test_update_exception']     = null;
@@ -48,14 +49,24 @@ namespace {
 	$GLOBALS['wp_auto_test_next_modified_gmt']    = '2026-09-01 12:00:01';
 	$GLOBALS['wp_auto_test_get_post_calls']        = 0;
 	$GLOBALS['wp_auto_test_before_get_post']       = null;
+	$GLOBALS['wp_auto_test_get_post_exception']    = null;
+	$GLOBALS['wp_auto_test_get_post_exception_on_call'] = null;
+	$GLOBALS['wp_auto_test_add_option_exception'] = null;
+	$GLOBALS['wp_auto_test_add_option_exception_after_write'] = null;
 	$GLOBALS['wp_auto_test_fail_update_option']   = false;
 	$GLOBALS['wp_auto_test_fail_update_option_on_call'] = null;
+	$GLOBALS['wp_auto_test_update_option_exception_on_call'] = null;
 	$GLOBALS['wp_auto_test_update_option_calls']   = 0;
+	$GLOBALS['wp_auto_test_fail_delete_option']   = false;
+	$GLOBALS['wp_auto_test_delete_option_exception'] = null;
+	$GLOBALS['wp_auto_test_delete_option_calls']  = 0;
 	$GLOBALS['wp_auto_test_fail_update_meta']     = false;
 	$GLOBALS['wp_auto_test_update_meta_exception'] = null;
 	$GLOBALS['wp_auto_test_before_update_meta']   = null;
 	$GLOBALS['wp_auto_test_update_meta_calls']    = 0;
 	$GLOBALS['wp_auto_test_permalink_exception']  = null;
+	$GLOBALS['wp_auto_test_edit_link_exception']  = null;
+	$GLOBALS['wp_auto_test_get_post_meta_exception'] = null;
 	$GLOBALS['wp_auto_test_site_info']            = array(
 		'name'                => 'WP-Auto Test Site',
 		'description'         => 'A safe connector test site.',
@@ -363,6 +374,14 @@ namespace {
 
 	function get_post( int $post_id ) {
 		++$GLOBALS['wp_auto_test_get_post_calls'];
+		if (
+			$GLOBALS['wp_auto_test_get_post_exception'] instanceof \Throwable
+			&& ( null === $GLOBALS['wp_auto_test_get_post_exception_on_call'] || $GLOBALS['wp_auto_test_get_post_calls'] === $GLOBALS['wp_auto_test_get_post_exception_on_call'] )
+		) {
+			$exception = $GLOBALS['wp_auto_test_get_post_exception'];
+			$GLOBALS['wp_auto_test_get_post_exception'] = null;
+			throw $exception;
+		}
 		if ( is_callable( $GLOBALS['wp_auto_test_before_get_post'] ) ) {
 			( $GLOBALS['wp_auto_test_before_get_post'] )( $post_id, $GLOBALS['wp_auto_test_get_post_calls'] );
 		}
@@ -376,6 +395,11 @@ namespace {
 	}
 
 	function get_post_meta( int $post_id, string $meta_key, bool $single = false ) {
+		if ( $GLOBALS['wp_auto_test_get_post_meta_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_get_post_meta_exception'];
+			$GLOBALS['wp_auto_test_get_post_meta_exception'] = null;
+			throw $exception;
+		}
 		if ( isset( $GLOBALS['wp_auto_test_post_meta_values'][ $post_id ][ $meta_key ] ) ) {
 			$values = $GLOBALS['wp_auto_test_post_meta_values'][ $post_id ][ $meta_key ];
 			return $single ? ( $values[0] ?? array() ) : $values;
@@ -408,12 +432,22 @@ namespace {
 
 	function add_option( string $option, $value = '', string $deprecated = '', $autoload = null ): bool {
 		unset( $deprecated );
+		if ( $GLOBALS['wp_auto_test_add_option_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_add_option_exception'];
+			$GLOBALS['wp_auto_test_add_option_exception'] = null;
+			throw $exception;
+		}
 		if ( array_key_exists( $option, $GLOBALS['wp_auto_test_options'] ) ) {
 			return false;
 		}
 
 		$GLOBALS['wp_auto_test_options'][ $option ] = $value;
 		$GLOBALS['wp_auto_test_option_autoload'][ $option ] = $autoload;
+		if ( $GLOBALS['wp_auto_test_add_option_exception_after_write'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_add_option_exception_after_write'];
+			$GLOBALS['wp_auto_test_add_option_exception_after_write'] = null;
+			throw $exception;
+		}
 		return true;
 	}
 
@@ -426,6 +460,10 @@ namespace {
 	function update_option( string $option, $value, $autoload = null ): bool {
 		unset( $autoload );
 		++$GLOBALS['wp_auto_test_update_option_calls'];
+		if ( $GLOBALS['wp_auto_test_update_option_calls'] === $GLOBALS['wp_auto_test_update_option_exception_on_call'] ) {
+			$GLOBALS['wp_auto_test_update_option_exception_on_call'] = null;
+			throw new \RuntimeException( 'sensitive-internal-detail' );
+		}
 		if ( $GLOBALS['wp_auto_test_fail_update_option'] || $GLOBALS['wp_auto_test_update_option_calls'] === $GLOBALS['wp_auto_test_fail_update_option_on_call'] ) {
 			return false;
 		}
@@ -435,12 +473,26 @@ namespace {
 	}
 
 	function delete_option( string $option ): bool {
+		++$GLOBALS['wp_auto_test_delete_option_calls'];
+		if ( $GLOBALS['wp_auto_test_delete_option_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_delete_option_exception'];
+			$GLOBALS['wp_auto_test_delete_option_exception'] = null;
+			throw $exception;
+		}
+		if ( $GLOBALS['wp_auto_test_fail_delete_option'] ) {
+			return false;
+		}
 		unset( $GLOBALS['wp_auto_test_options'][ $option ] );
 		return true;
 	}
 
 	function get_edit_post_link( $post, string $context = 'display' ): ?string {
 		unset( $context );
+		if ( $GLOBALS['wp_auto_test_edit_link_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_edit_link_exception'];
+			$GLOBALS['wp_auto_test_edit_link_exception'] = null;
+			throw $exception;
+		}
 		$post_id = $post instanceof WP_Post ? $post->ID : (int) $post;
 		return 'https://example.test/wp-admin/post.php?post=' . $post_id . '&action=edit';
 	}
@@ -452,6 +504,7 @@ namespace {
 
 	function wp_insert_post( array $postarr, bool $wp_error = false, bool $fire_after_hooks = true ) {
 		unset( $wp_error, $fire_after_hooks );
+		++$GLOBALS['wp_auto_test_insert_calls'];
 		$GLOBALS['wp_auto_test_last_insert_args'] = $postarr;
 
 		if ( $GLOBALS['wp_auto_test_insert_exception'] instanceof \Throwable ) {

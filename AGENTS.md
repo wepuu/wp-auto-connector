@@ -12,7 +12,7 @@ Phase 1.1 is complete: the direct MCP server foundation proves the authenticated
 
 Phase 1.2 is complete: all eight read-only tools passed the frozen contract, permission, privacy, schema, bounded-query, and live MCP validation gates.
 
-Phase 1.3.0, Phase 1.3.1, and Phase 1.3.2.0 are formally sealed. Phase 1.3.2 is implemented, merged, validated on `main`, and formally sealed with an exact twelve-tool Direct MCP runtime. The next active checkpoint is Phase 1.3.3 — Mutation Security / Audit Freeze. Do not implement publishing, deletion, media, taxonomy mutation, SEO, Cloud, or later roadmap work unless an explicit later task authorizes it.
+Phase 1.3.0, Phase 1.3.1, and Phase 1.3.2.0 are formally sealed. Phase 1.3.2 is implemented, merged, validated on `main`, and formally sealed with an exact twelve-tool Direct MCP runtime. The Phase 1.3.3 SEC-1 Create-side fail-closed remediation has passed Security Remediation Review and is pending PR, CI, merge, and main verification. The broader Phase 1.3.3 Mutation Security / Audit Freeze remains paused and must not resume until SEC-1 is merged and validated on `main`; Phase 1.3.4 remains blocked. Do not implement publishing, deletion, media, taxonomy mutation, SEO, Cloud, or later roadmap work unless an explicit later task authorizes it.
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
