@@ -19,26 +19,70 @@ final class MutationAuditStore {
 	private const MAX_EVENTS = 20;
 
 	/**
+	 * Atomic ownership primitive for per-object audit appends.
+	 *
+	 * @var AtomicOwnershipStore
+	 */
+	private AtomicOwnershipStore $ownership;
+
+	/**
+	 * Create the audit store with an optional ownership dependency for tests.
+	 *
+	 * @param AtomicOwnershipStore|null $ownership Atomic ownership store.
+	 */
+	public function __construct( ?AtomicOwnershipStore $ownership = null ) {
+		$this->ownership = $ownership ?? new AtomicOwnershipStore();
+	}
+
+	/**
 	 * Append one fixed-field event and verify the persisted value.
 	 *
 	 * @param int                  $post_id Target post ID.
 	 * @param array<string, mixed> $event Attribution event.
 	 */
 	public function append( int $post_id, array $event ): bool {
-		$events = $this->read_events( $post_id );
-		if ( null === $events ) {
+		try {
+			$token   = wp_generate_uuid4();
+			$lock    = $this->lock_name( $post_id );
+			$acquire = $this->ownership->acquire( $lock, $token );
+		} catch ( \Throwable ) {
+			return false;
+		}
+		if ( 'acquired' !== ( $acquire['status'] ?? null ) ) {
 			return false;
 		}
 
-		$events[] = $event;
+		$critical_ok = false;
+		$release     = null;
+		try {
+			$events = $this->read_events( $post_id );
+			if ( null === $events ) {
+				return false;
+			}
 
-		if ( self::MAX_EVENTS < count( $events ) ) {
-			$events = array_slice( $events, -self::MAX_EVENTS );
+			$events[] = $event;
+
+			if ( self::MAX_EVENTS < count( $events ) ) {
+				$events = array_slice( $events, -self::MAX_EVENTS );
+			}
+
+			$updated = update_post_meta( $post_id, self::META_KEY, $events );
+			if ( false === $updated ) {
+				return false;
+			}
+
+			$critical_ok = $this->read_events( $post_id ) === $events;
+		} catch ( \Throwable ) {
+			$critical_ok = false;
+		} finally {
+			try {
+				$release = $this->ownership->release( $lock, $token );
+			} catch ( \Throwable ) {
+				$release = null;
+			}
 		}
 
-		update_post_meta( $post_id, self::META_KEY, $events );
-
-		return $this->read_events( $post_id ) === $events;
+		return $critical_ok && 'released' === ( $release['status'] ?? null );
 	}
 
 	/**
@@ -99,5 +143,16 @@ final class MutationAuditStore {
 	 */
 	public static function meta_key(): string {
 		return self::META_KEY;
+	}
+
+	/**
+	 * Build the per-site, per-object audit ownership option name.
+	 *
+	 * @param int $post_id Target post ID.
+	 */
+	private function lock_name( int $post_id ): string {
+		$scope = (string) get_current_blog_id() . "\0" . (string) $post_id;
+
+		return 'wp_auto_connector_mutation_audit_lock_' . hash( 'sha256', $scope );
 	}
 }

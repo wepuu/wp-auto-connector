@@ -29,6 +29,7 @@ require_once WP_AUTO_CONNECTOR_DIR . 'src/Diagnostics/EnvironmentDiagnostics.php
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/ContentReadService.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/CreateDraftContract.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/UpdateDraftContract.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/AtomicOwnershipStore.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/CreateIdempotencyStore.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/MutationAuditStore.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/ContentMutationService.php';

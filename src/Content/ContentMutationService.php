@@ -182,11 +182,11 @@ final class ContentMutationService {
 
 		if ( is_wp_error( $post_id ) || ! is_int( $post_id ) || $post_id < 1 ) {
 			try {
-				$released = $this->idempotency->release( $option_name );
+				$released = $this->idempotency->release( $option_name, $record );
 			} catch ( \Throwable ) {
 				return $this->uncertain();
 			}
-			if ( ! $released ) {
+			if ( ! is_array( $released ) || 'released' !== ( $released['status'] ?? null ) ) {
 				return $this->uncertain();
 			}
 
