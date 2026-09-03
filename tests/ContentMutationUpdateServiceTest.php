@@ -17,28 +17,39 @@ use WPAuto\Connector\Content\MutationAuditStore;
 final class ContentMutationUpdateServiceTest extends TestCase {
 	/** Reset mutation fixtures. */
 	protected function setUp(): void {
-		$GLOBALS['wp_auto_test_posts']                  = array();
-		$GLOBALS['wp_auto_test_post_meta']              = array();
-		$GLOBALS['wp_auto_test_post_meta_values']       = array();
-		$GLOBALS['wp_auto_test_capabilities']           = array(
+		$GLOBALS['wp_auto_test_posts']                          = array();
+		$GLOBALS['wp_auto_test_post_meta']                      = array();
+		$GLOBALS['wp_auto_test_post_meta_values']               = array();
+		$GLOBALS['wp_auto_test_capabilities']                   = array(
 			'edit_posts' => true,
 			'edit_pages' => true,
 		);
-		$GLOBALS['wp_auto_test_object_capabilities']    = array();
-		$GLOBALS['wp_auto_test_current_user_id']        = 7;
-		$GLOBALS['wp_auto_test_filters']                = array();
-		$GLOBALS['wp_auto_test_last_update_args']       = array();
-		$GLOBALS['wp_auto_test_update_result']          = null;
-		$GLOBALS['wp_auto_test_update_exception']       = null;
-		$GLOBALS['wp_auto_test_update_after_exception'] = null;
-		$GLOBALS['wp_auto_test_next_modified_gmt']      = '2026-09-01 12:00:01';
-		$GLOBALS['wp_auto_test_get_post_calls']         = 0;
-		$GLOBALS['wp_auto_test_before_get_post']        = null;
-		$GLOBALS['wp_auto_test_fail_update_meta']       = false;
-		$GLOBALS['wp_auto_test_update_meta_exception']  = null;
-		$GLOBALS['wp_auto_test_before_update_meta']     = null;
-		$GLOBALS['wp_auto_test_update_meta_calls']      = 0;
-		$GLOBALS['wp_auto_test_permalink_exception']    = null;
+		$GLOBALS['wp_auto_test_object_capabilities']            = array();
+		$GLOBALS['wp_auto_test_current_user_id']                = 7;
+		$GLOBALS['wp_auto_test_current_user_id_calls']          = 0;
+		$GLOBALS['wp_auto_test_before_current_user_id']         = null;
+		$GLOBALS['wp_auto_test_current_user_can_calls']         = 0;
+		$GLOBALS['wp_auto_test_before_current_user_can']        = null;
+		$GLOBALS['wp_auto_test_current_user_can_exception']     = null;
+		$GLOBALS['wp_auto_test_get_post_type_object_exception'] = null;
+		$GLOBALS['wp_auto_test_add_filter_exception']           = null;
+		$GLOBALS['wp_auto_test_remove_filter_exception']        = null;
+		$GLOBALS['wp_auto_test_filters']                        = array();
+		$GLOBALS['wp_auto_test_last_update_args']               = array();
+		$GLOBALS['wp_auto_test_update_result']                  = null;
+		$GLOBALS['wp_auto_test_update_exception']               = null;
+		$GLOBALS['wp_auto_test_update_after_exception']         = null;
+		$GLOBALS['wp_auto_test_next_modified_gmt']              = '2026-09-01 12:00:01';
+		$GLOBALS['wp_auto_test_get_post_calls']                 = 0;
+		$GLOBALS['wp_auto_test_before_get_post']                = null;
+		$GLOBALS['wp_auto_test_get_post_exception']             = null;
+		$GLOBALS['wp_auto_test_get_post_exception_on_call']     = null;
+		$GLOBALS['wp_auto_test_get_post_meta_exception']        = null;
+		$GLOBALS['wp_auto_test_fail_update_meta']               = false;
+		$GLOBALS['wp_auto_test_update_meta_exception']          = null;
+		$GLOBALS['wp_auto_test_before_update_meta']             = null;
+		$GLOBALS['wp_auto_test_update_meta_calls']              = 0;
+		$GLOBALS['wp_auto_test_permalink_exception']            = null;
 	}
 
 	/** Post Update changes only supplied fields and returns the exact final output. */
@@ -644,6 +655,79 @@ final class ContentMutationUpdateServiceTest extends TestCase {
 		self::assertSame( 500, $result->get_error_data()['status'] );
 		self::assertStringNotContainsString( 'sensitive', $result->get_error_message() );
 		self::assertSame( 'Written before audit failure', get_post( 44 )->post_content );
+	}
+
+	/** Preflight target resolution Throwables are sanitized before any write. */
+	public function test_update_preflight_get_post_throwable_is_sanitized(): void {
+		$this->add_draft( 45, 'post' );
+		$GLOBALS['wp_auto_test_get_post_exception'] = new \RuntimeException( 'sensitive-internal-detail' );
+
+		$result = ( new ContentMutationService() )->update_post_draft(
+			array(
+				'id'                    => 45,
+				'expected_modified_gmt' => '2026-09-01 12:00:00',
+				'title'                 => 'x',
+			)
+		);
+
+		self::assertSame( 'wp_auto_mutation_state_uncertain', $result->get_error_code() );
+		self::assertStringNotContainsString( 'sensitive-internal-detail', $result->get_error_message() );
+		self::assertSame( 'Original title', get_post( 45 )->post_title );
+		self::assertSame( array(), get_post_meta( 45, MutationAuditStore::meta_key(), true ) );
+	}
+
+	/** Capability lookup Throwables are contained by the complete Update boundary. */
+	public function test_update_capability_throwable_is_sanitized(): void {
+		$this->add_draft( 46, 'post' );
+		$GLOBALS['wp_auto_test_current_user_can_exception'] = new \RuntimeException( 'sensitive-internal-detail' );
+
+		$result = ( new ContentMutationService() )->update_post_draft(
+			array(
+				'id'                    => 46,
+				'expected_modified_gmt' => '2026-09-01 12:00:00',
+				'title'                 => 'x',
+			)
+		);
+
+		self::assertSame( 'wp_auto_mutation_state_uncertain', $result->get_error_code() );
+		self::assertStringNotContainsString( 'sensitive-internal-detail', $result->get_error_message() );
+		self::assertSame( 'Original title', get_post( 46 )->post_title );
+	}
+
+	/** Guard installation Throwables are sanitized and do not reach Core Update. */
+	public function test_update_add_filter_throwable_is_sanitized(): void {
+		$this->add_draft( 47, 'post' );
+		$GLOBALS['wp_auto_test_add_filter_exception'] = new \RuntimeException( 'sensitive-internal-detail' );
+
+		$result = ( new ContentMutationService() )->update_post_draft(
+			array(
+				'id'                    => 47,
+				'expected_modified_gmt' => '2026-09-01 12:00:00',
+				'title'                 => 'x',
+			)
+		);
+
+		self::assertSame( 'wp_auto_mutation_state_uncertain', $result->get_error_code() );
+		self::assertStringNotContainsString( 'sensitive-internal-detail', $result->get_error_message() );
+		self::assertSame( array(), $GLOBALS['wp_auto_test_last_update_args'] );
+	}
+
+	/** Guard cleanup Throwables are sanitized after a possible Core Update. */
+	public function test_update_remove_filter_throwable_is_sanitized(): void {
+		$this->add_draft( 48, 'post' );
+		$GLOBALS['wp_auto_test_remove_filter_exception'] = new \RuntimeException( 'sensitive-internal-detail' );
+
+		$result = ( new ContentMutationService() )->update_post_draft(
+			array(
+				'id'                    => 48,
+				'expected_modified_gmt' => '2026-09-01 12:00:00',
+				'title'                 => 'x',
+			)
+		);
+
+		self::assertSame( 'wp_auto_mutation_state_uncertain', $result->get_error_code() );
+		self::assertStringNotContainsString( 'sensitive-internal-detail', $result->get_error_message() );
+		self::assertSame( 'x', get_post( 48 )->post_title );
 	}
 
 	/**

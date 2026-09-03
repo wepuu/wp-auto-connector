@@ -89,6 +89,14 @@ final class McpServerRegistrar {
 	 * @return bool|WP_Error
 	 */
 	public function check_transport_permission() {
+		if ( ! function_exists( 'wp_is_application_passwords_supported' ) || ! wp_is_application_passwords_supported() ) {
+			return new WP_Error(
+				'wp_auto_connector_authentication_required',
+				__( 'WordPress authentication is required for the WP-Auto MCP server.', 'wp-auto-connector' ),
+				array( 'status' => 401 )
+			);
+		}
+
 		if ( ! is_user_logged_in() ) {
 			return new WP_Error(
 				'wp_auto_connector_authentication_required',

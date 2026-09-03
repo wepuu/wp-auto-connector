@@ -95,4 +95,35 @@ final class CreateIdempotencyStoreTest extends TestCase {
 		self::assertSame( 'off', $GLOBALS['wp_auto_test_option_autoload'][ $name ] );
 		self::assertArrayNotHasKey( 'key', $record );
 	}
+
+	/** Occupied malformed persisted records fail closed instead of becoming existing claims. */
+	public function test_occupied_malformed_record_is_unresolved(): void {
+		$store                                    = new CreateIdempotencyStore();
+		$fingerprint                              = str_repeat( 'd', 64 );
+		$claim                                    = $store->claim( 'wp-auto/post-create-draft', 7, 'malformed1', $fingerprint );
+		$name                                     = $claim['name'];
+		$record                                   = $claim['record'];
+		$record['actor_user_id']                  = 0;
+		$GLOBALS['wp_auto_test_options'][ $name ] = $record;
+
+		$occupied = $store->claim( 'wp-auto/post-create-draft', 7, 'malformed1', $fingerprint );
+
+		self::assertSame( 'unresolved', $occupied['status'] );
+		self::assertSame( $name, $occupied['name'] );
+	}
+
+	/** State transitions reject malformed records before any option update. */
+	public function test_state_transitions_validate_persisted_record_before_writing(): void {
+		$store                                       = new CreateIdempotencyStore();
+		$claim                                       = $store->claim( 'wp-auto/post-create-draft', 7, 'transition1', str_repeat( 'e', 64 ) );
+		$name                                        = $claim['name'];
+		$record                                      = $claim['record'];
+		$record['updated_gmt']                       = '0000-00-00 00:00:00';
+		$GLOBALS['wp_auto_test_update_option_calls'] = 0;
+
+		self::assertFalse( $store->record_target_in_progress( $name, $record, 123 ) );
+		self::assertFalse( $store->mark_audit_recorded( $name, $record ) );
+		self::assertFalse( $store->complete( $name, $record ) );
+		self::assertSame( 0, $GLOBALS['wp_auto_test_update_option_calls'] );
+	}
 }

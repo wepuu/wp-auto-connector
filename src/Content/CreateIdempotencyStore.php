@@ -73,6 +73,14 @@ final class CreateIdempotencyStore {
 			);
 		}
 
+		if ( ! $this->is_valid_persisted_record( $acquired['existing_value'] ) ) {
+			return array(
+				'status' => 'unresolved',
+				'name'   => $option_name,
+				'record' => null,
+			);
+		}
+
 		return array(
 			'status' => 'existing',
 			'name'   => $option_name,
@@ -88,7 +96,7 @@ final class CreateIdempotencyStore {
 	 * @param int                  $target_id Created object ID.
 	 */
 	public function record_target_in_progress( string $option_name, array $record, int $target_id ): bool {
-		if ( $target_id < 1 || 'in_progress' !== ( $record['state'] ?? null ) ) {
+		if ( ! $this->is_valid_persisted_record( $record ) || $target_id < 1 || 'in_progress' !== $record['state'] ) {
 			return false;
 		}
 
@@ -106,7 +114,7 @@ final class CreateIdempotencyStore {
 	 * @param array<string, mixed> $record Existing record.
 	 */
 	public function mark_audit_recorded( string $option_name, array $record ): bool {
-		if ( 'in_progress' !== ( $record['state'] ?? null ) || ! isset( $record['target_id'] ) || ! is_int( $record['target_id'] ) || $record['target_id'] < 1 ) {
+		if ( ! $this->is_valid_persisted_record( $record ) || 'in_progress' !== $record['state'] || $record['target_id'] < 1 ) {
 			return false;
 		}
 
@@ -123,7 +131,7 @@ final class CreateIdempotencyStore {
 	 * @param array<string, mixed> $record Existing record.
 	 */
 	public function complete( string $option_name, array $record ): bool {
-		if ( ! in_array( $record['state'] ?? null, array( 'audit_recorded', 'completed' ), true ) || ! isset( $record['target_id'] ) || ! is_int( $record['target_id'] ) || $record['target_id'] < 1 ) {
+		if ( ! $this->is_valid_persisted_record( $record ) || ! in_array( $record['state'], array( 'audit_recorded', 'completed' ), true ) || $record['target_id'] < 1 ) {
 			return false;
 		}
 
@@ -156,6 +164,69 @@ final class CreateIdempotencyStore {
 		$scope   = $blog_id . "\0" . $actor_id . "\0" . $ability . "\0" . $key;
 
 		return self::OPTION_PREFIX . hash( 'sha256', $scope );
+	}
+
+	/**
+	 * Validate the exact persisted idempotency record schema and invariants.
+	 *
+	 * @param array<string, mixed> $record Persisted record.
+	 */
+	private function is_valid_persisted_record( array $record ): bool {
+		$required = array(
+			'version',
+			'actor_user_id',
+			'ability',
+			'fingerprint',
+			'state',
+			'target_id',
+			'created_gmt',
+			'updated_gmt',
+		);
+		$keys     = array_keys( $record );
+		$expected = $required;
+		sort( $keys );
+		sort( $expected );
+
+		if ( $keys !== $expected
+			|| 1 !== $record['version']
+			|| ! is_int( $record['actor_user_id'] )
+			|| $record['actor_user_id'] < 1
+			|| ! in_array( $record['ability'], array( 'wp-auto/post-create-draft', 'wp-auto/page-create-draft' ), true )
+			|| ! is_string( $record['fingerprint'] )
+			|| 1 !== preg_match( '/^[0-9a-f]{64}$/D', $record['fingerprint'] )
+			|| ! in_array( $record['state'], array( 'in_progress', 'audit_recorded', 'completed' ), true )
+			|| ! is_int( $record['target_id'] )
+			|| $record['target_id'] < 0
+			|| ( 'in_progress' !== $record['state'] && $record['target_id'] < 1 )
+			|| ! is_string( $record['created_gmt'] )
+			|| ! $this->valid_timestamp( $record['created_gmt'] )
+			|| ! is_string( $record['updated_gmt'] )
+			|| ! $this->valid_timestamp( $record['updated_gmt'] )
+		) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validate a real Gregorian GMT timestamp.
+	 *
+	 * @param string $value Timestamp.
+	 */
+	private function valid_timestamp( string $value ): bool {
+		if ( 1 !== preg_match( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/D', $value ) ) {
+			return false;
+		}
+
+		$year   = (int) substr( $value, 0, 4 );
+		$month  = (int) substr( $value, 5, 2 );
+		$day    = (int) substr( $value, 8, 2 );
+		$hour   = (int) substr( $value, 11, 2 );
+		$minute = (int) substr( $value, 14, 2 );
+		$second = (int) substr( $value, 17, 2 );
+
+		return $year > 0 && checkdate( $month, $day, $year ) && $hour < 24 && $minute < 60 && $second < 60;
 	}
 
 	/**
