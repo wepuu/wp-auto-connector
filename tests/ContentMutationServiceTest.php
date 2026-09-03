@@ -20,42 +20,57 @@ final class ContentMutationServiceTest extends TestCase {
 	 * Reset mutation fixtures.
 	 */
 	protected function setUp(): void {
-		$GLOBALS['wp_auto_test_posts']                            = array();
-		$GLOBALS['wp_auto_test_options']                          = array();
-		$GLOBALS['wp_auto_test_post_meta']                        = array();
-		$GLOBALS['wp_auto_test_post_meta_values']                 = array();
-		$GLOBALS['wp_auto_test_capabilities']                     = array(
+		$GLOBALS['wp_auto_test_posts']                             = array();
+		$GLOBALS['wp_auto_test_options']                           = array();
+		$GLOBALS['wp_auto_test_option_autoload']                   = array();
+		$GLOBALS['wp_auto_test_option_cache']                      = array();
+		$GLOBALS['wp_auto_test_notoptions_cache']                  = null;
+		$GLOBALS['wp_auto_test_alloptions_cache']                  = null;
+		$GLOBALS['wp_auto_test_use_option_cache']                  = false;
+		$GLOBALS['wp_auto_test_cache_delete_exception']            = null;
+		$GLOBALS['wp_auto_test_db_query_exception']                = null;
+		$GLOBALS['wp_auto_test_db_query_after_write_exception']    = null;
+		$GLOBALS['wp_auto_test_db_last_error']                     = '';
+		$GLOBALS['wp_auto_test_db_return_override']                = null;
+		$GLOBALS['wp_auto_test_db_suppress_state']                 = false;
+		$GLOBALS['wp_auto_test_db_suppress_history']               = array();
+		$GLOBALS['wp_auto_test_db_prepared_queries']               = array();
+		$GLOBALS['wp_auto_test_db_query_calls']                    = 0;
+		$GLOBALS['wp_auto_test_update_meta_exception_after_write'] = null;
+		$GLOBALS['wp_auto_test_post_meta']                         = array();
+		$GLOBALS['wp_auto_test_post_meta_values']                  = array();
+		$GLOBALS['wp_auto_test_capabilities']                      = array(
 			'edit_posts' => true,
 			'edit_pages' => true,
 		);
-		$GLOBALS['wp_auto_test_current_user_id']                  = 7;
-		$GLOBALS['wp_auto_test_next_post_id']                     = 1000;
-		$GLOBALS['wp_auto_test_last_insert_args']                 = array();
-		$GLOBALS['wp_auto_test_insert_result']                    = null;
-		$GLOBALS['wp_auto_test_insert_exception']                 = null;
-		$GLOBALS['wp_auto_test_insert_calls']                     = 0;
-		$GLOBALS['wp_auto_test_add_option_exception']             = null;
-		$GLOBALS['wp_auto_test_add_option_exception_after_write'] = null;
-		$GLOBALS['wp_auto_test_fail_update_option']               = false;
-		$GLOBALS['wp_auto_test_fail_update_option_on_call']       = null;
-		$GLOBALS['wp_auto_test_update_option_exception_on_call']  = null;
-		$GLOBALS['wp_auto_test_update_option_calls']              = 0;
-		$GLOBALS['wp_auto_test_fail_delete_option']               = false;
-		$GLOBALS['wp_auto_test_delete_option_exception']          = null;
-		$GLOBALS['wp_auto_test_delete_option_calls']              = 0;
-		$GLOBALS['wp_auto_test_fail_update_meta']                 = false;
-		$GLOBALS['wp_auto_test_update_meta_exception']            = null;
-		$GLOBALS['wp_auto_test_get_post_meta_exception']          = null;
-		$GLOBALS['wp_auto_test_before_update_meta']               = null;
-		$GLOBALS['wp_auto_test_nested_recovery']                  = null;
-		$GLOBALS['wp_auto_test_update_meta_calls']                = 0;
-		$GLOBALS['wp_auto_test_get_post_calls']                   = 0;
-		$GLOBALS['wp_auto_test_before_get_post']                  = null;
-		$GLOBALS['wp_auto_test_get_post_exception']               = null;
-		$GLOBALS['wp_auto_test_get_post_exception_on_call']       = null;
-		$GLOBALS['wp_auto_test_permalink_exception']              = null;
-		$GLOBALS['wp_auto_test_edit_link_exception']              = null;
-		$GLOBALS['wp_auto_test_filters']                          = array();
+		$GLOBALS['wp_auto_test_current_user_id']                   = 7;
+		$GLOBALS['wp_auto_test_next_post_id']                      = 1000;
+		$GLOBALS['wp_auto_test_last_insert_args']                  = array();
+		$GLOBALS['wp_auto_test_insert_result']                     = null;
+		$GLOBALS['wp_auto_test_insert_exception']                  = null;
+		$GLOBALS['wp_auto_test_insert_calls']                      = 0;
+		$GLOBALS['wp_auto_test_add_option_exception']              = null;
+		$GLOBALS['wp_auto_test_add_option_exception_after_write']  = null;
+		$GLOBALS['wp_auto_test_fail_update_option']                = false;
+		$GLOBALS['wp_auto_test_fail_update_option_on_call']        = null;
+		$GLOBALS['wp_auto_test_update_option_exception_on_call']   = null;
+		$GLOBALS['wp_auto_test_update_option_calls']               = 0;
+		$GLOBALS['wp_auto_test_fail_delete_option']                = false;
+		$GLOBALS['wp_auto_test_delete_option_exception']           = null;
+		$GLOBALS['wp_auto_test_delete_option_calls']               = 0;
+		$GLOBALS['wp_auto_test_fail_update_meta']                  = false;
+		$GLOBALS['wp_auto_test_update_meta_exception']             = null;
+		$GLOBALS['wp_auto_test_get_post_meta_exception']           = null;
+		$GLOBALS['wp_auto_test_before_update_meta']                = null;
+		$GLOBALS['wp_auto_test_nested_recovery']                   = null;
+		$GLOBALS['wp_auto_test_update_meta_calls']                 = 0;
+		$GLOBALS['wp_auto_test_get_post_calls']                    = 0;
+		$GLOBALS['wp_auto_test_before_get_post']                   = null;
+		$GLOBALS['wp_auto_test_get_post_exception']                = null;
+		$GLOBALS['wp_auto_test_get_post_exception_on_call']        = null;
+		$GLOBALS['wp_auto_test_permalink_exception']               = null;
+		$GLOBALS['wp_auto_test_edit_link_exception']               = null;
+		$GLOBALS['wp_auto_test_filters']                           = array();
 	}
 
 	/**
@@ -569,6 +584,19 @@ final class ContentMutationServiceTest extends TestCase {
 	}
 
 	/**
+	 * A claim whose cache readback cannot be proven never enters Core Create.
+	 */
+	public function test_unresolved_atomic_claim_never_enters_core_create(): void {
+		$GLOBALS['wp_auto_test_cache_delete_exception'] = new \RuntimeException( 'sensitive-internal-detail' );
+
+		$result = ( new ContentMutationService() )->create_post_draft( $this->create_input( 'cacheunc1' ) );
+
+		$this->assert_uncertain_without_sensitive_detail( $result );
+		self::assertSame( 0, $GLOBALS['wp_auto_test_insert_calls'] );
+		self::assertCount( 1, $GLOBALS['wp_auto_test_options'] );
+	}
+
+	/**
 	 * A definitive Core failure remains create-failed after verified release.
 	 */
 	public function test_definitive_core_failure_with_verified_release_remains_create_failed(): void {
@@ -676,7 +704,7 @@ final class ContentMutationServiceTest extends TestCase {
 		$this->assert_uncertain_without_sensitive_detail( $result );
 		self::assertCount( 1, $GLOBALS['wp_auto_test_posts'] );
 		self::assertSame( 1, $GLOBALS['wp_auto_test_update_meta_calls'] );
-		self::assertSame( 0, $GLOBALS['wp_auto_test_delete_option_calls'] );
+		self::assertSame( 1, $GLOBALS['wp_auto_test_delete_option_calls'] );
 	}
 
 	/**

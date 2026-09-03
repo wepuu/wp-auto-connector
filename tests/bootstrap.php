@@ -35,6 +35,25 @@ namespace {
 	$GLOBALS['wp_auto_test_last_term_clauses']    = array();
 	$GLOBALS['wp_auto_test_options']              = array();
 	$GLOBALS['wp_auto_test_option_autoload']      = array();
+	$GLOBALS['wp_auto_test_option_cache']         = array();
+	$GLOBALS['wp_auto_test_notoptions_cache']     = null;
+	$GLOBALS['wp_auto_test_alloptions_cache']     = null;
+	$GLOBALS['wp_auto_test_use_option_cache']     = false;
+	$GLOBALS['wp_auto_test_cache_delete_exception'] = null;
+	$GLOBALS['wp_auto_test_cache_delete_history'] = array();
+	$GLOBALS['wp_auto_test_db_query_calls']       = 0;
+	$GLOBALS['wp_auto_test_db_query_exception']   = null;
+	$GLOBALS['wp_auto_test_db_query_after_write_exception'] = null;
+	$GLOBALS['wp_auto_test_db_last_error']        = '';
+	$GLOBALS['wp_auto_test_db_return_override']   = null;
+	$GLOBALS['wp_auto_test_uuid_counter']         = 0;
+	$GLOBALS['wp_auto_test_db_prepare_exception'] = null;
+	$GLOBALS['wp_auto_test_db_suppress_state']    = false;
+	$GLOBALS['wp_auto_test_db_suppress_history']  = array();
+	$GLOBALS['wp_auto_test_db_prepared_queries']  = array();
+	$GLOBALS['wp_auto_test_before_db_query']      = null;
+	$GLOBALS['wp_auto_test_cache_delete_return_override'] = null;
+	$GLOBALS['wp_auto_test_update_meta_exception_after_write'] = null;
 	$GLOBALS['wp_auto_test_post_meta']            = array();
 	$GLOBALS['wp_auto_test_post_meta_values']     = array();
 	$GLOBALS['wp_auto_test_next_post_id']         = 1000;
@@ -80,6 +99,117 @@ namespace {
 
 	class WP_Ability {}
 	class WP_REST_Server {}
+	class wpdb {
+		public string $options = 'wp_options';
+		public int $rows_affected = 0;
+		public string $last_error = '';
+
+		public function suppress_errors( $suppress = null ): bool {
+			$previous = (bool) $GLOBALS['wp_auto_test_db_suppress_state'];
+			if ( null !== $suppress ) {
+				$GLOBALS['wp_auto_test_db_suppress_state']   = (bool) $suppress;
+				$GLOBALS['wp_auto_test_db_suppress_history'][] = (bool) $suppress;
+			}
+
+			return $previous;
+		}
+
+		public function prepare( string $query, ...$args ) {
+			if ( $GLOBALS['wp_auto_test_db_prepare_exception'] instanceof \Throwable ) {
+				$exception = $GLOBALS['wp_auto_test_db_prepare_exception'];
+				$GLOBALS['wp_auto_test_db_prepare_exception'] = null;
+				throw $exception;
+			}
+
+			$prepared = array( 'query' => $query, 'args' => $args );
+			$GLOBALS['wp_auto_test_db_prepared_queries'][] = $prepared;
+			return $prepared;
+		}
+
+		public function query( $prepared ) {
+			++$GLOBALS['wp_auto_test_db_query_calls'];
+			$this->rows_affected = 0;
+			$this->last_error    = '';
+
+			if ( is_callable( $GLOBALS['wp_auto_test_before_db_query'] ) ) {
+				( $GLOBALS['wp_auto_test_before_db_query'] )( $prepared, $this );
+			}
+			if ( $GLOBALS['wp_auto_test_db_query_exception'] instanceof \Throwable ) {
+				$exception = $GLOBALS['wp_auto_test_db_query_exception'];
+				$GLOBALS['wp_auto_test_db_query_exception'] = null;
+				throw $exception;
+			}
+			if ( null !== $GLOBALS['wp_auto_test_db_return_override'] ) {
+				return $GLOBALS['wp_auto_test_db_return_override'];
+			}
+
+			if ( ! is_array( $prepared ) || ! isset( $prepared['query'], $prepared['args'] ) ) {
+				$this->last_error = 'invalid prepared query';
+				return false;
+			}
+
+			$args = $prepared['args'];
+			if ( false !== stripos( $prepared['query'], 'INSERT IGNORE' ) ) {
+				if ( $GLOBALS['wp_auto_test_add_option_exception'] instanceof \Throwable ) {
+					$exception = $GLOBALS['wp_auto_test_add_option_exception'];
+					$GLOBALS['wp_auto_test_add_option_exception'] = null;
+					throw $exception;
+				}
+				$name = (string) ( $args[0] ?? '' );
+				if ( array_key_exists( $name, $GLOBALS['wp_auto_test_options'] ) ) {
+					$this->rows_affected = 0;
+					$this->last_error    = (string) $GLOBALS['wp_auto_test_db_last_error'];
+					return 0;
+				}
+
+				$GLOBALS['wp_auto_test_options'][ $name ]         = maybe_unserialize( $args[1] ?? '' );
+				$GLOBALS['wp_auto_test_option_autoload'][ $name ] = (string) ( $args[2] ?? '' );
+				$this->rows_affected = 1;
+				if ( $GLOBALS['wp_auto_test_add_option_exception_after_write'] instanceof \Throwable ) {
+					$exception = $GLOBALS['wp_auto_test_add_option_exception_after_write'];
+					$GLOBALS['wp_auto_test_add_option_exception_after_write'] = null;
+					throw $exception;
+				}
+				if ( $GLOBALS['wp_auto_test_db_query_after_write_exception'] instanceof \Throwable ) {
+					$exception = $GLOBALS['wp_auto_test_db_query_after_write_exception'];
+					$GLOBALS['wp_auto_test_db_query_after_write_exception'] = null;
+					throw $exception;
+				}
+
+				$this->last_error = (string) $GLOBALS['wp_auto_test_db_last_error'];
+				return 1;
+			}
+
+			if ( false !== stripos( $prepared['query'], 'DELETE FROM' ) ) {
+				++$GLOBALS['wp_auto_test_delete_option_calls'];
+				if ( $GLOBALS['wp_auto_test_delete_option_exception'] instanceof \Throwable ) {
+					$exception = $GLOBALS['wp_auto_test_delete_option_exception'];
+					$GLOBALS['wp_auto_test_delete_option_exception'] = null;
+					throw $exception;
+				}
+				if ( $GLOBALS['wp_auto_test_fail_delete_option'] ) {
+					$this->last_error = (string) $GLOBALS['wp_auto_test_db_last_error'];
+					return 0;
+				}
+
+				$name       = (string) ( $args[0] ?? '' );
+				$serialized = (string) ( $args[1] ?? '' );
+				if ( ! array_key_exists( $name, $GLOBALS['wp_auto_test_options'] ) || maybe_serialize( $GLOBALS['wp_auto_test_options'][ $name ] ) !== $serialized ) {
+					$this->last_error = (string) $GLOBALS['wp_auto_test_db_last_error'];
+					return 0;
+				}
+
+				unset( $GLOBALS['wp_auto_test_options'][ $name ], $GLOBALS['wp_auto_test_option_autoload'][ $name ] );
+				$this->rows_affected = 1;
+				$this->last_error    = (string) $GLOBALS['wp_auto_test_db_last_error'];
+				return 1;
+			}
+
+			$this->last_error = 'unsupported query';
+			return false;
+		}
+	}
+	$GLOBALS['wpdb'] = new wpdb();
 	class WP_Term {
 		public int $term_id;
 		public string $name;
@@ -247,6 +377,92 @@ namespace {
 	function current_time( string $type, bool $gmt = false ): string {
 		unset( $type, $gmt );
 		return '2026-09-01 12:00:00';
+	}
+
+	function maybe_serialize( $value ): string {
+		return is_array( $value ) || is_object( $value ) || is_bool( $value ) || null === $value
+			? serialize( $value )
+			: (string) $value;
+	}
+
+	function maybe_unserialize( $value ) {
+		if ( ! is_string( $value ) || ! preg_match( '/^(a|O|s|b|i|d|N):/', $value ) ) {
+			return $value;
+		}
+
+		$unserialized = @unserialize( $value );
+		return false === $unserialized && 'b:0;' !== $value ? $value : $unserialized;
+	}
+
+	function wp_generate_uuid4(): string {
+		++$GLOBALS['wp_auto_test_uuid_counter'];
+		return sprintf( '12345678-1234-4%03d-8234-%012d', $GLOBALS['wp_auto_test_uuid_counter'] % 1000, $GLOBALS['wp_auto_test_uuid_counter'] );
+	}
+
+	function wp_cache_delete( $key, $group = '' ): bool {
+		if ( $GLOBALS['wp_auto_test_cache_delete_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_cache_delete_exception'];
+			$GLOBALS['wp_auto_test_cache_delete_exception'] = null;
+			throw $exception;
+		}
+
+		$GLOBALS['wp_auto_test_cache_delete_history'][] = array( $key, $group );
+		if ( 'options' === $group ) {
+			if ( 'notoptions' === $key ) {
+				$GLOBALS['wp_auto_test_notoptions_cache'] = null;
+			} elseif ( 'alloptions' === $key ) {
+				$GLOBALS['wp_auto_test_alloptions_cache'] = null;
+			} else {
+				unset( $GLOBALS['wp_auto_test_option_cache'][ $key ] );
+			}
+		}
+
+		return null !== $GLOBALS['wp_auto_test_cache_delete_return_override']
+			? (bool) $GLOBALS['wp_auto_test_cache_delete_return_override']
+			: true;
+	}
+
+	function wp_cache_get( $key, $group = '', $force = false, &$found = null ) {
+		unset( $force );
+		$found = false;
+		if ( 'options' !== $group ) {
+			return false;
+		}
+		if ( 'notoptions' === $key ) {
+			$found = null !== $GLOBALS['wp_auto_test_notoptions_cache'];
+			return $GLOBALS['wp_auto_test_notoptions_cache'];
+		}
+		if ( 'alloptions' === $key ) {
+			$found = null !== $GLOBALS['wp_auto_test_alloptions_cache'];
+			return $GLOBALS['wp_auto_test_alloptions_cache'];
+		}
+		if ( array_key_exists( $key, $GLOBALS['wp_auto_test_option_cache'] ) ) {
+			$found = true;
+			return $GLOBALS['wp_auto_test_option_cache'][ $key ];
+		}
+
+		return false;
+	}
+
+	function wp_cache_set( $key, $value, $group = '', $expire = 0 ): bool {
+		unset( $expire );
+		if ( 'options' === $group ) {
+			if ( 'notoptions' === $key ) {
+				$GLOBALS['wp_auto_test_notoptions_cache'] = $value;
+			} elseif ( 'alloptions' === $key ) {
+				$GLOBALS['wp_auto_test_alloptions_cache'] = $value;
+			} else {
+				$GLOBALS['wp_auto_test_option_cache'][ $key ] = $value;
+			}
+		}
+		return true;
+	}
+
+	function wp_cache_add( $key, $value, $group = '', $expire = 0 ): bool {
+		unset( $expire );
+		$found = false;
+		wp_cache_get( $key, $group, false, $found );
+		return $found ? false : wp_cache_set( $key, $value, $group );
 	}
 
 	function wp_slash( $value ) {
@@ -427,6 +643,11 @@ namespace {
 		}
 
 		$GLOBALS['wp_auto_test_post_meta'][ $post_id ][ $meta_key ] = $value;
+		if ( $GLOBALS['wp_auto_test_update_meta_exception_after_write'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_update_meta_exception_after_write'];
+			$GLOBALS['wp_auto_test_update_meta_exception_after_write'] = null;
+			throw $exception;
+		}
 		return true;
 	}
 
@@ -452,6 +673,27 @@ namespace {
 	}
 
 	function get_option( string $option, $default = false ) {
+		if ( $GLOBALS['wp_auto_test_use_option_cache'] ) {
+			if ( is_array( $GLOBALS['wp_auto_test_alloptions_cache'] ) && array_key_exists( $option, $GLOBALS['wp_auto_test_alloptions_cache'] ) ) {
+				return $GLOBALS['wp_auto_test_alloptions_cache'][ $option ];
+			}
+			if ( is_array( $GLOBALS['wp_auto_test_notoptions_cache'] ) && in_array( $option, $GLOBALS['wp_auto_test_notoptions_cache'], true ) ) {
+				return $default;
+			}
+			if ( array_key_exists( $option, $GLOBALS['wp_auto_test_option_cache'] ) ) {
+				return $GLOBALS['wp_auto_test_option_cache'][ $option ];
+			}
+			if ( array_key_exists( $option, $GLOBALS['wp_auto_test_options'] ) ) {
+				wp_cache_set( $option, $GLOBALS['wp_auto_test_options'][ $option ], 'options' );
+				return $GLOBALS['wp_auto_test_options'][ $option ];
+			}
+			if ( ! is_array( $GLOBALS['wp_auto_test_notoptions_cache'] ) ) {
+				$GLOBALS['wp_auto_test_notoptions_cache'] = array();
+			}
+			$GLOBALS['wp_auto_test_notoptions_cache'][] = $option;
+			return $default;
+		}
+
 		return array_key_exists( $option, $GLOBALS['wp_auto_test_options'] )
 			? $GLOBALS['wp_auto_test_options'][ $option ]
 			: ( 'permalink_structure' === $option ? $GLOBALS['wp_auto_test_site_info']['permalink_structure'] : $default );
@@ -917,6 +1159,7 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Content/ContentReadService.php';
 	require_once dirname( __DIR__ ) . '/src/Content/CreateDraftContract.php';
 	require_once dirname( __DIR__ ) . '/src/Content/UpdateDraftContract.php';
+	require_once dirname( __DIR__ ) . '/src/Content/AtomicOwnershipStore.php';
 	require_once dirname( __DIR__ ) . '/src/Content/CreateIdempotencyStore.php';
 	require_once dirname( __DIR__ ) . '/src/Content/MutationAuditStore.php';
 	require_once dirname( __DIR__ ) . '/src/Content/ContentMutationService.php';

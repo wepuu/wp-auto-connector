@@ -18,26 +18,43 @@ final class CreateIdempotencyStoreTest extends TestCase {
 	 * Reset option fixtures.
 	 */
 	protected function setUp(): void {
-		$GLOBALS['wp_auto_test_options']                    = array();
-		$GLOBALS['wp_auto_test_option_autoload']            = array();
-		$GLOBALS['wp_auto_test_fail_update_option']         = false;
-		$GLOBALS['wp_auto_test_fail_update_option_on_call'] = null;
-		$GLOBALS['wp_auto_test_update_option_calls']        = 0;
+		$GLOBALS['wp_auto_test_options']                        = array();
+		$GLOBALS['wp_auto_test_option_autoload']                = array();
+		$GLOBALS['wp_auto_test_option_cache']                   = array();
+		$GLOBALS['wp_auto_test_notoptions_cache']               = null;
+		$GLOBALS['wp_auto_test_alloptions_cache']               = null;
+		$GLOBALS['wp_auto_test_use_option_cache']               = false;
+		$GLOBALS['wp_auto_test_cache_delete_exception']         = null;
+		$GLOBALS['wp_auto_test_db_query_exception']             = null;
+		$GLOBALS['wp_auto_test_db_query_after_write_exception'] = null;
+		$GLOBALS['wp_auto_test_db_last_error']                  = '';
+		$GLOBALS['wp_auto_test_db_return_override']             = null;
+		$GLOBALS['wp_auto_test_db_suppress_state']              = false;
+		$GLOBALS['wp_auto_test_db_suppress_history']            = array();
+		$GLOBALS['wp_auto_test_db_prepared_queries']            = array();
+		$GLOBALS['wp_auto_test_db_query_calls']                 = 0;
+		$GLOBALS['wp_auto_test_delete_option_calls']            = 0;
+		$GLOBALS['wp_auto_test_fail_delete_option']             = false;
+		$GLOBALS['wp_auto_test_delete_option_exception']        = null;
+		$GLOBALS['wp_auto_test_fail_update_option']             = false;
+		$GLOBALS['wp_auto_test_fail_update_option_on_call']     = null;
+		$GLOBALS['wp_auto_test_update_option_calls']            = 0;
 	}
 
 	/**
 	 * Claims are durable and non-autoloaded.
 	 */
 	public function test_claim_is_durable_and_non_autoloaded(): void {
-		$store = new CreateIdempotencyStore();
-		$claim = $store->claim( 'wp-auto/post-create-draft', 7, 'abc12345', 'fingerprint' );
+		$store       = new CreateIdempotencyStore();
+		$fingerprint = str_repeat( 'a', 64 );
+		$claim       = $store->claim( 'wp-auto/post-create-draft', 7, 'abc12345', $fingerprint );
 		self::assertSame( 'claimed', $claim['status'] );
 		self::assertStringStartsWith( 'wp_auto_connector_idempotency_', $claim['name'] );
-		self::assertSame( false, $GLOBALS['wp_auto_test_option_autoload'][ $claim['name'] ] );
+		self::assertSame( 'off', $GLOBALS['wp_auto_test_option_autoload'][ $claim['name'] ] );
 		self::assertArrayNotHasKey( 'key', $claim['record'] );
 		self::assertArrayNotHasKey( 'content', $claim['record'] );
 
-		$again = $store->claim( 'wp-auto/post-create-draft', 7, 'abc12345', 'fingerprint' );
+		$again = $store->claim( 'wp-auto/post-create-draft', 7, 'abc12345', $fingerprint );
 		self::assertSame( 'existing', $again['status'] );
 		self::assertSame( $claim['record'], $again['record'] );
 	}
@@ -46,9 +63,10 @@ final class CreateIdempotencyStoreTest extends TestCase {
 	 * Scope changes produce independent claims.
 	 */
 	public function test_different_scope_keys_produce_independent_claims(): void {
-		$store  = new CreateIdempotencyStore();
-		$first  = $store->claim( 'wp-auto/post-create-draft', 7, 'abc12345', 'one' );
-		$second = $store->claim( 'wp-auto/post-create-draft', 8, 'abc12345', 'one' );
+		$store       = new CreateIdempotencyStore();
+		$fingerprint = str_repeat( 'b', 64 );
+		$first       = $store->claim( 'wp-auto/post-create-draft', 7, 'abc12345', $fingerprint );
+		$second      = $store->claim( 'wp-auto/post-create-draft', 8, 'abc12345', $fingerprint );
 		self::assertNotSame( $first['name'], $second['name'] );
 	}
 
@@ -57,7 +75,7 @@ final class CreateIdempotencyStoreTest extends TestCase {
 	 */
 	public function test_claim_state_transitions_are_ordered_and_non_autoloaded(): void {
 		$store = new CreateIdempotencyStore();
-		$claim = $store->claim( 'wp-auto/post-create-draft', 7, 'abc12345', 'fingerprint' );
+		$claim = $store->claim( 'wp-auto/post-create-draft', 7, 'abc12345', str_repeat( 'c', 64 ) );
 		$name  = $claim['name'];
 
 		self::assertSame( 'in_progress', $claim['record']['state'] );
@@ -74,7 +92,7 @@ final class CreateIdempotencyStoreTest extends TestCase {
 		$record = $GLOBALS['wp_auto_test_options'][ $name ];
 		self::assertSame( 'completed', $record['state'] );
 		self::assertSame( 123, $record['target_id'] );
-		self::assertSame( false, $GLOBALS['wp_auto_test_option_autoload'][ $name ] );
+		self::assertSame( 'off', $GLOBALS['wp_auto_test_option_autoload'][ $name ] );
 		self::assertArrayNotHasKey( 'key', $record );
 	}
 }

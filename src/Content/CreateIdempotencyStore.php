@@ -18,6 +18,22 @@ final class CreateIdempotencyStore {
 	private const OPTION_PREFIX = 'wp_auto_connector_idempotency_';
 
 	/**
+	 * Atomic ownership primitive for initial claims.
+	 *
+	 * @var AtomicOwnershipStore
+	 */
+	private AtomicOwnershipStore $ownership;
+
+	/**
+	 * Create the store with an optional ownership dependency for tests.
+	 *
+	 * @param AtomicOwnershipStore|null $ownership Atomic ownership store.
+	 */
+	public function __construct( ?AtomicOwnershipStore $ownership = null ) {
+		$this->ownership = $ownership ?? new AtomicOwnershipStore();
+	}
+
+	/**
 	 * Atomically claim a scope or return the existing record.
 	 *
 	 * @param string $ability Ability name.
@@ -40,7 +56,8 @@ final class CreateIdempotencyStore {
 			'updated_gmt'   => $now,
 		);
 
-		if ( add_option( $option_name, $record, '', false ) ) {
+		$acquired = $this->ownership->acquire( $option_name, $record );
+		if ( 'acquired' === ( $acquired['status'] ?? null ) ) {
 			return array(
 				'status' => 'claimed',
 				'name'   => $option_name,
@@ -48,8 +65,7 @@ final class CreateIdempotencyStore {
 			);
 		}
 
-		$existing = get_option( $option_name, null );
-		if ( ! is_array( $existing ) ) {
+		if ( 'occupied' !== ( $acquired['status'] ?? null ) || ! isset( $acquired['existing_value'] ) || ! is_array( $acquired['existing_value'] ) ) {
 			return array(
 				'status' => 'unresolved',
 				'name'   => $option_name,
@@ -60,7 +76,7 @@ final class CreateIdempotencyStore {
 		return array(
 			'status' => 'existing',
 			'name'   => $option_name,
-			'record' => $existing,
+			'record' => $acquired['existing_value'],
 		);
 	}
 
@@ -120,12 +136,12 @@ final class CreateIdempotencyStore {
 	/**
 	 * Release a claim only after Core has proven that no object was created.
 	 *
-	 * @param string $option_name Option name.
+	 * @param string               $option_name Option name.
+	 * @param array<string, mixed> $expected_record Exact initial record.
+	 * @return array<string, string>
 	 */
-	public function release( string $option_name ): bool {
-		delete_option( $option_name );
-
-		return null === get_option( $option_name, null );
+	public function release( string $option_name, array $expected_record ): array {
+		return $this->ownership->release( $option_name, $expected_record );
 	}
 
 	/**
