@@ -158,10 +158,11 @@ final class ContentMutationService {
 		if ( 'unresolved' === $claim['status'] ) {
 			return $this->uncertain();
 		}
-		if ( ! isset( $claim['name'], $claim['record'] ) || ! is_string( $claim['name'] ) || ! is_array( $claim['record'] ) || ! $this->valid_record( $claim['record'] ) ) {
+		if ( ! isset( $claim['name'], $claim['record'] ) || ! is_string( $claim['name'] ) || ! is_array( $claim['record'] ) ) {
 			return $this->uncertain();
 		}
 
+		$authorization_failed = false;
 		try {
 			$option_name = $claim['name'];
 			$record      = $claim['record'];
@@ -172,12 +173,45 @@ final class ContentMutationService {
 
 			add_filter( 'wp_insert_post_data', $guard, PHP_INT_MAX, 4 );
 			try {
-				$post_id = wp_insert_post( $insert, true, true );
+				$actor_before = get_current_user_id();
+				if ( $actor_id !== $actor_before ) {
+					$authorization_failed = true;
+				} else {
+					$post_type_object  = get_post_type_object( $post_type );
+					$capability_passes = false;
+					if ( $post_type_object && isset( $post_type_object->cap->create_posts ) && is_string( $post_type_object->cap->create_posts ) ) {
+						$capability_passes = true === current_user_can( $post_type_object->cap->create_posts );
+					}
+
+					if ( ! $capability_passes ) {
+						$authorization_failed = true;
+					} else {
+						$actor_after = get_current_user_id();
+						if ( $actor_id !== $actor_after ) {
+							$authorization_failed = true;
+						} else {
+							$post_id = wp_insert_post( $insert, true, true );
+						}
+					}
+				}
 			} finally {
 				remove_filter( 'wp_insert_post_data', $guard, PHP_INT_MAX );
 			}
 		} catch ( \Throwable ) {
 			return $this->uncertain();
+		}
+
+		if ( $authorization_failed ) {
+			try {
+				$released = $this->idempotency->release( $option_name, $record );
+			} catch ( \Throwable ) {
+				return $this->uncertain();
+			}
+			if ( ! is_array( $released ) || 'released' !== ( $released['status'] ?? null ) ) {
+				return $this->uncertain();
+			}
+
+			return $this->create_failed();
 		}
 
 		if ( is_wp_error( $post_id ) || ! is_int( $post_id ) || $post_id < 1 ) {
@@ -251,59 +285,56 @@ final class ContentMutationService {
 			return $normalized;
 		}
 
-		$actor_id = get_current_user_id();
-		if ( $actor_id < 1 || ! $this->can_update( $post_type ) ) {
-			return $this->content_not_found();
-		}
-
-		$initial = $this->authorized_update_target( $normalized['id'], $post_type );
-		if ( is_wp_error( $initial ) ) {
-			return $initial;
-		}
-		if ( 'draft' !== $initial->post_status ) {
-			return $this->content_status_conflict();
-		}
-		if ( $this->is_empty_content_after_update( $initial, $normalized ) ) {
-			return $this->invalid_request();
-		}
-
-		// Re-fetch immediately before the write so authorization, status, content,
-		// and the raw concurrency token are evaluated against the latest object.
-		$current = $this->authorized_update_target( $normalized['id'], $post_type );
-		if ( is_wp_error( $current ) ) {
-			return $current;
-		}
-		if ( 'draft' !== $current->post_status ) {
-			return $this->content_status_conflict();
-		}
-		if ( $this->is_empty_content_after_update( $current, $normalized ) ) {
-			return $this->invalid_request();
-		}
-		if ( $normalized['expected_modified_gmt'] !== (string) $current->post_modified_gmt ) {
-			return $this->content_conflict();
-		}
-
-		$snapshot = $this->protected_snapshot( $current, $normalized );
-		$token    = hash( 'sha256', $post_type . '|' . $current->ID . '|' . microtime( true ) . '|' . wp_rand() );
-		$update   = $this->build_update_args( $current->ID, $normalized, $token );
-		$guard    = $this->build_update_invariant_guard( $current->ID, $snapshot, $token );
-
-		add_filter( 'wp_insert_post_data', $guard, PHP_INT_MAX, 4 );
 		try {
+			$actor_id = get_current_user_id();
+			if ( $actor_id < 1 || ! $this->can_update( $post_type ) ) {
+				return $this->content_not_found();
+			}
+
+			$initial = $this->authorized_update_target( $normalized['id'], $post_type );
+			if ( is_wp_error( $initial ) ) {
+				return $initial;
+			}
+			if ( 'draft' !== $initial->post_status ) {
+				return $this->content_status_conflict();
+			}
+			if ( $this->is_empty_content_after_update( $initial, $normalized ) ) {
+				return $this->invalid_request();
+			}
+
+			// Re-fetch immediately before the write so authorization, status, content,
+			// and the raw concurrency token are evaluated against the latest object.
+			$current = $this->authorized_update_target( $normalized['id'], $post_type );
+			if ( is_wp_error( $current ) ) {
+				return $current;
+			}
+			if ( 'draft' !== $current->post_status ) {
+				return $this->content_status_conflict();
+			}
+			if ( $this->is_empty_content_after_update( $current, $normalized ) ) {
+				return $this->invalid_request();
+			}
+			if ( $normalized['expected_modified_gmt'] !== (string) $current->post_modified_gmt ) {
+				return $this->content_conflict();
+			}
+
+			$snapshot = $this->protected_snapshot( $current, $normalized );
+			$token    = hash( 'sha256', $post_type . '|' . $current->ID . '|' . microtime( true ) . '|' . wp_rand() );
+			$update   = $this->build_update_args( $current->ID, $normalized, $token );
+			$guard    = $this->build_update_invariant_guard( $current->ID, $snapshot, $token );
+			$result   = null;
+
+			add_filter( 'wp_insert_post_data', $guard, PHP_INT_MAX, 4 );
 			try {
 				$result = wp_update_post( $update, true, true );
-			} catch ( \Throwable ) {
-				return $this->uncertain();
+			} finally {
+				remove_filter( 'wp_insert_post_data', $guard, PHP_INT_MAX );
 			}
-		} finally {
-			remove_filter( 'wp_insert_post_data', $guard, PHP_INT_MAX );
-		}
 
-		if ( is_wp_error( $result ) || ! is_int( $result ) || $current->ID !== $result ) {
-			return $this->update_failed();
-		}
+			if ( is_wp_error( $result ) || ! is_int( $result ) || $current->ID !== $result ) {
+				return $this->update_failed();
+			}
 
-		try {
 			$final = get_post( $current->ID );
 			if ( ! $final instanceof WP_Post || $snapshot !== $this->protected_snapshot( $final, $normalized ) ) {
 				return $this->uncertain();
@@ -691,7 +722,7 @@ final class ContentMutationService {
 	 * @return array<string, mixed>|WP_Error
 	 */
 	private function handle_existing_claim( string $option_name, $record, string $post_type, string $ability, int $actor_id, string $fingerprint ) {
-		if ( ! is_array( $record ) || ! $this->valid_record( $record ) ) {
+		if ( ! is_array( $record ) ) {
 			return $this->uncertain();
 		}
 
@@ -725,28 +756,6 @@ final class ContentMutationService {
 		}
 
 		return $this->output( $post, $post_type, true );
-	}
-
-	/**
-	 * Validate the fixed persisted claim shape.
-	 *
-	 * @param array<string, mixed> $record Stored record.
-	 */
-	private function valid_record( array $record ): bool {
-		$required = array( 'version', 'actor_user_id', 'ability', 'fingerprint', 'state', 'target_id', 'created_gmt', 'updated_gmt' );
-		return array_diff( $required, array_keys( $record ) ) === array()
-			&& array_diff( array_keys( $record ), $required ) === array()
-			&& is_int( $record['version'] )
-			&& 1 === $record['version']
-			&& is_int( $record['actor_user_id'] )
-			&& is_string( $record['ability'] )
-			&& is_string( $record['fingerprint'] )
-			&& in_array( $record['state'], array( 'in_progress', 'audit_recorded', 'completed' ), true )
-			&& is_int( $record['target_id'] )
-			&& $record['target_id'] >= 0
-			&& ( 'in_progress' === $record['state'] || $record['target_id'] > 0 )
-			&& is_string( $record['created_gmt'] )
-			&& is_string( $record['updated_gmt'] );
 	}
 
 	/**

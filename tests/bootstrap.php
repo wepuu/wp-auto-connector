@@ -18,7 +18,19 @@ namespace {
 	$GLOBALS['wp_auto_test_registered_category'] = null;
 	$GLOBALS['wp_auto_test_can_read']            = false;
 	$GLOBALS['wp_auto_test_logged_in']           = false;
+	$GLOBALS['wp_auto_test_is_user_logged_in_calls'] = 0;
+	$GLOBALS['wp_auto_test_mcp_current_user_can_calls'] = 0;
 	$GLOBALS['wp_auto_test_is_ssl']              = true;
+	$GLOBALS['wp_auto_test_environment_type']    = 'production';
+	$GLOBALS['wp_auto_test_application_passwords_available'] = false;
+	$GLOBALS['wp_auto_test_current_user_id_calls'] = 0;
+	$GLOBALS['wp_auto_test_before_current_user_id'] = null;
+	$GLOBALS['wp_auto_test_current_user_can_calls'] = 0;
+	$GLOBALS['wp_auto_test_before_current_user_can'] = null;
+	$GLOBALS['wp_auto_test_current_user_can_exception'] = null;
+	$GLOBALS['wp_auto_test_get_post_type_object_exception'] = null;
+	$GLOBALS['wp_auto_test_add_filter_exception'] = null;
+	$GLOBALS['wp_auto_test_remove_filter_exception'] = null;
 	$GLOBALS['wp_auto_test_current_user_id']      = 0;
 	$GLOBALS['wp_auto_test_capabilities']         = array();
 	$GLOBALS['wp_auto_test_posts']                = array();
@@ -374,6 +386,22 @@ namespace {
 		return 1;
 	}
 
+	function is_ssl(): bool {
+		return $GLOBALS['wp_auto_test_is_ssl'];
+	}
+
+	function wp_get_environment_type(): string {
+		return $GLOBALS['wp_auto_test_environment_type'];
+	}
+
+	function wp_is_application_passwords_supported(): bool {
+		return is_ssl() || 'local' === wp_get_environment_type();
+	}
+
+	function wp_is_application_passwords_available(): bool {
+		return $GLOBALS['wp_auto_test_application_passwords_available'];
+	}
+
 	function current_time( string $type, bool $gmt = false ): string {
 		unset( $type, $gmt );
 		return '2026-09-01 12:00:00';
@@ -490,6 +518,11 @@ namespace {
 	}
 
 	function add_filter( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
+		if ( $GLOBALS['wp_auto_test_add_filter_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_add_filter_exception'];
+			$GLOBALS['wp_auto_test_add_filter_exception'] = null;
+			throw $exception;
+		}
 		$GLOBALS['wp_auto_test_filters'][ $hook ][ $priority ][] = array(
 			'callback'      => $callback,
 			'accepted_args' => $accepted_args,
@@ -497,6 +530,11 @@ namespace {
 	}
 
 	function remove_filter( string $hook, callable $callback, int $priority = 10 ): bool {
+		if ( $GLOBALS['wp_auto_test_remove_filter_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_remove_filter_exception'];
+			$GLOBALS['wp_auto_test_remove_filter_exception'] = null;
+			throw $exception;
+		}
 		if ( empty( $GLOBALS['wp_auto_test_filters'][ $hook ][ $priority ] ) ) {
 			return false;
 		}
@@ -832,6 +870,11 @@ namespace {
 	}
 
 	function get_post_type_object( string $post_type ) {
+		if ( $GLOBALS['wp_auto_test_get_post_type_object_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_get_post_type_object_exception'];
+			$GLOBALS['wp_auto_test_get_post_type_object_exception'] = null;
+			throw $exception;
+		}
 		if ( ! in_array( $post_type, array( 'post', 'page' ), true ) ) {
 			return null;
 		}
@@ -852,6 +895,11 @@ namespace {
 	}
 
 	function get_current_user_id(): int {
+		++$GLOBALS['wp_auto_test_current_user_id_calls'];
+		if ( is_callable( $GLOBALS['wp_auto_test_before_current_user_id'] ) ) {
+			$callback = $GLOBALS['wp_auto_test_before_current_user_id'];
+			$callback( $GLOBALS['wp_auto_test_current_user_id_calls'] );
+		}
 		return $GLOBALS['wp_auto_test_current_user_id'];
 	}
 
@@ -1083,6 +1131,16 @@ namespace WPAuto\Connector\Taxonomy {
 
 namespace WPAuto\Connector\Content {
 	function current_user_can( string $capability, int $object_id = 0 ): bool {
+		++$GLOBALS['wp_auto_test_current_user_can_calls'];
+		if ( $GLOBALS['wp_auto_test_current_user_can_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_current_user_can_exception'];
+			$GLOBALS['wp_auto_test_current_user_can_exception'] = null;
+			throw $exception;
+		}
+		if ( is_callable( $GLOBALS['wp_auto_test_before_current_user_can'] ) ) {
+			$callback = $GLOBALS['wp_auto_test_before_current_user_can'];
+			$callback( $capability, $GLOBALS['wp_auto_test_current_user_can_calls'] );
+		}
 		return \wp_auto_test_user_can( $capability, $object_id );
 	}
 
@@ -1136,10 +1194,12 @@ namespace WPAuto\Connector\Mcp {
 	}
 
 	function is_user_logged_in(): bool {
+		++$GLOBALS['wp_auto_test_is_user_logged_in_calls'];
 		return $GLOBALS['wp_auto_test_logged_in'];
 	}
 
 	function current_user_can( string $capability ): bool {
+		++$GLOBALS['wp_auto_test_mcp_current_user_can_calls'];
 		return 'read' === $capability && $GLOBALS['wp_auto_test_can_read'];
 	}
 

@@ -44,6 +44,14 @@ final class ContentMutationServiceTest extends TestCase {
 			'edit_pages' => true,
 		);
 		$GLOBALS['wp_auto_test_current_user_id']                   = 7;
+		$GLOBALS['wp_auto_test_current_user_id_calls']             = 0;
+		$GLOBALS['wp_auto_test_before_current_user_id']            = null;
+		$GLOBALS['wp_auto_test_current_user_can_calls']            = 0;
+		$GLOBALS['wp_auto_test_before_current_user_can']           = null;
+		$GLOBALS['wp_auto_test_current_user_can_exception']        = null;
+		$GLOBALS['wp_auto_test_get_post_type_object_exception']    = null;
+		$GLOBALS['wp_auto_test_add_filter_exception']              = null;
+		$GLOBALS['wp_auto_test_remove_filter_exception']           = null;
 		$GLOBALS['wp_auto_test_next_post_id']                      = 1000;
 		$GLOBALS['wp_auto_test_last_insert_args']                  = array();
 		$GLOBALS['wp_auto_test_insert_result']                     = null;
@@ -116,6 +124,100 @@ final class ContentMutationServiceTest extends TestCase {
 		self::assertSame( 'page', $result['type'] );
 		self::assertSame( 0, $GLOBALS['wp_auto_test_posts'][0]->post_parent );
 		self::assertSame( 0, $GLOBALS['wp_auto_test_last_insert_args']['post_parent'] );
+	}
+
+	/** Actor changes before the adjacent capability check, so Core Create is forbidden. */
+	public function test_adjacent_create_authorization_rejects_actor_changed_before_capability(): void {
+		$GLOBALS['wp_auto_test_before_current_user_id'] = static function ( int $call ): void {
+			if ( 2 === $call ) {
+				$GLOBALS['wp_auto_test_current_user_id'] = 8;
+			}
+		};
+
+		$result = ( new ContentMutationService() )->create_post_draft( $this->create_input( 'actorbef1' ) );
+
+		self::assertSame( 'wp_auto_content_create_failed', $result->get_error_code() );
+		self::assertSame( 0, $GLOBALS['wp_auto_test_insert_calls'] );
+		self::assertSame( array(), $GLOBALS['wp_auto_test_options'] );
+	}
+
+	/** Actor changes before capability and the adjacent capability check is short-circuited. */
+	public function test_adjacent_actor_mismatch_skips_capability_and_releases_claim(): void {
+		$GLOBALS['wp_auto_test_before_current_user_id']  = static function ( int $call ): void {
+			if ( 2 === $call ) {
+				$GLOBALS['wp_auto_test_current_user_id'] = 8;
+			}
+		};
+		$GLOBALS['wp_auto_test_before_current_user_can'] = static function ( string $capability, int $call ): void {
+			if ( 2 === $call ) {
+				throw new \RuntimeException( 'sensitive-internal-detail' );
+			}
+		};
+
+		$result = ( new ContentMutationService() )->create_post_draft( $this->create_input( 'actorbyp1' ) );
+
+		self::assertInstanceOf( WP_Error::class, $result );
+		self::assertSame( 'wp_auto_content_create_failed', $result->get_error_code() );
+		self::assertSame( 500, $result->get_error_data()['status'] );
+		self::assertSame( 0, $GLOBALS['wp_auto_test_insert_calls'] );
+		self::assertSame( 1, $GLOBALS['wp_auto_test_current_user_can_calls'] );
+		self::assertSame( array(), $GLOBALS['wp_auto_test_options'] );
+		self::assertStringNotContainsString( 'sensitive-internal-detail', $result->get_error_message() );
+	}
+
+	/** A capability callback that changes identity is caught by actor_after. */
+	public function test_adjacent_create_authorization_rejects_actor_changed_during_capability(): void {
+		$GLOBALS['wp_auto_test_before_current_user_can'] = static function ( string $capability, int $call ): void {
+			if ( 'edit_posts' === $capability && 2 === $call ) {
+				$GLOBALS['wp_auto_test_current_user_id'] = 8;
+			}
+		};
+
+		$result = ( new ContentMutationService() )->create_post_draft( $this->create_input( 'actordur1' ) );
+
+		self::assertSame( 'wp_auto_content_create_failed', $result->get_error_code() );
+		self::assertSame( 0, $GLOBALS['wp_auto_test_insert_calls'] );
+		self::assertSame( array(), $GLOBALS['wp_auto_test_options'] );
+	}
+
+	/** A stable actor and passing actual post-type capability permit exactly one Core Create. */
+	public function test_adjacent_create_authorization_allows_stable_actor_and_capability(): void {
+		$result = ( new ContentMutationService() )->create_post_draft( $this->create_input( 'actorok01' ) );
+
+		self::assertIsArray( $result );
+		self::assertSame( 1, $GLOBALS['wp_auto_test_insert_calls'] );
+		self::assertSame( 2, $GLOBALS['wp_auto_test_current_user_can_calls'] );
+	}
+
+	/** A capability revoked after claim is safely released and reported as Create Failed. */
+	public function test_adjacent_capability_loss_releases_claim_without_core_create(): void {
+		$GLOBALS['wp_auto_test_before_current_user_can'] = static function ( string $capability, int $call ): void {
+			if ( 'edit_posts' === $capability && 2 === $call ) {
+				$GLOBALS['wp_auto_test_capabilities']['edit_posts'] = false;
+			}
+		};
+
+		$result = ( new ContentMutationService() )->create_post_draft( $this->create_input( 'caploss01' ) );
+
+		self::assertSame( 'wp_auto_content_create_failed', $result->get_error_code() );
+		self::assertSame( 0, $GLOBALS['wp_auto_test_insert_calls'] );
+		self::assertSame( array(), $GLOBALS['wp_auto_test_posts'] );
+		self::assertSame( array(), $GLOBALS['wp_auto_test_options'] );
+	}
+
+	/** A failed ownership release after deterministic authorization loss is uncertain. */
+	public function test_adjacent_capability_loss_with_not_owner_release_is_uncertain(): void {
+		$GLOBALS['wp_auto_test_before_current_user_can'] = static function ( string $capability, int $call ): void {
+			if ( 'edit_posts' === $capability && 2 === $call ) {
+				$GLOBALS['wp_auto_test_capabilities']['edit_posts'] = false;
+				$GLOBALS['wp_auto_test_options']                    = array();
+			}
+		};
+
+		$result = ( new ContentMutationService() )->create_post_draft( $this->create_input( 'capnotow' ) );
+
+		self::assertSame( 'wp_auto_mutation_state_uncertain', $result->get_error_code() );
+		self::assertSame( 0, $GLOBALS['wp_auto_test_insert_calls'] );
 	}
 
 	/**

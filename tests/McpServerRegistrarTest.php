@@ -34,9 +34,14 @@ final class McpServerRegistrarTest extends TestCase {
 	 * Reset WordPress stub state.
 	 */
 	protected function setUp(): void {
-		$GLOBALS['wp_auto_test_hooks']     = array();
-		$GLOBALS['wp_auto_test_logged_in'] = false;
-		$GLOBALS['wp_auto_test_can_read']  = false;
+		$GLOBALS['wp_auto_test_hooks']                           = array();
+		$GLOBALS['wp_auto_test_logged_in']                       = false;
+		$GLOBALS['wp_auto_test_can_read']                        = false;
+		$GLOBALS['wp_auto_test_is_ssl']                          = true;
+		$GLOBALS['wp_auto_test_environment_type']                = 'production';
+		$GLOBALS['wp_auto_test_application_passwords_available'] = false;
+		$GLOBALS['wp_auto_test_is_user_logged_in_calls']         = 0;
+		$GLOBALS['wp_auto_test_mcp_current_user_can_calls']      = 0;
 	}
 
 	/**
@@ -122,5 +127,32 @@ final class McpServerRegistrarTest extends TestCase {
 
 		$GLOBALS['wp_auto_test_can_read'] = true;
 		self::assertTrue( $registrar->check_transport_permission() );
+	}
+
+	/** Unsupported non-local transport is denied before identity/capability checks. */
+	public function test_transport_denies_unsupported_transport_even_when_availability_is_true(): void {
+		$GLOBALS['wp_auto_test_is_ssl']                          = false;
+		$GLOBALS['wp_auto_test_environment_type']                = 'production';
+		$GLOBALS['wp_auto_test_application_passwords_available'] = true;
+		$GLOBALS['wp_auto_test_logged_in']                       = true;
+		$GLOBALS['wp_auto_test_can_read']                        = true;
+
+		$result = ( new McpServerRegistrar() )->check_transport_permission();
+
+		self::assertInstanceOf( WP_Error::class, $result );
+		self::assertSame( 'wp_auto_connector_authentication_required', $result->get_error_code() );
+		self::assertSame( 401, $result->get_error_data()['status'] );
+		self::assertSame( 0, $GLOBALS['wp_auto_test_is_user_logged_in_calls'] );
+		self::assertSame( 0, $GLOBALS['wp_auto_test_mcp_current_user_can_calls'] );
+	}
+
+	/** Local plain HTTP remains usable for an authenticated read-capable identity. */
+	public function test_transport_allows_local_plain_http(): void {
+		$GLOBALS['wp_auto_test_is_ssl']           = false;
+		$GLOBALS['wp_auto_test_environment_type'] = 'local';
+		$GLOBALS['wp_auto_test_logged_in']        = true;
+		$GLOBALS['wp_auto_test_can_read']         = true;
+
+		self::assertTrue( ( new McpServerRegistrar() )->check_transport_permission() );
 	}
 }
