@@ -1,6 +1,6 @@
 # ADR-004: Uninstall Private-State Cleanup
 
-- Status: **Accepted - Phase 1.3.3 Uninstall Private-State Cleanup**
+- Status: **Accepted, implemented, and included in the Phase 1.3.3 seal**
 - Date: 2026-09-04
 - Decision scope: explicit uninstall cleanup of private mutation state and the three uninstall-only read-only SQL families
 
@@ -8,9 +8,11 @@
 
 This is the accepted normative Architecture Decision Record for Phase 1.3.3. It records the approved Policy A uninstall boundary and the narrowly scoped database reads required to discover and verify WP-Auto-owned private mutation state.
 
-This accepted ADR authorizes no implementation. It does not create or modify uninstall.php, production PHP, tests, bootstrap code, the MCP server, an Ability, a tool, Composer dependencies, CI, plugin version, or any public contract. Implementation remains separately gated and this ADR is pending repository landing.
+This ADR itself authorized but did not implement the cleanup. The implementation
+later landed on `main` in `223c845`, without changing the MCP server, an Ability,
+a tool, Composer dependencies, CI, plugin version, or any public contract.
 
-ADR-004 = ACCEPTED BY SECURITY / NORMATIVE REVIEW / PENDING REPOSITORY LANDING
+ADR-004 = ACCEPTED / IMPLEMENTED / VALIDATED / SEALED
 
 ## Authoritative baseline and source architecture
 
@@ -401,16 +403,19 @@ Request-time idempotency semantics delta: NONE.
 Audit event schema delta: NONE.
 Update concurrency delta: NONE.
 Runtime endpoint, authentication, transport checks, allowlist, resources, and prompts: unchanged.
-Phase 1.3.3 runtime status: unchanged and not sealed.
+Phase 1.3.3 runtime status: implementation landed in `223c845` and is included
+in the final seal recorded by `PHASE_1_3_3_VALIDATION.md`.
 
 ## Phase status and stop rule
 
-At this docs-only landing stage:
+At the original docs-only landing stage, the historical stop state was:
 
-- Phase 1.3.3: AUDIT FINAL REVIEW PASSED / GOV-1 POLICY APPROVED / GOV-2 POLICY A APPROVED / GOV-2 ARCHITECTURE APPROVED / ADR-004 SECURITY / NORMATIVE REVIEW APPROVED / DOCS-ONLY LANDING CANDIDATE PENDING REVIEW / NOT SEALED.
-- Phase 1.3.4: BLOCKED.
+- Phase 1.3.3: ADR-004 accepted but implementation not yet authorized.
+- Phase 1.3.4: blocked by the incomplete Phase 1.3.3 gate.
 
-If the state inventory, Core deletion proof, SQL boundary, multisite restoration, privacy behavior, residual-authority rule, or WordPress deletion-flow limitation cannot be demonstrated, the landing is BLOCKED. Do not implement uninstall.php, modify AGENTS.md, add tests, seal Phase 1.3.3, or start Phase 1.3.4 from this ADR.
+Those stop conditions were subsequently satisfied by the implementation and
+validation records. Current status is Phase 1.3.3 sealed; Phase 1.3.4 is next
+and not started. This ADR alone still does not authorize later-roadmap work.
 
 ## Scope and Git freeze
 

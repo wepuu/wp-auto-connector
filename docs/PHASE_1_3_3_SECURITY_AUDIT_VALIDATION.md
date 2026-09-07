@@ -1,6 +1,6 @@
 # Phase 1.3.3 Current-Worktree Security Audit Validation
 
-Status: SECURITY GATE PASS — PENDING GIT LANDING AND EXACT-MAIN VERIFICATION
+Status: HISTORICAL CANDIDATE AUDIT PASS — SUPERSEDED BY EXACT-MAIN SEAL AUDIT
 
 This record covers the ADR-004 runtime candidate snapshot and the associated
 repository Standard audit. Documentation-only updates made while assembling this
@@ -55,18 +55,14 @@ sealed scan records complete coverage and retains the limitation.
 TAC advisory status was `not_granted`; this is an output-visibility advisory only
 and did not gate or authorize the local audit.
 
-## Remaining gates
+## Landing disposition
 
-1. Obtain explicit authorization for staging, commit, push/PR, and merge actions.
-2. Land the ADR-004 candidate as one independently reversible implementation commit.
-3. Verify the exact merged `main` SHA, required Composer gates, CI, and twelve-tool
-   runtime allowlist.
-4. Normalize `AGENTS.md`, `docs/ROADMAP.md`, and stale Phase 1.3.3 status records
-   against the landed evidence.
-5. Seal Phase 1.3.3 only when the exact-main audit has zero BLOCKER and MAJOR issues.
+The ADR-004 candidate landed in `223c845`. A later exact-main scan found one
+Medium cleartext-transport issue outside the uninstall implementation. That issue
+was fixed in `216dc34`, and the final exact-main repository scan completed with
+zero findings. The authoritative seal record is `PHASE_1_3_3_VALIDATION.md`.
 
 ## Verdict
 
-PASS — the Phase 1.3.3 mutation runtime candidate and uninstall security gate pass
-with zero findings. Git landing, final diff-hygiene checks, and exact-main
-verification remain pending; Phase 1.3.4 remains blocked.
+PASS — this historical candidate audit passed for its bound snapshot. Final
+Phase 1.3.3 status is governed by `PHASE_1_3_3_VALIDATION.md`.

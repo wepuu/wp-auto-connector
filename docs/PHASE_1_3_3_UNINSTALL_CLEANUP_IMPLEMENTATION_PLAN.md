@@ -1,6 +1,6 @@
 # Phase 1.3.3 Uninstall Cleanup Implementation Plan
 
-Status: IMPLEMENTED AND VALIDATED — PENDING GIT LANDING
+Status: IMPLEMENTED, LANDED, VALIDATED, AND INCLUDED IN THE PHASE 1.3.3 SEAL
 
 This document governed the implementation of the uninstall-only private-state cleanup
 approved by ADR-004. The implementation and validation evidence are recorded in
@@ -565,8 +565,9 @@ Phase state after implementation validation:
 
 - Phase 1.3.3: AUDIT FINAL REVIEW PASSED; GOV-1 POLICY APPROVED; GOV-2 POLICY
   APPROVED; GOV-2 ARCHITECTURE APPROVED; ADR-004 LANDED; UNINSTALL IMPLEMENTATION
-  AND CURRENT-WORKTREE SECURITY GATES PASS; PENDING GIT LANDING; NOT SEALED.
-- Phase 1.3.4: BLOCKED.
+  AND CURRENT-WORKTREE SECURITY GATES PASS; LANDED IN `223c845`; INCLUDED IN
+  THE PHASE 1.3.3 SEAL.
+- Phase 1.3.4: NEXT / NOT STARTED after the final Phase 1.3.3 seal.
 
 No staging, commit, push, PR, merge, tag, release, reset, or Phase 1.3.4 work is
 authorized without a separate explicit instruction.
@@ -593,5 +594,5 @@ PASS — Phase 1.3.3 Uninstall Cleanup implementation and current-worktree secur
 
 Next task:
 
-Git landing review, explicit-path staging, commit/PR authorization, and exact-main
-post-merge verification. Phase 1.3.4 remains blocked.
+The implementation landed on `main` in `223c845` and passed exact-main CI and
+the final Phase 1.3.3 seal gates recorded in `PHASE_1_3_3_VALIDATION.md`.

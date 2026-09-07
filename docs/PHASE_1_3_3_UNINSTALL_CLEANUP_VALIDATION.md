@@ -1,6 +1,6 @@
 # Phase 1.3.3 Uninstall Cleanup Validation
 
-Status: IMPLEMENTATION, LIVE CLEANUP, AND SECURITY GATES PASS; PENDING GIT LANDING
+Status: LANDED ON MAIN; LIVE CLEANUP AND SECURITY GATES PASS
 
 This record covers the explicit-uninstall private-state cleanup implementation
 authorized by ADR-004. It does not seal Phase 1.3.3, advance Phase 1.3.4, change
@@ -155,8 +155,7 @@ external-call checks; TAC enrollment is advisory and is not a project gate.
 ## Verdict
 
 The scoped ADR-004 implementation, WordPress 6.9 single-site/multisite cleanup,
-diff-security, and repository-security gates pass. The candidate is ready for an
-explicitly authorized Git landing workflow. Phase 1.3.3 is not sealed and Phase
-1.3.4 remains blocked until this candidate is merged, the exact `main` revision and
-CI are verified, and the Phase 1.3.3 status documents are normalized against that
-landed evidence. Release-wide Plugin Check findings remain release blockers.
+diff-security, and repository-security gates pass. The implementation landed on
+`main` in `223c845`; exact-main CI and the final Phase 1.3.3 seal gates passed.
+Release-wide Plugin Check findings remain release blockers and are not waived by
+the phase seal.

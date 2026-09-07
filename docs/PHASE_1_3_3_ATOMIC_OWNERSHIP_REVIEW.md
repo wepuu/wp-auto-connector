@@ -1,6 +1,6 @@
 # Phase 1.3.3 Atomic Ownership Review Evidence
 
-Status: **ARCHITECTURE EVIDENCE**
+Status: **ARCHITECTURE EVIDENCE — IMPLEMENTED, VALIDATED, AND SEALED**
 
 Review date: 2026-09-02
 
@@ -145,5 +145,7 @@ APPROVED
 
 The accepted candidate includes binary-safe byte-exact conditional release,
 prepared SQL binding, the distinction between database and Store-level
-success, and fail-closed cache-finalization semantics. This is architecture
-evidence only; it does not mark runtime validation complete.
+success, and fail-closed cache-finalization semantics. It landed in `9ca1854`
+and passed the later hardening, exact-main, and Phase 1.3.3 seal gates recorded
+in `PHASE_1_3_3_VALIDATION.md`. The earlier race evidence and rejected
+`add_option()` candidate remain preserved as historical rationale.

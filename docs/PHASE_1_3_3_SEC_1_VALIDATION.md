@@ -1,6 +1,6 @@
 # Phase 1.3.3 SEC-1 Validation
 
-Status: **SECURITY REMEDIATION REVIEW APPROVED — PENDING PR / MERGE / MAIN VERIFICATION**
+Status: **RESOLVED ON MAIN AND INCLUDED IN THE PHASE 1.3.3 SEAL**
 
 Date: 2026-09-02
 
@@ -144,4 +144,6 @@ ADR delta = NONE
 
 Review verdict: **PASS — Phase 1.3.3 SEC-1 Security Remediation Review Gate approved**.
 
-Phase 1.3.3 remains paused pending PR, CI, merge, and main verification of SEC-1. Phase 1.3.4 remains blocked. The next gate is Phase 1.3.3 SEC-1 PR Merge Gate; the broader mutation audit has not resumed.
+SEC-1 landed on `main` in `dd97120` and passed post-merge CI and exact-main
+verification. The broader audit subsequently resumed and Phase 1.3.3 was
+formally sealed; see `PHASE_1_3_3_VALIDATION.md`.

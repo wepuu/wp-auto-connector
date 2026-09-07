@@ -298,6 +298,7 @@ Before runtime remediation can proceed, implementation review must prove:
 9. no prohibited SQL or generic database surface is introduced.
 
 This ADR records the architecture decision approved at the Phase 1.3.3
-Atomic Ownership Contract / ADR Amendment Re-Review Gate. Runtime remediation
-is still blocked until this amendment is landed on `main`; acceptance here
-does not resolve SEC-2 or SEC-3.
+Atomic Ownership Contract / ADR Amendment Re-Review Gate. The implementation
+landed on `main` in `9ca1854`; subsequent hardening and exact-main validation
+resolved SEC-2 and SEC-3. Final Phase 1.3.3 evidence is recorded in
+`PHASE_1_3_3_VALIDATION.md`.

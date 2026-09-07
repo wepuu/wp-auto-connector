@@ -1,6 +1,6 @@
 # Phase 1.3.3 SEC-1 Security Remediation Plan
 
-Status: **SEC-1 REMEDIATION REVIEW APPROVED — PENDING PR / MERGE / MAIN VERIFICATION**
+Status: **SEC-1 RESOLVED ON MAIN**
 
 Baseline: `main@8f45359f553bd346ee29b62e5524fbf047746c4e`
 
@@ -300,4 +300,7 @@ Validation results:
 - retrying the same actor, Ability, key, and payload returned the in-progress semantic result and the exact-title draft count remained one;
 - all disposable users, Application Passwords, fixtures, containers, volumes, networks, and credentials were removed.
 
-The SEC-1 remediation passed Security Remediation Review. It remains pending PR, CI, merge, and main verification. The broader Phase 1.3.3 audit stays paused and this implementation does not start or complete that audit.
+The SEC-1 remediation passed Security Remediation Review, landed on `main` in
+`dd97120`, and passed post-merge CI and exact-main verification. Phase 1.3.3
+later completed its remaining remediation and audit gates; see
+`PHASE_1_3_3_VALIDATION.md`. This plan remains the historical SEC-1 design record.
