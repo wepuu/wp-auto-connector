@@ -1,6 +1,6 @@
 # Phase 1.3 Mutation Contracts
 
-Status: **Phase 1.3.0 contract frozen**
+Status: **Phase 1.3 complete and formally sealed on main**
 
 Contract draft: 2026-08-31
 
@@ -8,7 +8,7 @@ Remediation review: 2026-09-01
 
 Phase 1.3.2.0 amendment status: **Formally sealed on main**
 
-This document is the authoritative public contract for the Phase 1.3 draft mutation abilities. Phase 1.3.1 implemented and validated the two Create Draft abilities, and Phase 1.3.2 implemented and validated the two Update Draft abilities. The dedicated Direct MCP server now exposes exactly twelve tools; the narrow Phase 1.3.2.0 sentinel amendment and Phase 1.3.2 runtime are formally sealed on `main`.
+This document is the authoritative public contract for the Phase 1.3 draft mutation abilities. Phase 1.3.1 implemented and validated the two Create Draft abilities, Phase 1.3.2 implemented and validated the two Update Draft abilities, Phase 1.3.3 sealed their security architecture, and Phase 1.3.4 completed full mutation integration validation. The dedicated Direct MCP server exposes exactly twelve tools and Phase 1.3 is formally sealed on `main`.
 
 ## Contract goals
 
@@ -381,7 +381,7 @@ wp-auto/post-update
 wp-auto/page-update
 ```
 
-Phase 1.3.0, Phase 1.3.1, Phase 1.3.2.0, and Phase 1.3.2 are formally sealed on `main`. The two Create Draft and two Update Draft tools produce the exact twelve-tool runtime.
+Phase 1.3.0 through Phase 1.3.4 are formally sealed on `main`. The two Create Draft and two Update Draft tools produce the exact twelve-tool runtime.
 
 ## Phase checkpoints
 
@@ -389,7 +389,7 @@ Phase 1.3.0, Phase 1.3.1, Phase 1.3.2.0, and Phase 1.3.2 are formally sealed on 
 2. **Phase 1.3.1 — Post/Page Create Draft:** implemented and validated only the two Create Draft abilities; this checkpoint expanded the runtime to ten tools.
 3. **Phase 1.3.2.0 — modified_gmt Sentinel Compatibility Amendment:** formally sealed on `main`; no tool is exposed.
 4. **Phase 1.3.2 — Draft Update + Best-effort Optimistic Concurrency:** implemented, validated, and formally sealed only the two Update Draft abilities; the current runtime is twelve tools.
-5. **Phase 1.3.3 — Mutation Security / Audit Freeze:** next active checkpoint; audit exact schemas, capability paths, idempotency, invariant guards, error privacy, resource use, and allowlist.
-6. **Phase 1.3.4 — Full Mutation Integration Validation:** verify that each request changes only its intended target plus documented Core/plugin lifecycle effects; confirm no published/status-promoted or unrelated content changes and no WP-Auto taxonomy, media, featured-image, SEO, arbitrary-meta, user, setting, plugin, theme, Cloud, or telemetry mutation. Validation must not require a byte-for-byte unchanged database, then seal Phase 1.3.
+5. **Phase 1.3.3 — Mutation Security / Audit Freeze:** completed the exact-schema, capability, ownership, idempotency, invariant, error-privacy, resource, allowlist, uninstall, HTTPS, and exact-main security gates.
+6. **Phase 1.3.4 — Full Mutation Integration Validation:** completed real WordPress and Streamable HTTP MCP validation of intended target effects, documented Core/plugin lifecycle effects, and the full forbidden-side-effect matrix without requiring byte-for-byte database identity; Phase 1.3 is sealed.
 
 Phase 1.3.0 does not authorize placeholder abilities, skipped mutation tests, production services, registrar changes, publishing, deletion, media, taxonomy mutation, SEO, Cloud MCP, Skills, automation, telemetry, or external WP-Auto requests.

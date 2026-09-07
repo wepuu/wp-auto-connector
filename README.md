@@ -8,7 +8,7 @@ Phase 1 is Direct WordPress MCP. The plugin should let compatible AI agents conn
 
 Phase 1.2 is complete: eight read-only site, content, and taxonomy abilities passed the frozen contract and full integration/security validation. The dedicated endpoint is `/wp-json/wp-auto/mcp`, and the exposed MCP tools are `wp-auto-site-health`, `wp-auto-site-info`, `wp-auto-posts-search`, `wp-auto-post-get`, `wp-auto-pages-search`, `wp-auto-page-get`, `wp-auto-categories-list`, and `wp-auto-tags-list`.
 
-Phase 1.3.0 Mutation Contract Freeze, Phase 1.3.1 Post/Page Create Draft, Phase 1.3.2.0 sentinel compatibility, and Phase 1.3.2 Draft Update are formally sealed on `main`. The Direct MCP server exposes exactly twelve explicitly allowlisted tools, including draft-only `wp-auto-post-update` and `wp-auto-page-update`. Phase 1.3.3 Mutation Security / Audit Freeze is the next development checkpoint; Phase 1.3 is not yet complete.
+Phase 1.3 is complete and formally sealed on `main`: its contract, Post/Page Create Draft, sentinel compatibility, Draft Update, mutation security architecture, and full real-WordPress integration matrix all passed. The Direct MCP server exposes exactly twelve explicitly allowlisted tools, including draft-only `wp-auto-post-update` and `wp-auto-page-update`. Phase 1.4 Media planning is the next development checkpoint and has not started.
 
 Start with:
 

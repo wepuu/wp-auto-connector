@@ -18,7 +18,7 @@ The project is designed to expose carefully scoped WordPress capabilities to com
 
 Phase 1.2 provides a validated authenticated direct MCP endpoint at `/wp-json/wp-auto/mcp` with read-only site-health, site-info, posts-search, post-get, pages-search, page-get, categories-list, and tags-list tools. It uses normal WordPress authentication and requires the authenticated user to have the `read` capability. Non-public posts and pages also require WordPress object-level authorization. Application Passwords over HTTPS are the remote access baseline.
 
-Phase 1.3.0 mutation contracts, Phase 1.3.1 Create Draft, Phase 1.3.2.0 `modified_gmt` compatibility, and Phase 1.3.2 Draft Update are formally sealed on `main`. The current Direct MCP runtime exposes exactly twelve explicitly allowlisted tools, including authenticated Post/Page Create Draft and draft-only Post/Page Update. Create operations always produce drafts owned by the authenticated user and use persistent idempotency claims.
+Phase 1.3 is formally sealed on `main` after contract, Create Draft, `modified_gmt` compatibility, Draft Update, mutation security, and full integration validation. The current Direct MCP runtime exposes exactly twelve explicitly allowlisted tools, including authenticated Post/Page Create Draft and draft-only Post/Page Update. Create operations always produce drafts owned by the authenticated user and use persistent idempotency claims.
 
 No publish, delete, arbitrary content write, cloud, telemetry, or automation operation is included. The scoped mutation boundary is limited to Create Draft and authorized draft-only Update.
 

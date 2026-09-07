@@ -12,7 +12,7 @@ Phase 1.1 is complete: the direct MCP server foundation proves the authenticated
 
 Phase 1.2 is complete: all eight read-only tools passed the frozen contract, permission, privacy, schema, bounded-query, and live MCP validation gates.
 
-Phase 1.3.0, Phase 1.3.1, Phase 1.3.2.0, Phase 1.3.2, and Phase 1.3.3 are formally sealed on `main`. Phase 1.3.3 resolved SEC-1, SEC-2, and SEC-3; landed the ADR-003 atomic ownership runtime and ADR-004 uninstall cleanup; enforced HTTPS for remote Direct MCP with an exact local-development exception; and completed a zero-finding exact-main security audit with an exact twelve-tool runtime. Phase 1.3.4 is the next roadmap checkpoint and has not started. Do not implement publishing, deletion, media, taxonomy mutation, SEO, Cloud, or later roadmap work unless an explicit later task authorizes it.
+Phase 1.3.0 through Phase 1.3.4 are formally sealed on `main`. Phase 1.3.3 resolved SEC-1, SEC-2, and SEC-3; landed the ADR-003 atomic ownership runtime and ADR-004 uninstall cleanup; enforced HTTPS for remote Direct MCP with an exact local-development exception; and completed a zero-finding exact-main security audit. Phase 1.3.4 then completed full real-WordPress and Streamable HTTP mutation integration validation without changing the exact twelve-tool runtime. Phase 1.4 Media is the next roadmap checkpoint and has not started. Do not implement publishing, deletion, media, taxonomy mutation, SEO, Cloud, or later roadmap work unless an explicit later task authorizes it.
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
@@ -89,7 +89,7 @@ Phase 1 is not complete until at least Claude Code and one additional standard M
 ## Phase 1.3 mutation invariants
 
 - `docs/PHASE_1_3_MUTATION_CONTRACTS.md` is the authoritative contract; `docs/ADR-002-MUTATION-SAFETY.md` records the safety decisions.
-- Phase 1.3.1, Phase 1.3.2.0, and Phase 1.3.2 are formally sealed on `main`. Phase 1.3.2 added only `wp-auto/post-update` and `wp-auto/page-update`, producing the exact twelve-tool runtime baseline.
+- Phase 1.3.1 through Phase 1.3.4 are formally sealed on `main`. Phase 1.3.2 added only `wp-auto/post-update` and `wp-auto/page-update`, producing the exact twelve-tool runtime baseline; Phase 1.3.3 and Phase 1.3.4 added no tool.
 - Create fixes the actual post type, `draft` status, current authenticated author, and root Page parent. Clients cannot provide status, author, dates, taxonomy, media, meta, template, parent, menu order, comments, or pings.
 - Create permission uses the fixed post type object's actual `cap->create_posts` capability and repeats the check in the service.
 - Create uses concurrent-safe persistent idempotency scoped to site, actor, Ability, and key. ADR-003 uses a strict insert-if-absent ownership primitive against a private non-autoloaded `$wpdb->options` row; never use `add_option()` as an atomic ownership primitive or release an uncertain claim before deterministic resolution proves that doing so cannot duplicate an object.
