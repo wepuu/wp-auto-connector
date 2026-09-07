@@ -23,6 +23,7 @@ namespace {
 	$GLOBALS['wp_auto_test_mcp_current_user_can_calls'] = 0;
 	$GLOBALS['wp_auto_test_is_ssl']              = true;
 	$GLOBALS['wp_auto_test_environment_type']    = 'production';
+	$GLOBALS['wp_auto_test_application_passwords_supported'] = null;
 	$GLOBALS['wp_auto_test_application_passwords_available'] = false;
 	$GLOBALS['wp_auto_test_current_user_id_calls'] = 0;
 	$GLOBALS['wp_auto_test_before_current_user_id'] = null;
@@ -577,6 +578,10 @@ namespace {
 	}
 
 	function wp_is_application_passwords_supported(): bool {
+		if ( null !== $GLOBALS['wp_auto_test_application_passwords_supported'] ) {
+			return (bool) $GLOBALS['wp_auto_test_application_passwords_supported'];
+		}
+
 		return is_ssl() || 'local' === wp_get_environment_type();
 	}
 

@@ -39,6 +39,7 @@ final class McpServerRegistrarTest extends TestCase {
 		$GLOBALS['wp_auto_test_can_read']                        = false;
 		$GLOBALS['wp_auto_test_is_ssl']                          = true;
 		$GLOBALS['wp_auto_test_environment_type']                = 'production';
+		$GLOBALS['wp_auto_test_application_passwords_supported'] = null;
 		$GLOBALS['wp_auto_test_application_passwords_available'] = false;
 		$GLOBALS['wp_auto_test_is_user_logged_in_calls']         = 0;
 		$GLOBALS['wp_auto_test_mcp_current_user_can_calls']      = 0;
@@ -129,11 +130,11 @@ final class McpServerRegistrarTest extends TestCase {
 		self::assertTrue( $registrar->check_transport_permission() );
 	}
 
-	/** Unsupported non-local transport is denied before identity/capability checks. */
-	public function test_transport_denies_unsupported_transport_even_when_availability_is_true(): void {
+	/** Remote plain HTTP is denied even when Core support is filter-enabled. */
+	public function test_transport_denies_remote_http_even_when_application_password_support_is_forced(): void {
 		$GLOBALS['wp_auto_test_is_ssl']                          = false;
 		$GLOBALS['wp_auto_test_environment_type']                = 'production';
-		$GLOBALS['wp_auto_test_application_passwords_available'] = true;
+		$GLOBALS['wp_auto_test_application_passwords_supported'] = true;
 		$GLOBALS['wp_auto_test_logged_in']                       = true;
 		$GLOBALS['wp_auto_test_can_read']                        = true;
 

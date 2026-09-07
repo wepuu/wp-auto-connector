@@ -89,7 +89,7 @@ final class McpServerRegistrar {
 	 * @return bool|WP_Error
 	 */
 	public function check_transport_permission() {
-		if ( ! function_exists( 'wp_is_application_passwords_supported' ) || ! wp_is_application_passwords_supported() ) {
+		if ( ! $this->is_supported_transport() || ! function_exists( 'wp_is_application_passwords_supported' ) || ! wp_is_application_passwords_supported() ) {
 			return new WP_Error(
 				'wp_auto_connector_authentication_required',
 				__( 'WordPress authentication is required for the WP-Auto MCP server.', 'wp-auto-connector' ),
@@ -114,5 +114,16 @@ final class McpServerRegistrar {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Require HTTPS except in WordPress's explicit local environment.
+	 */
+	private function is_supported_transport(): bool {
+		if ( function_exists( 'is_ssl' ) && is_ssl() ) {
+			return true;
+		}
+
+		return function_exists( 'wp_get_environment_type' ) && 'local' === wp_get_environment_type();
 	}
 }
