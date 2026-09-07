@@ -11,6 +11,7 @@ namespace {
 	define( 'ABSPATH', __DIR__ . '/' );
 	define( 'WP_AUTO_CONNECTOR_VERSION', '0.1.0-test' );
 	define( 'WP_AUTO_CONNECTOR_DIR', dirname( __DIR__ ) . '/' );
+	define( 'ARRAY_A', 'ARRAY_A' );
 
 	$GLOBALS['wp_auto_test_hooks']               = array();
 	$GLOBALS['wp_auto_test_hook_history']        = array();
@@ -89,6 +90,7 @@ namespace {
 	$GLOBALS['wp_auto_test_update_option_exception_on_call'] = null;
 	$GLOBALS['wp_auto_test_update_option_calls']   = 0;
 	$GLOBALS['wp_auto_test_fail_delete_option']   = false;
+	$GLOBALS['wp_auto_test_delete_option_return_after_delete'] = null;
 	$GLOBALS['wp_auto_test_delete_option_exception'] = null;
 	$GLOBALS['wp_auto_test_delete_option_calls']  = 0;
 	$GLOBALS['wp_auto_test_fail_update_meta']     = false;
@@ -98,6 +100,29 @@ namespace {
 	$GLOBALS['wp_auto_test_permalink_exception']  = null;
 	$GLOBALS['wp_auto_test_edit_link_exception']  = null;
 	$GLOBALS['wp_auto_test_get_post_meta_exception'] = null;
+	$GLOBALS['wp_auto_test_current_blog_id']     = 1;
+	$GLOBALS['wp_auto_test_blog_options']        = array();
+	$GLOBALS['wp_auto_test_option_rows']         = array( 1 => array() );
+	$GLOBALS['wp_auto_test_postmeta_rows']       = array( 1 => array() );
+	$GLOBALS['wp_auto_test_physical_blog_ids']   = array( 1 );
+	$GLOBALS['wp_auto_test_get_results_calls']   = 0;
+	$GLOBALS['wp_auto_test_get_results_history'] = array();
+	$GLOBALS['wp_auto_test_get_results_exception'] = null;
+	$GLOBALS['wp_auto_test_get_results_override_set'] = false;
+	$GLOBALS['wp_auto_test_get_results_override'] = null;
+	$GLOBALS['wp_auto_test_switch_history']      = array();
+	$GLOBALS['wp_auto_test_restore_history']     = array();
+	$GLOBALS['wp_auto_test_switch_exception_before'] = null;
+	$GLOBALS['wp_auto_test_switch_exception_after'] = null;
+	$GLOBALS['wp_auto_test_restore_exception_before'] = null;
+	$GLOBALS['wp_auto_test_restore_exception_after'] = null;
+	$GLOBALS['wp_auto_test_delete_post_meta_calls'] = 0;
+	$GLOBALS['wp_auto_test_delete_post_meta_exception'] = null;
+	$GLOBALS['wp_auto_test_delete_post_meta_exception_after'] = null;
+	$GLOBALS['wp_auto_test_delete_post_meta_return_override'] = null;
+	$GLOBALS['_wp_switched_stack']               = array();
+	$GLOBALS['switched']                         = false;
+	$GLOBALS['table_prefix']                     = 'wp_';
 	$GLOBALS['wp_auto_test_site_info']            = array(
 		'name'                => 'WP-Auto Test Site',
 		'description'         => 'A safe connector test site.',
@@ -113,6 +138,12 @@ namespace {
 	class WP_REST_Server {}
 	class wpdb {
 		public string $options = 'wp_options';
+		public string $postmeta = 'wp_postmeta';
+		public string $blogs = 'wp_blogs';
+		/** @var int|string */
+		public $blogid = 1;
+		public string $prefix = 'wp_';
+		public string $base_prefix = 'wp_';
 		public int $rows_affected = 0;
 		public string $last_error = '';
 
@@ -136,6 +167,83 @@ namespace {
 			$prepared = array( 'query' => $query, 'args' => $args );
 			$GLOBALS['wp_auto_test_db_prepared_queries'][] = $prepared;
 			return $prepared;
+		}
+
+		public function esc_like( string $text ): string {
+			return addcslashes( $text, '_%\\' );
+		}
+
+		public function get_results( $prepared, $output = ARRAY_A ) {
+			++$GLOBALS['wp_auto_test_get_results_calls'];
+			$this->last_error = '';
+			$GLOBALS['wp_auto_test_get_results_history'][] = array(
+				'prepared' => $prepared,
+				'output'   => $output,
+				'blog_id'  => $GLOBALS['wp_auto_test_current_blog_id'],
+			);
+
+			if ( $GLOBALS['wp_auto_test_get_results_exception'] instanceof \Throwable ) {
+				$exception = $GLOBALS['wp_auto_test_get_results_exception'];
+				$GLOBALS['wp_auto_test_get_results_exception'] = null;
+				throw $exception;
+			}
+			if ( $GLOBALS['wp_auto_test_get_results_override_set'] ) {
+				$GLOBALS['wp_auto_test_get_results_override_set'] = false;
+				$this->last_error = (string) $GLOBALS['wp_auto_test_db_last_error'];
+				return $GLOBALS['wp_auto_test_get_results_override'];
+			}
+			if ( ! is_array( $prepared ) || ! isset( $prepared['query'], $prepared['args'] ) ) {
+				$this->last_error = 'invalid prepared query';
+				return null;
+			}
+
+			$query = $prepared['query'];
+			$args  = $prepared['args'];
+			if ( false !== stripos( $query, 'SELECT option_id, option_name' ) ) {
+				$cursor  = (int) ( $args[0] ?? 0 );
+				$limit   = (int) ( $args[3] ?? 0 );
+				$blog_id = $GLOBALS['wp_auto_test_current_blog_id'];
+				$rows    = $GLOBALS['wp_auto_test_option_rows'][ $blog_id ] ?? array();
+				usort( $rows, static fn( array $left, array $right ): int => (int) $left['option_id'] <=> (int) $right['option_id'] );
+				$rows = array_values(
+					array_filter(
+						$rows,
+						static function ( array $row ) use ( $cursor ): bool {
+							$name = (string) ( $row['option_name'] ?? '' );
+							return (int) ( $row['option_id'] ?? 0 ) > $cursor
+								&& ( str_starts_with( $name, 'wp_auto_connector_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_mutation_audit_lock_' ) );
+						}
+					)
+				);
+				return array_slice( $rows, 0, $limit );
+			}
+
+			if ( false !== stripos( $query, 'SELECT meta_id' ) ) {
+				$blog_id = $GLOBALS['wp_auto_test_current_blog_id'];
+				$key     = (string) ( $args[0] ?? '' );
+				$rows    = array_values(
+					array_filter(
+						$GLOBALS['wp_auto_test_postmeta_rows'][ $blog_id ] ?? array(),
+						static fn( array $row ): bool => (string) ( $row['meta_key'] ?? '' ) === $key
+					)
+				);
+				usort( $rows, static fn( array $left, array $right ): int => (int) $left['meta_id'] <=> (int) $right['meta_id'] );
+				return array_map(
+					static fn( array $row ): array => array( 'meta_id' => (string) $row['meta_id'] ),
+					array_slice( $rows, 0, 1 )
+				);
+			}
+
+			if ( false !== stripos( $query, 'SELECT blog_id' ) ) {
+				$cursor = (int) ( $args[0] ?? 0 );
+				$limit  = (int) ( $args[1] ?? 0 );
+				$ids    = array_values( array_filter( $GLOBALS['wp_auto_test_physical_blog_ids'], static fn( int $id ): bool => $id > $cursor ) );
+				sort( $ids, SORT_NUMERIC );
+				return array_map( static fn( int $id ): array => array( 'blog_id' => (string) $id ), array_slice( $ids, 0, $limit ) );
+			}
+
+			$this->last_error = 'unsupported read query';
+			return null;
 		}
 
 		public function query( $prepared ) {
@@ -383,7 +491,81 @@ namespace {
 	function wp_register_ability_category(): void {}
 	function rest_get_server(): void {}
 	function get_current_blog_id(): int {
-		return 1;
+		return (int) $GLOBALS['wp_auto_test_current_blog_id'];
+	}
+
+	function is_multisite(): bool {
+		return (bool) $GLOBALS['wp_auto_test_site_info']['multisite'];
+	}
+
+	/**
+	 * Return the option store for one test blog.
+	 *
+	 * @return array<string,mixed>
+	 */
+	function &wp_auto_test_options_for_blog( ?int $blog_id = null ): array {
+		$blog_id = $blog_id ?? get_current_blog_id();
+		if ( 1 === $blog_id ) {
+			return $GLOBALS['wp_auto_test_options'];
+		}
+		if ( ! isset( $GLOBALS['wp_auto_test_blog_options'][ $blog_id ] ) ) {
+			$GLOBALS['wp_auto_test_blog_options'][ $blog_id ] = array();
+		}
+
+		return $GLOBALS['wp_auto_test_blog_options'][ $blog_id ];
+	}
+
+	function wp_auto_test_apply_blog_context( int $blog_id ): void {
+		$prefix                                  = 1 === $blog_id ? 'wp_' : 'wp_' . $blog_id . '_';
+		$GLOBALS['wp_auto_test_current_blog_id'] = $blog_id;
+		$GLOBALS['table_prefix']                 = $prefix;
+		$GLOBALS['wpdb']->blogid                 = $blog_id;
+		$GLOBALS['wpdb']->prefix                 = $prefix;
+		$GLOBALS['wpdb']->options                = $prefix . 'options';
+		$GLOBALS['wpdb']->postmeta               = $prefix . 'postmeta';
+	}
+
+	function switch_to_blog( int $blog_id ): bool {
+		$GLOBALS['wp_auto_test_switch_history'][] = $blog_id;
+		if ( $GLOBALS['wp_auto_test_switch_exception_before'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_switch_exception_before'];
+			$GLOBALS['wp_auto_test_switch_exception_before'] = null;
+			throw $exception;
+		}
+
+		$GLOBALS['_wp_switched_stack'][] = get_current_blog_id();
+		wp_auto_test_apply_blog_context( $blog_id );
+		$GLOBALS['switched'] = true;
+		if ( $GLOBALS['wp_auto_test_switch_exception_after'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_switch_exception_after'];
+			$GLOBALS['wp_auto_test_switch_exception_after'] = null;
+			throw $exception;
+		}
+
+		return true;
+	}
+
+	function restore_current_blog(): bool {
+		$GLOBALS['wp_auto_test_restore_history'][] = get_current_blog_id();
+		if ( $GLOBALS['wp_auto_test_restore_exception_before'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_restore_exception_before'];
+			$GLOBALS['wp_auto_test_restore_exception_before'] = null;
+			throw $exception;
+		}
+		if ( array() === $GLOBALS['_wp_switched_stack'] ) {
+			return false;
+		}
+
+		$blog_id = (int) array_pop( $GLOBALS['_wp_switched_stack'] );
+		wp_auto_test_apply_blog_context( $blog_id );
+		$GLOBALS['switched'] = array() !== $GLOBALS['_wp_switched_stack'];
+		if ( $GLOBALS['wp_auto_test_restore_exception_after'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_restore_exception_after'];
+			$GLOBALS['wp_auto_test_restore_exception_after'] = null;
+			throw $exception;
+		}
+
+		return true;
 	}
 
 	function is_ssl(): bool {
@@ -689,6 +871,45 @@ namespace {
 		return true;
 	}
 
+	function delete_post_meta_by_key( string $meta_key ): bool {
+		++$GLOBALS['wp_auto_test_delete_post_meta_calls'];
+		if ( $GLOBALS['wp_auto_test_delete_post_meta_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_delete_post_meta_exception'];
+			$GLOBALS['wp_auto_test_delete_post_meta_exception'] = null;
+			throw $exception;
+		}
+		if ( null !== $GLOBALS['wp_auto_test_delete_post_meta_return_override'] ) {
+			return (bool) $GLOBALS['wp_auto_test_delete_post_meta_return_override'];
+		}
+
+		$blog_id = get_current_blog_id();
+		$rows    = $GLOBALS['wp_auto_test_postmeta_rows'][ $blog_id ] ?? array();
+		$kept    = array_values(
+			array_filter(
+				$rows,
+				static fn( array $row ): bool => (string) ( $row['meta_key'] ?? '' ) !== $meta_key
+			)
+		);
+		$deleted = count( $kept ) !== count( $rows );
+		$GLOBALS['wp_auto_test_postmeta_rows'][ $blog_id ] = $kept;
+
+		if ( 1 === $blog_id ) {
+			foreach ( $GLOBALS['wp_auto_test_post_meta'] as $post_id => $metadata ) {
+				unset( $GLOBALS['wp_auto_test_post_meta'][ $post_id ][ $meta_key ] );
+			}
+			foreach ( $GLOBALS['wp_auto_test_post_meta_values'] as $post_id => $metadata ) {
+				unset( $GLOBALS['wp_auto_test_post_meta_values'][ $post_id ][ $meta_key ] );
+			}
+		}
+		if ( $GLOBALS['wp_auto_test_delete_post_meta_exception_after'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_delete_post_meta_exception_after'];
+			$GLOBALS['wp_auto_test_delete_post_meta_exception_after'] = null;
+			throw $exception;
+		}
+
+		return $deleted;
+	}
+
 	function add_option( string $option, $value = '', string $deprecated = '', $autoload = null ): bool {
 		unset( $deprecated );
 		if ( $GLOBALS['wp_auto_test_add_option_exception'] instanceof \Throwable ) {
@@ -696,11 +917,12 @@ namespace {
 			$GLOBALS['wp_auto_test_add_option_exception'] = null;
 			throw $exception;
 		}
-		if ( array_key_exists( $option, $GLOBALS['wp_auto_test_options'] ) ) {
+		$options =& wp_auto_test_options_for_blog();
+		if ( array_key_exists( $option, $options ) ) {
 			return false;
 		}
 
-		$GLOBALS['wp_auto_test_options'][ $option ] = $value;
+		$options[ $option ] = $value;
 		$GLOBALS['wp_auto_test_option_autoload'][ $option ] = $autoload;
 		if ( $GLOBALS['wp_auto_test_add_option_exception_after_write'] instanceof \Throwable ) {
 			$exception = $GLOBALS['wp_auto_test_add_option_exception_after_write'];
@@ -711,6 +933,7 @@ namespace {
 	}
 
 	function get_option( string $option, $default = false ) {
+		$options =& wp_auto_test_options_for_blog();
 		if ( $GLOBALS['wp_auto_test_use_option_cache'] ) {
 			if ( is_array( $GLOBALS['wp_auto_test_alloptions_cache'] ) && array_key_exists( $option, $GLOBALS['wp_auto_test_alloptions_cache'] ) ) {
 				return $GLOBALS['wp_auto_test_alloptions_cache'][ $option ];
@@ -721,9 +944,9 @@ namespace {
 			if ( array_key_exists( $option, $GLOBALS['wp_auto_test_option_cache'] ) ) {
 				return $GLOBALS['wp_auto_test_option_cache'][ $option ];
 			}
-			if ( array_key_exists( $option, $GLOBALS['wp_auto_test_options'] ) ) {
-				wp_cache_set( $option, $GLOBALS['wp_auto_test_options'][ $option ], 'options' );
-				return $GLOBALS['wp_auto_test_options'][ $option ];
+			if ( array_key_exists( $option, $options ) ) {
+				wp_cache_set( $option, $options[ $option ], 'options' );
+				return $options[ $option ];
 			}
 			if ( ! is_array( $GLOBALS['wp_auto_test_notoptions_cache'] ) ) {
 				$GLOBALS['wp_auto_test_notoptions_cache'] = array();
@@ -732,8 +955,8 @@ namespace {
 			return $default;
 		}
 
-		return array_key_exists( $option, $GLOBALS['wp_auto_test_options'] )
-			? $GLOBALS['wp_auto_test_options'][ $option ]
+		return array_key_exists( $option, $options )
+			? $options[ $option ]
 			: ( 'permalink_structure' === $option ? $GLOBALS['wp_auto_test_site_info']['permalink_structure'] : $default );
 	}
 
@@ -748,7 +971,8 @@ namespace {
 			return false;
 		}
 
-		$GLOBALS['wp_auto_test_options'][ $option ] = $value;
+		$options =& wp_auto_test_options_for_blog();
+		$options[ $option ] = $value;
 		return true;
 	}
 
@@ -762,8 +986,21 @@ namespace {
 		if ( $GLOBALS['wp_auto_test_fail_delete_option'] ) {
 			return false;
 		}
-		unset( $GLOBALS['wp_auto_test_options'][ $option ] );
-		return true;
+		$options =& wp_auto_test_options_for_blog();
+		$existed = array_key_exists( $option, $options );
+		unset( $options[ $option ] );
+		$blog_id = get_current_blog_id();
+		$GLOBALS['wp_auto_test_option_rows'][ $blog_id ] = array_values(
+			array_filter(
+				$GLOBALS['wp_auto_test_option_rows'][ $blog_id ] ?? array(),
+				static fn( array $row ): bool => (string) ( $row['option_name'] ?? '' ) !== $option
+			)
+		);
+		if ( null !== $GLOBALS['wp_auto_test_delete_option_return_after_delete'] ) {
+			return (bool) $GLOBALS['wp_auto_test_delete_option_return_after_delete'];
+		}
+
+		return $existed;
 	}
 
 	function get_edit_post_link( $post, string $context = 'display' ): ?string {
@@ -1216,6 +1453,7 @@ namespace WPAuto\Connector {
 
 namespace {
 	require_once dirname( __DIR__ ) . '/src/Diagnostics/EnvironmentDiagnostics.php';
+	require_once dirname( __DIR__ ) . '/src/Uninstall/PrivateStateCleanup.php';
 	require_once dirname( __DIR__ ) . '/src/Content/ContentReadService.php';
 	require_once dirname( __DIR__ ) . '/src/Content/CreateDraftContract.php';
 	require_once dirname( __DIR__ ) . '/src/Content/UpdateDraftContract.php';
