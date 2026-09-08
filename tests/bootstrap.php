@@ -40,7 +40,25 @@ namespace {
 	$GLOBALS['wp_auto_test_thumbnail_ids']        = array();
 	$GLOBALS['wp_auto_test_attachment_urls']      = array();
 	$GLOBALS['wp_auto_test_attached_files']       = array();
+	$GLOBALS['wp_auto_test_original_image_paths'] = array();
 	$GLOBALS['wp_auto_test_attachment_metadata']  = array();
+	$GLOBALS['wp_auto_test_max_upload_size']      = 10485760;
+	$GLOBALS['wp_auto_test_allowed_mime_types']   = array(
+		'jpg|jpeg|jpe' => 'image/jpeg',
+		'png'          => 'image/png',
+		'gif'          => 'image/gif',
+		'webp'         => 'image/webp',
+		'avif'         => 'image/avif',
+	);
+	$GLOBALS['wp_auto_test_image_mime']           = 'image/png';
+	$GLOBALS['wp_auto_test_filetype_override']    = null;
+	$GLOBALS['wp_auto_test_tempnam_failure']      = false;
+	$GLOBALS['wp_auto_test_delete_file_failure']  = false;
+	$GLOBALS['wp_auto_test_media_handle_result']  = null;
+	$GLOBALS['wp_auto_test_media_handle_calls']   = 0;
+	$GLOBALS['wp_auto_test_media_transform']      = false;
+	$GLOBALS['wp_auto_test_next_attachment_id']   = 2000;
+	$GLOBALS['wp_auto_test_media_paths']          = array();
 	$GLOBALS['wp_auto_test_last_query_args']      = array();
 	$GLOBALS['wp_auto_test_query_args_history']   = array();
 	$GLOBALS['wp_auto_test_object_capabilities']  = array();
@@ -205,7 +223,7 @@ namespace {
 			$args  = $prepared['args'];
 			if ( false !== stripos( $query, 'SELECT option_id, option_name' ) ) {
 				$cursor  = (int) ( $args[0] ?? 0 );
-				$limit   = (int) ( $args[3] ?? 0 );
+				$limit   = (int) ( $args[4] ?? 0 );
 				$blog_id = $GLOBALS['wp_auto_test_current_blog_id'];
 				$rows    = $GLOBALS['wp_auto_test_option_rows'][ $blog_id ] ?? array();
 				usort( $rows, static fn( array $left, array $right ): int => (int) $left['option_id'] <=> (int) $right['option_id'] );
@@ -215,7 +233,7 @@ namespace {
 						static function ( array $row ) use ( $cursor ): bool {
 							$name = (string) ( $row['option_name'] ?? '' );
 							return (int) ( $row['option_id'] ?? 0 ) > $cursor
-								&& ( str_starts_with( $name, 'wp_auto_connector_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_mutation_audit_lock_' ) );
+								&& ( str_starts_with( $name, 'wp_auto_connector_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_media_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_mutation_audit_lock_' ) );
 						}
 					)
 				);
@@ -1195,12 +1213,101 @@ namespace {
 		return $GLOBALS['wp_auto_test_attached_files'][ $attachment_id ] ?? false;
 	}
 
+	function wp_get_original_image_path( int $attachment_id ) {
+		return $GLOBALS['wp_auto_test_original_image_paths'][ $attachment_id ] ?? get_attached_file( $attachment_id );
+	}
+
 	function wp_get_attachment_metadata( int $attachment_id ) {
 		return $GLOBALS['wp_auto_test_attachment_metadata'][ $attachment_id ] ?? false;
 	}
 
 	function wp_basename( string $path ): string {
 		return basename( str_replace( '\\', '/', $path ) );
+	}
+
+	function sanitize_file_name( string $filename ): string {
+		$filename = preg_replace( '/[^A-Za-z0-9._+-]/', '-', $filename );
+		return is_string( $filename ) ? trim( $filename, '-' ) : '';
+	}
+
+	function wp_max_upload_size(): int {
+		return (int) $GLOBALS['wp_auto_test_max_upload_size'];
+	}
+
+	function wp_tempnam( string $filename ) {
+		unset( $filename );
+		if ( $GLOBALS['wp_auto_test_tempnam_failure'] ) {
+			return false;
+		}
+		return tempnam( sys_get_temp_dir(), 'wp-auto-' );
+	}
+
+	function wp_delete_file( string $path ): void {
+		if ( ! $GLOBALS['wp_auto_test_delete_file_failure'] && file_exists( $path ) ) {
+			unlink( $path );
+		}
+	}
+
+	function get_allowed_mime_types( int $user_id = 0 ): array {
+		unset( $user_id );
+		return $GLOBALS['wp_auto_test_allowed_mime_types'];
+	}
+
+	function wp_check_filetype_and_ext( string $path, string $filename, array $mimes ): array {
+		unset( $path );
+		if ( is_array( $GLOBALS['wp_auto_test_filetype_override'] ) ) {
+			return $GLOBALS['wp_auto_test_filetype_override'];
+		}
+		$extension = strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
+		foreach ( $mimes as $extensions => $mime ) {
+			if ( in_array( $extension, explode( '|', $extensions ), true ) ) {
+				return array( 'ext' => $extension, 'type' => $mime, 'proper_filename' => false );
+			}
+		}
+		return array( 'ext' => false, 'type' => false, 'proper_filename' => false );
+	}
+
+	function wp_get_image_mime( string $path ) {
+		return file_exists( $path ) ? $GLOBALS['wp_auto_test_image_mime'] : false;
+	}
+
+	function media_handle_sideload( array $file, int $parent_id ) {
+		++$GLOBALS['wp_auto_test_media_handle_calls'];
+		if ( null !== $GLOBALS['wp_auto_test_media_handle_result'] ) {
+			return $GLOBALS['wp_auto_test_media_handle_result'];
+		}
+		$target = tempnam( sys_get_temp_dir(), 'wp-auto-media-' );
+		if ( false === $target || ! rename( $file['tmp_name'], $target ) ) {
+			return new WP_Error( 'upload_error', 'Upload failed.' );
+		}
+		$id = ++$GLOBALS['wp_auto_test_next_attachment_id'];
+		$GLOBALS['wp_auto_test_posts'][] = new WP_Post(
+			array(
+				'ID'             => $id,
+				'post_type'      => 'attachment',
+				'post_status'    => 'inherit',
+				'post_author'    => get_current_user_id(),
+				'post_parent'    => $parent_id,
+				'post_title'     => pathinfo( $file['name'], PATHINFO_FILENAME ),
+				'post_mime_type' => wp_get_image_mime( $target ),
+			)
+		);
+		$attached = $target;
+		if ( $GLOBALS['wp_auto_test_media_transform'] ) {
+			$attached = tempnam( sys_get_temp_dir(), 'wp-auto-scaled-' );
+			if ( false === $attached ) {
+				return new WP_Error( 'upload_error', 'Upload failed.' );
+			}
+			file_put_contents( $attached, 'core-transformed-image' );
+			$GLOBALS['wp_auto_test_media_paths'][] = $attached;
+		}
+		$GLOBALS['wp_auto_test_attachment_urls'][ $id ]             = 'https://example.test/uploads/' . rawurlencode( $file['name'] );
+		$GLOBALS['wp_auto_test_attached_files'][ $id ]              = $attached;
+		$GLOBALS['wp_auto_test_original_image_paths'][ $id ]        = $target;
+		$GLOBALS['wp_auto_test_attachment_metadata'][ $id ] = array( 'width' => 1, 'height' => 1 );
+		$GLOBALS['wp_auto_test_post_meta'][ $id ]['_wp_attachment_image_alt'] = '';
+		$GLOBALS['wp_auto_test_media_paths'][] = $target;
+		return $id;
 	}
 
 	function get_terms( array $args ) {
@@ -1495,6 +1602,26 @@ namespace WPAuto\Connector\Media {
 	function __( string $text ): string {
 		return $text;
 	}
+
+	function file_put_contents( string $filename, string $data, int $flags = 0 ) {
+		return \file_put_contents( $filename, $data, $flags );
+	}
+
+	function filesize( string $filename ) {
+		return \filesize( $filename );
+	}
+
+	function hash_file( string $algorithm, string $filename ) {
+		return \hash_file( $algorithm, $filename );
+	}
+
+	function file_exists( string $filename ): bool {
+		return \file_exists( $filename );
+	}
+
+	function is_file( string $filename ): bool {
+		return \is_file( $filename );
+	}
 }
 
 namespace WPAuto\Connector\Diagnostics {
@@ -1546,6 +1673,10 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Content/ContentMutationService.php';
 	require_once dirname( __DIR__ ) . '/src/Media/MediaReadContract.php';
 	require_once dirname( __DIR__ ) . '/src/Media/MediaReadService.php';
+	require_once dirname( __DIR__ ) . '/src/Media/MediaUploadContract.php';
+	require_once dirname( __DIR__ ) . '/src/Media/MediaIngestionIdempotencyStore.php';
+	require_once dirname( __DIR__ ) . '/src/Media/MediaMutationAuditStore.php';
+	require_once dirname( __DIR__ ) . '/src/Media/MediaUploadService.php';
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyReadService.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteHealthAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteInfoAbility.php';
@@ -1561,6 +1692,7 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaAbilityCategory.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaSearchAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaGetAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaUploadAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TaxonomyAbilityCategory.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/CategoriesListAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TagsListAbility.php';

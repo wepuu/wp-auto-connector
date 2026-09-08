@@ -12,6 +12,7 @@ use WPAuto\Connector\Abilities\Content\PageUpdateAbility;
 use WPAuto\Connector\Abilities\Content\PostUpdateAbility;
 use WPAuto\Connector\Abilities\Media\MediaGetAbility;
 use WPAuto\Connector\Abilities\Media\MediaSearchAbility;
+use WPAuto\Connector\Abilities\Media\MediaUploadAbility;
 use WPAuto\Connector\Plugin;
 
 /** Covers production registration of the Phase 1.4.1 abilities. */
@@ -32,6 +33,7 @@ final class PluginTest extends TestCase {
 		self::assertContains( PageUpdateAbility::class, $classes );
 		self::assertContains( MediaSearchAbility::class, $classes );
 		self::assertContains( MediaGetAbility::class, $classes );
-		self::assertCount( 14, $callbacks );
+		self::assertContains( MediaUploadAbility::class, $classes );
+		self::assertCount( 15, $callbacks );
 	}
 }

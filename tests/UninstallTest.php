@@ -68,6 +68,7 @@ final class UninstallTest extends TestCase {
 	 */
 	public function test_single_site_removes_only_exact_private_state(): void {
 		$valid_idempotency = $this->idempotency_name( 'a' );
+		$valid_media       = $this->media_idempotency_name( 'c' );
 		$valid_lock        = $this->audit_lock_name( 'b' );
 		$preserved         = array(
 			$this->idempotency_name( 'A' ),
@@ -80,12 +81,15 @@ final class UninstallTest extends TestCase {
 			$this->idempotency_name( 'a' ) . '-suffix',
 			'wp_auto_connector_idempotency_' . str_repeat( 'a', 31 ) . ':' . str_repeat( 'a', 32 ),
 			'wp_auto_connector_other_' . str_repeat( 'f', 64 ),
+			$this->media_idempotency_name( 'A' ),
+			$this->media_idempotency_name( 'd' ) . '-suffix',
 		);
 
 		$this->seed_option( 1, 1, $valid_idempotency );
-		$this->seed_option( 1, 2, $valid_lock );
+		$this->seed_option( 1, 2, $valid_media );
+		$this->seed_option( 1, 3, $valid_lock );
 		foreach ( $preserved as $index => $name ) {
-			$this->seed_option( 1, $index + 3, $name );
+			$this->seed_option( 1, $index + 4, $name );
 		}
 		$GLOBALS['wp_auto_test_postmeta_rows'][1] = array(
 			array(
@@ -94,6 +98,10 @@ final class UninstallTest extends TestCase {
 			),
 			array(
 				'meta_id'  => '2',
+				'meta_key' => '_wp_auto_connector_media_mutation_audit',
+			),
+			array(
+				'meta_id'  => '3',
 				'meta_key' => '_unrelated_meta',
 			),
 		);
@@ -101,6 +109,7 @@ final class UninstallTest extends TestCase {
 		self::assertTrue( ( new PrivateStateCleanup() )->run() );
 		$options =& \wp_auto_test_options_for_blog( 1 );
 		self::assertArrayNotHasKey( $valid_idempotency, $options );
+		self::assertArrayNotHasKey( $valid_media, $options );
 		self::assertArrayNotHasKey( $valid_lock, $options );
 		foreach ( $preserved as $name ) {
 			self::assertArrayHasKey( $name, $options );
@@ -108,7 +117,7 @@ final class UninstallTest extends TestCase {
 		self::assertSame(
 			array(
 				array(
-					'meta_id'  => '2',
+					'meta_id'  => '3',
 					'meta_key' => '_unrelated_meta',
 				),
 			),
@@ -131,8 +140,9 @@ final class UninstallTest extends TestCase {
 		$first = $GLOBALS['wp_auto_test_db_prepared_queries'][0];
 		self::assertSame( 0, $first['args'][0] );
 		self::assertSame( 'wp\\_auto\\_connector\\_idempotency\\_%', $first['args'][1] );
-		self::assertSame( 'wp\\_auto\\_connector\\_mutation\\_audit\\_lock\\_%', $first['args'][2] );
-		self::assertSame( 100, $first['args'][3] );
+		self::assertSame( 'wp\\_auto\\_connector\\_media\\_idempotency\\_%', $first['args'][2] );
+		self::assertSame( 'wp\\_auto\\_connector\\_mutation\\_audit\\_lock\\_%', $first['args'][3] );
+		self::assertSame( 100, $first['args'][4] );
 	}
 
 	/**
@@ -199,7 +209,7 @@ final class UninstallTest extends TestCase {
 	 */
 	public function test_false_audit_delete_with_verified_absence_is_complete(): void {
 		self::assertTrue( ( new PrivateStateCleanup() )->run() );
-		self::assertSame( 1, $GLOBALS['wp_auto_test_delete_post_meta_calls'] );
+		self::assertSame( 2, $GLOBALS['wp_auto_test_delete_post_meta_calls'] );
 	}
 
 	/**
@@ -249,7 +259,7 @@ final class UninstallTest extends TestCase {
 
 		self::assertFalse( ( new PrivateStateCleanup() )->run() );
 		self::assertFalse( $GLOBALS['wp_auto_test_db_suppress_state'] );
-		self::assertSame( array( true, false, true, false, true, false ), $GLOBALS['wp_auto_test_db_suppress_history'] );
+		self::assertSame( array( true, false, true, false, true, false, true, false ), $GLOBALS['wp_auto_test_db_suppress_history'] );
 	}
 
 	/**
@@ -287,7 +297,7 @@ final class UninstallTest extends TestCase {
 		self::assertFalse( $result );
 		self::assertSame( '', $output );
 		self::assertFalse( $GLOBALS['wp_auto_test_db_suppress_state'] );
-		self::assertSame( array( true, false, true, false, true, false ), $GLOBALS['wp_auto_test_db_suppress_history'] );
+		self::assertSame( array( true, false, true, false, true, false, true, false ), $GLOBALS['wp_auto_test_db_suppress_history'] );
 	}
 
 	/**
@@ -564,6 +574,15 @@ final class UninstallTest extends TestCase {
 	 */
 	private function idempotency_name( string $character ): string {
 		return 'wp_auto_connector_idempotency_' . str_repeat( $character, 64 );
+	}
+
+	/**
+	 * Build one canonical media idempotency option name.
+	 *
+	 * @param string $character Repeated lowercase hexadecimal character.
+	 */
+	private function media_idempotency_name( string $character ): string {
+		return 'wp_auto_connector_media_idempotency_' . str_repeat( $character, 64 );
 	}
 
 	/**

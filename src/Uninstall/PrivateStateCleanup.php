@@ -12,15 +12,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Removes only the private persistent families approved by ADR-004.
+ * Removes only the private persistent families approved by ADR-004/ADR-005.
  */
 final class PrivateStateCleanup {
-	private const IDEMPOTENCY_PREFIX = 'wp_auto_connector_idempotency_';
-	private const AUDIT_LOCK_PREFIX  = 'wp_auto_connector_mutation_audit_lock_';
-	private const AUDIT_META_KEY     = '_wp_auto_connector_mutation_audit';
+	private const IDEMPOTENCY_PREFIX       = 'wp_auto_connector_idempotency_';
+	private const MEDIA_IDEMPOTENCY_PREFIX = 'wp_auto_connector_media_idempotency_';
+	private const AUDIT_LOCK_PREFIX        = 'wp_auto_connector_mutation_audit_lock_';
+	private const AUDIT_META_KEYS          = array( '_wp_auto_connector_mutation_audit', '_wp_auto_connector_media_mutation_audit' );
 
-	private const IDEMPOTENCY_PATTERN = '/\Awp_auto_connector_idempotency_[0-9a-f]{64}\z/';
-	private const AUDIT_LOCK_PATTERN  = '/\Awp_auto_connector_mutation_audit_lock_[0-9a-f]{64}\z/';
+	private const IDEMPOTENCY_PATTERN       = '/\Awp_auto_connector_idempotency_[0-9a-f]{64}\z/';
+	private const MEDIA_IDEMPOTENCY_PATTERN = '/\Awp_auto_connector_media_idempotency_[0-9a-f]{64}\z/';
+	private const AUDIT_LOCK_PATTERN        = '/\Awp_auto_connector_mutation_audit_lock_[0-9a-f]{64}\z/';
 
 	private const OPTION_BATCH_SIZE    = 100;
 	private const SITE_BATCH_SIZE      = 50;
@@ -127,13 +129,15 @@ final class PrivateStateCleanup {
 	 */
 	private function read_option_batch( int $cursor ): ?array {
 		try {
-			$idempotency_like = $this->wpdb->esc_like( self::IDEMPOTENCY_PREFIX ) . '%';
-			$audit_lock_like  = $this->wpdb->esc_like( self::AUDIT_LOCK_PREFIX ) . '%';
-			$prepared         = $this->wpdb->prepare(
+			$idempotency_like       = $this->wpdb->esc_like( self::IDEMPOTENCY_PREFIX ) . '%';
+			$media_idempotency_like = $this->wpdb->esc_like( self::MEDIA_IDEMPOTENCY_PREFIX ) . '%';
+			$audit_lock_like        = $this->wpdb->esc_like( self::AUDIT_LOCK_PREFIX ) . '%';
+			$prepared               = $this->wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT option_id, option_name FROM {$this->wpdb->options} WHERE option_id > %d AND ( option_name LIKE %s OR option_name LIKE %s ) ORDER BY option_id ASC LIMIT %d",
+				"SELECT option_id, option_name FROM {$this->wpdb->options} WHERE option_id > %d AND ( option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s ) ORDER BY option_id ASC LIMIT %d",
 				$cursor,
 				$idempotency_like,
+				$media_idempotency_like,
 				$audit_lock_like,
 				self::OPTION_BATCH_SIZE
 			);
@@ -145,29 +149,31 @@ final class PrivateStateCleanup {
 	}
 
 	/**
-	 * Remove and independently verify the exact audit metadata key.
+	 * Remove and independently verify every exact audit metadata key.
 	 */
 	private function cleanup_audit_metadata(): bool {
 		$complete = true;
-		try {
-			delete_post_meta_by_key( self::AUDIT_META_KEY );
-		} catch ( \Throwable ) {
-			$complete = false;
-		}
+		foreach ( self::AUDIT_META_KEYS as $meta_key ) {
+			try {
+				delete_post_meta_by_key( $meta_key );
+			} catch ( \Throwable ) {
+				$complete = false;
+			}
 
-		try {
-			$prepared = $this->wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT meta_id FROM {$this->wpdb->postmeta} WHERE meta_key = %s ORDER BY meta_id ASC LIMIT 1",
-				self::AUDIT_META_KEY
-			);
-		} catch ( \Throwable ) {
-			return false;
-		}
+			try {
+				$prepared = $this->wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT meta_id FROM {$this->wpdb->postmeta} WHERE meta_key = %s ORDER BY meta_id ASC LIMIT 1",
+					$meta_key
+				);
+			} catch ( \Throwable ) {
+				return false;
+			}
 
-		$rows = $this->read_rows( $prepared, array( 'meta_id' ), 1 );
-		if ( null === $rows || 0 !== count( $rows ) ) {
-			return false;
+			$rows = $this->read_rows( $prepared, array( 'meta_id' ), 1 );
+			if ( null === $rows || 0 !== count( $rows ) ) {
+				return false;
+			}
 		}
 
 		return $complete;
@@ -451,6 +457,8 @@ final class PrivateStateCleanup {
 	 * @param string $option_name Candidate option name.
 	 */
 	private function is_owned_option_name( string $option_name ): bool {
-		return 1 === preg_match( self::IDEMPOTENCY_PATTERN, $option_name ) || 1 === preg_match( self::AUDIT_LOCK_PATTERN, $option_name );
+		return 1 === preg_match( self::IDEMPOTENCY_PATTERN, $option_name )
+			|| 1 === preg_match( self::MEDIA_IDEMPOTENCY_PATTERN, $option_name )
+			|| 1 === preg_match( self::AUDIT_LOCK_PATTERN, $option_name );
 	}
 }

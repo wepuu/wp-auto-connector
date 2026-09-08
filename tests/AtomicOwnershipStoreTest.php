@@ -26,14 +26,17 @@ final class AtomicOwnershipStoreTest extends TestCase {
 		$create  = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/CreateIdempotencyStore.php';" );
 		$audit   = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/MutationAuditStore.php';" );
 		$service = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/ContentMutationService.php';" );
+		$media   = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Media/MediaIngestionIdempotencyStore.php';" );
 
 		self::assertNotFalse( $atomic );
 		self::assertNotFalse( $create );
 		self::assertNotFalse( $audit );
 		self::assertNotFalse( $service );
+		self::assertNotFalse( $media );
 		self::assertTrue( $atomic < $create );
 		self::assertTrue( $create < $audit );
 		self::assertTrue( $audit < $service );
+		self::assertTrue( $atomic < $media );
 	}
 
 	/**
@@ -170,9 +173,22 @@ final class AtomicOwnershipStoreTest extends TestCase {
 	public function test_invalid_namespace_value_pairs_fail_before_sql(): void {
 		$store = new AtomicOwnershipStore();
 		self::assertSame( 'unresolved', $store->acquire( $this->idempotency_name(), wp_generate_uuid4() )['status'] );
+		self::assertSame( 'unresolved', $store->acquire( $this->media_idempotency_name(), $this->initial_record() )['status'] );
+		self::assertSame( 'unresolved', $store->acquire( $this->idempotency_name(), $this->media_initial_record() )['status'] );
 		self::assertSame( 'unresolved', $store->acquire( $this->audit_name(), $this->initial_record() )['status'] );
 		self::assertSame( 'unresolved', $store->acquire( $this->audit_name(), 'not-a-uuid' )['status'] );
 		self::assertSame( 0, $GLOBALS['wp_auto_test_db_query_calls'] );
+	}
+
+	/** Media claims use the dedicated namespace and exact Ability family. */
+	public function test_media_idempotency_namespace_accepts_only_media_upload_claims(): void {
+		$store  = new AtomicOwnershipStore();
+		$name   = $this->media_idempotency_name();
+		$record = $this->media_initial_record();
+
+		self::assertSame( 'acquired', $store->acquire( $name, $record )['status'] );
+		self::assertSame( $record, $GLOBALS['wp_auto_test_options'][ $name ] );
+		self::assertSame( 'off', $GLOBALS['wp_auto_test_option_autoload'][ $name ] );
 	}
 
 	/**
@@ -393,6 +409,18 @@ final class AtomicOwnershipStoreTest extends TestCase {
 	 */
 	private function audit_name(): string {
 		return 'wp_auto_connector_mutation_audit_lock_' . str_repeat( 'b', 64 );
+	}
+
+	/** Return a deterministic media idempotency option name. */
+	private function media_idempotency_name(): string {
+		return 'wp_auto_connector_media_idempotency_' . str_repeat( 'c', 64 );
+	}
+
+	/** Return a valid initial media claim record. */
+	private function media_initial_record(): array {
+		$record            = $this->initial_record();
+		$record['ability'] = 'wp-auto/media-upload';
+		return $record;
 	}
 
 	/**

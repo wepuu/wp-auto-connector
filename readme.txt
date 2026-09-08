@@ -18,9 +18,11 @@ The project is designed to expose carefully scoped WordPress capabilities to com
 
 Phase 1.2 provides a validated authenticated direct MCP endpoint at `/wp-json/wp-auto/mcp` with read-only site-health, site-info, posts-search, post-get, pages-search, page-get, categories-list, and tags-list tools. It uses normal WordPress authentication and requires the authenticated user to have the `read` capability. Non-public posts and pages also require WordPress object-level authorization. Application Passwords over HTTPS are the remote access baseline.
 
-Phase 1.3 is formally sealed on `main` after contract, Create Draft, `modified_gmt` compatibility, Draft Update, mutation security, and full integration validation. The current Direct MCP runtime exposes exactly twelve explicitly allowlisted tools, including authenticated Post/Page Create Draft and draft-only Post/Page Update. Create operations always produce drafts owned by the authenticated user and use persistent idempotency claims.
+Phase 1.3 is formally sealed on `main` after contract, Create Draft, `modified_gmt` compatibility, Draft Update, mutation security, and full integration validation. Its twelve-tool baseline includes authenticated Post/Page Create Draft and draft-only Post/Page Update. Create operations always produce drafts owned by the authenticated user and use persistent idempotency claims.
 
-No publish, delete, arbitrary content write, cloud, telemetry, or automation operation is included. The scoped mutation boundary is limited to Create Draft and authorized draft-only Update.
+Phase 1.4 adds bounded, permission-aware image Media Search/Get and one authenticated image Upload tool. Upload accepts only strict canonical Base64 for JPEG, PNG, GIF, WebP, or AVIF, enforces the smaller of the site's upload limit and 10 MiB, uses WordPress Core media APIs, and supports only an optional editable Post/Page draft parent. Persistent idempotency prevents duplicate retries and private attribution is bounded.
+
+No publish, delete, arbitrary content/file write, remote URL import, cloud, telemetry, or automation operation is included. The media upload does not contact an external service.
 
 = Privacy and external services =
 
@@ -58,4 +60,5 @@ The WordPress connector is distributed under GPLv2 or later. Optional hosted WP-
 * Added bounded, permission-aware `wp-auto-pages-search` and `wp-auto-page-get` MCP tools.
 * Added bounded `wp-auto-categories-list` and `wp-auto-tags-list` MCP tools.
 * Added authenticated `wp-auto-post-create-draft` and `wp-auto-page-create-draft` MCP tools with capability checks, persistent idempotency, invariant guards, and local mutation attribution.
+* Added bounded, permission-aware `wp-auto-media-search`, `wp-auto-media-get`, and authenticated `wp-auto-media-upload` image tools.
 * Added authenticated transport and per-ability `read` capability checks.

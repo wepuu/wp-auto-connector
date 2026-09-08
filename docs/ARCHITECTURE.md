@@ -149,6 +149,16 @@ never receive or provide server paths. The existing `AtomicOwnershipStore` may
 arbitrate only the fixed private media-ingestion idempotency option family and
 does not authorize direct SQL against attachments, postmeta, or files.
 
+Phase 1.4.2 Upload accepts one strict canonical Base64 image bounded by the
+smaller of 10 MiB and the Core upload limit. It acquires a site/actor/Ability/key
+claim before writing a WordPress-owned temporary file, rechecks permission and
+optional draft-parent authorization immediately before Core sideload, and
+verifies the final attachment, author, parent, MIME, file hash, and canonical
+Media Get output. Deterministic pre-Core failures clean the owned temporary file
+and may release the exact initial claim; any possible Core/file/audit ambiguity
+retains ownership and fails closed. Media attribution is separate, fixed-schema,
+and bounded to the newest 20 events per attachment.
+
 Remote image import adds a dedicated policy layer before the WordPress HTTP
 API. It validates public DNS destinations and every redirect, fixes ports and
 resource limits, prevents filters from relaxing the WP-Auto boundary, and then
