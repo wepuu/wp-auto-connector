@@ -55,14 +55,18 @@ Publishing, deletion, arbitrary status changes, and generic WordPress mutation a
 
 ## Phase 1.4
 
-| Ability | Type | WordPress capability baseline |
-| --- | --- | --- |
-| `wp-auto/media-search` | Read-only | `upload_files` or narrower read policy |
-| `wp-auto/media-get` | Read-only | visibility policy |
-| `wp-auto/media-upload` | Mutation | `upload_files` |
-| `wp-auto/media-import-url` | Mutation/open-world | `upload_files` + SSRF/media policy |
-| `wp-auto/media-update` | Mutation | attachment edit capability |
-| `wp-auto/media-set-featured` | Mutation | target post edit capability |
+Phase 1.4.0 freezes the planned public contracts in `docs/PHASE_1_4_MEDIA_CONTRACTS.md` and safety model in `docs/ADR-005-MEDIA-SAFETY.md`. It adds no runtime tool; the current Direct MCP allowlist remains exactly twelve.
+
+| Ability | MCP tool | Type | WordPress capability baseline | Status |
+| --- | --- | --- | --- | --- |
+| `wp-auto/media-search` | `wp-auto-media-search` | Read-only | `upload_files`, attachment `read_post`, parent visibility | Frozen; planned Phase 1.4.1 |
+| `wp-auto/media-get` | `wp-auto-media-get` | Read-only | `upload_files`, attachment `read_post`, parent visibility | Frozen; planned Phase 1.4.1 |
+| `wp-auto/media-upload` | `wp-auto-media-upload` | Image creation | `upload_files`; optional parent `edit_post` | Frozen; planned Phase 1.4.2 |
+| `wp-auto/media-update` | `wp-auto-media-update` | Mutation | `upload_files`, attachment `edit_post` | Frozen; planned Phase 1.4.3 |
+| `wp-auto/media-set-featured` | `wp-auto-media-set-featured` | Mutation | fixed type baseline plus target `edit_post`; attachment `read_post` | Frozen; planned Phase 1.4.4 |
+| `wp-auto/media-import-url` | `wp-auto-media-import-url` | Mutation/open-world | `upload_files`; optional parent `edit_post`; SSRF/media policy | Frozen; planned Phase 1.4.5 |
+
+The fixed implementation order produces exact allowlist counts of 14, 15, 16, 17, and 18. No generic media, file, URL-fetch, REST, filesystem, arbitrary metadata, resource, prompt, or third-party capability is authorized.
 
 ## Phase 1.5
 

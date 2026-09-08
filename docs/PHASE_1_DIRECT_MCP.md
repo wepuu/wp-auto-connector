@@ -62,6 +62,12 @@ Before Phase 1.3 is considered complete:
 
 Remote URL media import is not a generic URL fetcher. It must include SSRF controls, redirect re-validation, private/reserved IP blocking, file-size/type limits, WordPress media validation, and timeouts.
 
+Phase 1.4.0 freezes the detailed image-only contracts in
+`PHASE_1_4_MEDIA_CONTRACTS.md` and the independent SSRF, ingestion,
+authorization, idempotency, concurrency, cleanup, audit, and disclosure
+decisions in `ADR-005-MEDIA-SAFETY.md`. No media tool or outbound request is
+present until its later implementation checkpoint.
+
 ## Phase 1 final acceptance scenario
 
 From a compatible AI client:

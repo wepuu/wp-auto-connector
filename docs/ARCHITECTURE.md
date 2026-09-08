@@ -140,3 +140,18 @@ WP-Auto Ability Layer
 ```
 
 Direct MCP and cloud MCP must invoke the same abilities and permission checks.
+
+## Phase 1.4 media boundary
+
+Phase 1.4 media operations stay behind WordPress Abilities and small domain
+services. Upload and sideload use WordPress temporary-file/media APIs; clients
+never receive or provide server paths. The existing `AtomicOwnershipStore` may
+arbitrate only the fixed private media-ingestion idempotency option family and
+does not authorize direct SQL against attachments, postmeta, or files.
+
+Remote image import adds a dedicated policy layer before the WordPress HTTP
+API. It validates public DNS destinations and every redirect, fixes ports and
+resource limits, prevents filters from relaxing the WP-Auto boundary, and then
+passes the completed temporary file through the same Core media validation as
+local upload. It is not a generic HTTP client or proxy. See
+`docs/PHASE_1_4_MEDIA_CONTRACTS.md` and `docs/ADR-005-MEDIA-SAFETY.md`.

@@ -47,6 +47,16 @@ Before any WP-Auto/external service request ships:
 - [ ] Disconnect/revoke behavior is implemented.
 - [ ] No analytics/telemetry is enabled without consent.
 
+Caller-triggered Phase 1.4 remote media import is not a WP-Auto Cloud service,
+but it does make the site contact a caller-selected third-party host. Before
+that Ability ships:
+
+- [ ] `readme.txt` explains the explicit trigger and image-import purpose.
+- [ ] It explains that the destination sees the site's egress IP and WordPress HTTP user agent.
+- [ ] It states that no WP-Auto Cloud service receives the request or imported image.
+- [ ] There is no background fetch, telemetry, forwarded credential, cookie, or caller-selected header.
+- [ ] The independent SSRF, redirect, DNS, port, timeout, byte, MIME, and cleanup tests pass.
+
 ## MCP security
 
 - [ ] Remote MCP transport requires appropriate authentication.

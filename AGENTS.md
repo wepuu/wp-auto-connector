@@ -12,7 +12,7 @@ Phase 1.1 is complete: the direct MCP server foundation proves the authenticated
 
 Phase 1.2 is complete: all eight read-only tools passed the frozen contract, permission, privacy, schema, bounded-query, and live MCP validation gates.
 
-Phase 1.3.0 through Phase 1.3.4 are formally sealed on `main`. Phase 1.3.3 resolved SEC-1, SEC-2, and SEC-3; landed the ADR-003 atomic ownership runtime and ADR-004 uninstall cleanup; enforced HTTPS for remote Direct MCP with an exact local-development exception; and completed a zero-finding exact-main security audit. Phase 1.3.4 then completed full real-WordPress and Streamable HTTP mutation integration validation without changing the exact twelve-tool runtime. Phase 1.4 Media is the next roadmap checkpoint and has not started. Do not implement publishing, deletion, media, taxonomy mutation, SEO, Cloud, or later roadmap work unless an explicit later task authorizes it.
+Phase 1.3.0 through Phase 1.3.4 are formally sealed on `main`. Phase 1.3.3 resolved SEC-1, SEC-2, and SEC-3; landed the ADR-003 atomic ownership runtime and ADR-004 uninstall cleanup; enforced HTTPS for remote Direct MCP with an exact local-development exception; and completed a zero-finding exact-main security audit. Phase 1.3.4 then completed full real-WordPress and Streamable HTTP mutation integration validation without changing the exact twelve-tool runtime. Phase 1.4.0 freezes the Media contracts and ADR-005 safety model when its documentation lands on `main`; it adds no runtime tool. Phase 1.4.1 Media Search/Get is the next implementation checkpoint. Do not implement later Phase 1.4 checkpoints, publishing, deletion, taxonomy mutation, SEO, Cloud, or later roadmap work unless an explicit later task authorizes it.
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
@@ -100,6 +100,20 @@ Phase 1 is not complete until at least Claude Code and one additional standard M
 - Core-managed default category assignment, revisions, hooks, KSES, slashing, and slug canonicalization are allowed; the client does not gain control of those fields or mechanisms.
 - Private local mutation attribution is bounded to the most recent 20 events per object and must never contain content, raw idempotency keys, request bodies, or credentials. Audit retention is not authoritative idempotency state, and pruning it must never weaken an idempotency guarantee.
 - Publishing, deletion, arbitrary status changes, arbitrary metadata/query arguments, Cloud, telemetry, and external WP-Auto requests remain out of scope.
+
+## Phase 1.4 media invariants
+
+- `docs/PHASE_1_4_MEDIA_CONTRACTS.md` is the authoritative public contract; `docs/ADR-005-MEDIA-SAFETY.md` records the safety decisions.
+- Phase 1.4.0 is documentation-only and keeps the exact twelve-tool runtime. Media tools may enter the allowlist only at their named implementation checkpoint.
+- Phase 1.4 is image-only: JPEG, PNG, GIF, WebP, and AVIF must pass both the authenticated user's effective Core upload policy and the fixed WP-Auto allowlist/real-file checks. SVG, archives, executable or arbitrary media types remain unavailable.
+- Media Search/Get require `upload_files`, final attachment `read_post`, conservative parent visibility, bounded logical pagination, and existence-hiding errors.
+- Upload/import accept one image, enforce the smaller of 10 MiB and `wp_max_upload_size()`, use WordPress-owned temporary files/Core media APIs, and never accept a client filesystem path or arbitrary upload override.
+- Upload/import use persistent atomic idempotency scoped to site, actor, Ability, and key. Only the existing ADR-003 `AtomicOwnershipStore` may arbitrate the fixed private media-idempotency option family; this grants no direct-SQL media or postmeta authority.
+- Metadata update permits only title, alt text, caption, and description on an authorized supported image and uses best-effort raw `modified_gmt` concurrency.
+- Featured-image assignment is limited to authorized Post/Page drafts and uses the expected current featured-media ID; it cannot remove a featured image or modify published/custom content.
+- Remote URL import is implemented last. It requires independent SSRF protection, every-redirect revalidation, strict public IPv4/IPv6 destinations, DNS/connection consistency, ports 80/443 only, fixed time/redirect/byte limits, no forwarded credentials, and final Core file validation.
+- Media audit is private, content/URL/path-free, bounded to the most recent 20 events per audited object, and never authoritative idempotency state.
+- Remote import remains caller-triggered and must be disclosed in `readme.txt` before it ships. It must never become background fetching or a WP-Auto Cloud request.
 
 ## Architecture rules
 
