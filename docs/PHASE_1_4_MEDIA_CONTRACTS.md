@@ -1,6 +1,6 @@
 # Phase 1.4 Media Contracts
 
-Status: **Phase 1.4.0 through Phase 1.4.3 sealed; Phase 1.4.4 Featured Image Assignment in progress**
+Status: **Phase 1.4.0 through Phase 1.4.4 sealed; Phase 1.4.5 remains planned**
 
 Contract date: 2026-09-08
 
@@ -353,8 +353,9 @@ third-party tool.
 7. **1.4.6:** complete automated, wp-env, Streamable HTTP, Plugin Check where
    available, security, state-integrity, cleanup, and exact-allowlist gates.
 
-Phase 1.4.4 authorizes only draft Featured Image Assignment production PHP,
-test support, extension of the existing private media audit event schema,
-Ability registration, and the exact seventeen-tool allowlist. It adds no
-dependency, external request, URL import, publishing, deletion, new persistent
-state family, later roadmap work, or release authorization.
+Phase 1.4.4 is implemented and validated on main with only draft Featured Image
+Assignment production PHP, test support, extension of the existing private
+media audit event schema, Ability registration, and the exact seventeen-tool
+allowlist. It adds no dependency, external request, URL import, publishing,
+deletion, new persistent state family, later roadmap work, or release
+authorization.

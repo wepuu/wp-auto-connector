@@ -1,12 +1,12 @@
 # Phase 1.4.4 Validation — Featured Image Assignment
 
-Status: **IMPLEMENTED AND VALIDATED ON THE FEATURE BRANCH**
+Status: **COMPLETE; FORMALLY SEALED ON MAIN**
 
 Validation date: 2026-09-08
 
-Base runtime: main@fce5ec7
+Base runtime: main@9a05356
 
-Validation branch: feat/phase-1-4-featured-image
+Validation branch: main
 
 This checkpoint adds only wp-auto/media-set-featured. It does not add remote
 URL import, publishing, deletion, taxonomy mutation, SEO, Cloud, telemetry,

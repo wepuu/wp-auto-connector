@@ -91,11 +91,11 @@ Delivery checkpoints:
 2. **Phase 1.4.1 - Media Search/Get (complete; formally sealed):** implements bounded, permission-aware supported-image discovery/retrieval, validates the real Streamable HTTP surface, and expands the explicit allowlist to exactly fourteen tools.
 3. **Phase 1.4.2 - Authenticated Image Upload (complete; formally sealed):** implements one bounded Base64 image upload, optional authorized draft parent association, persistent idempotency, Core validation, private bounded audit, uninstall cleanup, and the fifteen-tool allowlist.
 4. **Phase 1.4.3 - Media Metadata Update (complete; formally sealed):** implements and validates allowlisted image title/alt/caption/description updates with object authorization, best-effort concurrency, protected attachment invariants, private bounded audit, and the sixteen-tool allowlist.
-5. **Phase 1.4.4 - Featured Image Assignment (in progress):** implement idempotent assignment for authorized Post/Page drafts and the seventeen-tool allowlist.
+5. **Phase 1.4.4 - Featured Image Assignment (complete; formally sealed):** implemented and validated idempotent assignment for authorized Post/Page drafts and the seventeen-tool allowlist.
 6. **Phase 1.4.5 - Remote URL Import:** implement the open-world downloader last, with the frozen SSRF/DNS/redirect/time/byte/MIME policy and the eighteen-tool allowlist.
 7. **Phase 1.4.6 - Integration/Security Validation:** validate automated and live wp-env/Streamable HTTP behavior, exact schemas/permissions/privacy/allowlist, ingestion concurrency, filesystem cleanup, SSRF matrix, state integrity, Plugin Check where available, and seal Phase 1.4.
 
-The authoritative contract is `docs/PHASE_1_4_MEDIA_CONTRACTS.md`; the accepted safety decision is `docs/ADR-005-MEDIA-SAFETY.md`; checkpoint evidence is recorded in `docs/PHASE_1_4_0_VALIDATION.md` through `docs/PHASE_1_4_3_VALIDATION.md`. Phase 1.4 remains image-only and does not authorize publishing, deletion, generic file/network access, taxonomy mutation, SEO, Cloud, telemetry, or later roadmap work.
+The authoritative contract is `docs/PHASE_1_4_MEDIA_CONTRACTS.md`; the accepted safety decision is `docs/ADR-005-MEDIA-SAFETY.md`; checkpoint evidence is recorded in `docs/PHASE_1_4_0_VALIDATION.md` through `docs/PHASE_1_4_4_VALIDATION.md`. Phase 1.4 remains image-only and does not authorize publishing, deletion, generic file/network access, taxonomy mutation, SEO, Cloud, telemetry, or later roadmap work.
 
 ### Phase 1.5 - Taxonomy
 
