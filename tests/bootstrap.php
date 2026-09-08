@@ -895,7 +895,7 @@ namespace {
 			return false;
 		}
 
-		$GLOBALS['wp_auto_test_post_meta'][ $post_id ][ $meta_key ] = $value;
+		$GLOBALS['wp_auto_test_post_meta'][ $post_id ][ $meta_key ] = wp_unslash( $value );
 		if ( $GLOBALS['wp_auto_test_update_meta_exception_after_write'] instanceof \Throwable ) {
 			$exception = $GLOBALS['wp_auto_test_update_meta_exception_after_write'];
 			$GLOBALS['wp_auto_test_update_meta_exception_after_write'] = null;
@@ -1677,6 +1677,8 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Media/MediaIngestionIdempotencyStore.php';
 	require_once dirname( __DIR__ ) . '/src/Media/MediaMutationAuditStore.php';
 	require_once dirname( __DIR__ ) . '/src/Media/MediaUploadService.php';
+	require_once dirname( __DIR__ ) . '/src/Media/MediaUpdateContract.php';
+	require_once dirname( __DIR__ ) . '/src/Media/MediaUpdateService.php';
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyReadService.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteHealthAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteInfoAbility.php';
@@ -1693,6 +1695,7 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaSearchAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaGetAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaUploadAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaUpdateAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TaxonomyAbilityCategory.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/CategoriesListAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TagsListAbility.php';

@@ -39,6 +39,8 @@ require_once WP_AUTO_CONNECTOR_DIR . 'src/Media/MediaUploadContract.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Media/MediaIngestionIdempotencyStore.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Media/MediaMutationAuditStore.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Media/MediaUploadService.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Media/MediaUpdateContract.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Media/MediaUpdateService.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Taxonomy/TaxonomyReadService.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Site/SiteHealthAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Site/SiteInfoAbility.php';
@@ -55,6 +57,7 @@ require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Media/MediaAbilityCategory.p
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Media/MediaSearchAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Media/MediaGetAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Media/MediaUploadAbility.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Media/MediaUpdateAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Taxonomy/TaxonomyAbilityCategory.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Taxonomy/CategoriesListAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Taxonomy/TagsListAbility.php';

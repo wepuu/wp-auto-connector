@@ -135,24 +135,51 @@ final class MediaMutationAuditStore {
 	}
 
 	/**
-	 * Validate one exact upload event.
+	 * Validate one exact media mutation event.
 	 *
 	 * @param array<string, mixed> $event Candidate event.
 	 */
 	private function is_valid_event( array $event ): bool {
-		$expected = array( 'version', 'operation', 'ability', 'actor_user_id', 'target_object_id', 'timestamp_gmt', 'fingerprint' );
-		$keys     = array_keys( $event );
+		$base = array( 'version', 'operation', 'ability', 'actor_user_id', 'target_object_id', 'timestamp_gmt' );
+		if ( 'upload' === ( $event['operation'] ?? null ) ) {
+			$expected = array_merge( $base, array( 'fingerprint' ) );
+		} elseif ( 'update' === ( $event['operation'] ?? null ) ) {
+			$expected = array_merge( $base, array( 'expected_modified_gmt', 'result_modified_gmt' ) );
+		} else {
+			return false;
+		}
+		$keys = array_keys( $event );
 		sort( $expected );
 		sort( $keys );
 
-		return $keys === $expected
-			&& 1 === $event['version']
-			&& 'upload' === $event['operation']
-			&& 'wp-auto/media-upload' === $event['ability']
-			&& is_int( $event['actor_user_id'] ) && $event['actor_user_id'] >= 1
-			&& is_int( $event['target_object_id'] ) && $event['target_object_id'] >= 1
-			&& is_string( $event['fingerprint'] ) && 1 === preg_match( '/^[0-9a-f]{64}$/D', $event['fingerprint'] )
-			&& is_string( $event['timestamp_gmt'] ) && $this->valid_timestamp( $event['timestamp_gmt'] );
+		if ( $keys !== $expected
+			|| 1 !== $event['version']
+			|| ! is_int( $event['actor_user_id'] ) || $event['actor_user_id'] < 1
+			|| ! is_int( $event['target_object_id'] ) || $event['target_object_id'] < 1
+			|| ! is_string( $event['timestamp_gmt'] ) || ! $this->valid_timestamp( $event['timestamp_gmt'] ) ) {
+			return false;
+		}
+
+		if ( 'upload' === $event['operation'] ) {
+			return 'wp-auto/media-upload' === $event['ability']
+				&& is_string( $event['fingerprint'] )
+				&& 1 === preg_match( '/^[0-9a-f]{64}$/D', $event['fingerprint'] );
+		}
+
+		return 'wp-auto/media-update' === $event['ability']
+			&& is_string( $event['expected_modified_gmt'] )
+			&& $this->valid_concurrency_timestamp( $event['expected_modified_gmt'] )
+			&& is_string( $event['result_modified_gmt'] )
+			&& $this->valid_concurrency_timestamp( $event['result_modified_gmt'] );
+	}
+
+	/**
+	 * Validate a concurrency timestamp, including Core's zero sentinel.
+	 *
+	 * @param string $value Timestamp.
+	 */
+	private function valid_concurrency_timestamp( string $value ): bool {
+		return '0000-00-00 00:00:00' === $value || $this->valid_timestamp( $value );
 	}
 
 	/**

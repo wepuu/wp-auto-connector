@@ -61,4 +61,5 @@ The WordPress connector is distributed under GPLv2 or later. Optional hosted WP-
 * Added bounded `wp-auto-categories-list` and `wp-auto-tags-list` MCP tools.
 * Added authenticated `wp-auto-post-create-draft` and `wp-auto-page-create-draft` MCP tools with capability checks, persistent idempotency, invariant guards, and local mutation attribution.
 * Added bounded, permission-aware `wp-auto-media-search`, `wp-auto-media-get`, and authenticated `wp-auto-media-upload` image tools.
+* Added permission-aware `wp-auto-media-update` for narrowly allowlisted image presentation metadata with optimistic concurrency.
 * Added authenticated transport and per-ability `read` capability checks.

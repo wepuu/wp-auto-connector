@@ -20,6 +20,7 @@ use WPAuto\Connector\Abilities\Media\MediaAbilityCategory;
 use WPAuto\Connector\Abilities\Media\MediaGetAbility;
 use WPAuto\Connector\Abilities\Media\MediaSearchAbility;
 use WPAuto\Connector\Abilities\Media\MediaUploadAbility;
+use WPAuto\Connector\Abilities\Media\MediaUpdateAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
@@ -101,6 +102,7 @@ final class Plugin {
 		( new MediaSearchAbility() )->register();
 		( new MediaGetAbility() )->register();
 		( new MediaUploadAbility() )->register();
+		( new MediaUpdateAbility() )->register();
 		( new McpServerRegistrar() )->register();
 		McpAdapterLoader::initialize();
 

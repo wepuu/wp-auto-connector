@@ -1,14 +1,15 @@
 # Phase 1.4 Media Contracts
 
-Status: **Phase 1.4.0 frozen; Phase 1.4.1 sealed; Phase 1.4.2 Upload implemented and validated when its implementation lands on `main`**
+Status: **Phase 1.4.0 through Phase 1.4.2 sealed; Phase 1.4.3 Metadata Update implemented and validated when its implementation lands on `main`**
 
 Contract date: 2026-09-08
 
 This is the authoritative public contract for Phase 1.4 media Abilities.
 Phase 1.4.0 changed no PHP runtime, MCP allowlist, dependency, external request
 behavior, or WordPress state. Phase 1.4.1 added only the two read-only Search/Get
-tools defined here. Phase 1.4.2 adds only authenticated image Upload, producing
-an exact fifteen-tool Direct MCP runtime.
+tools defined here. Phase 1.4.2 added only authenticated image Upload. Phase
+1.4.3 adds only Media Metadata Update, producing an exact sixteen-tool Direct
+MCP runtime.
 
 ## Goals and architecture
 
@@ -351,7 +352,8 @@ third-party tool.
 7. **1.4.6:** complete automated, wp-env, Streamable HTTP, Plugin Check where
    available, security, state-integrity, cleanup, and exact-allowlist gates.
 
-Phase 1.4.2 authorizes only Upload production PHP, test support, private media
-idempotency/audit/uninstall state, Ability registration, and the exact
-fifteen-tool allowlist. It adds no dependency, external request, URL import,
-metadata/featured mutation, later roadmap work, or release authorization.
+Phase 1.4.3 authorizes only Metadata Update production PHP, test support,
+extension of the existing private media audit event schema, Ability
+registration, and the exact sixteen-tool allowlist. It adds no dependency,
+external request, URL import, featured mutation, new persistent state family,
+later roadmap work, or release authorization.

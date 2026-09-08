@@ -92,7 +92,7 @@ final class MediaReadService {
 			return $this->media_not_found();
 		}
 
-		$record = $this->normalize_full_record( $attachment );
+		$record = $this->full_record( $attachment );
 		return is_array( $record ) ? $record : $this->media_read_failed();
 	}
 
@@ -248,7 +248,7 @@ final class MediaReadService {
 	 * @param WP_Post $attachment Authorized attachment.
 	 * @return array<string, mixed>|WP_Error
 	 */
-	private function normalize_full_record( WP_Post $attachment ) {
+	public function full_record( WP_Post $attachment ) {
 		$item       = $this->normalize_search_item( $attachment );
 		$dimensions = $this->image_dimensions( $attachment->ID );
 		$alt_text   = get_post_meta( $attachment->ID, '_wp_attachment_image_alt', true );

@@ -8,7 +8,7 @@ Phase 1 is Direct WordPress MCP. The plugin should let compatible AI agents conn
 
 Phase 1.2 is complete: eight read-only site, content, and taxonomy abilities passed the frozen contract and full integration/security validation. The dedicated endpoint is `/wp-json/wp-auto/mcp`, and the exposed MCP tools are `wp-auto-site-health`, `wp-auto-site-info`, `wp-auto-posts-search`, `wp-auto-post-get`, `wp-auto-pages-search`, `wp-auto-page-get`, `wp-auto-categories-list`, and `wp-auto-tags-list`.
 
-Phase 1.3 is complete and formally sealed on `main`: its contract, Post/Page Create Draft, sentinel compatibility, Draft Update, mutation security architecture, and full real-WordPress integration matrix all passed. Phase 1.4.0 froze the image-only Media contracts and ADR-005 safety boundary, and Phase 1.4.1 formally sealed bounded, permission-aware `wp-auto-media-search` and `wp-auto-media-get`. Phase 1.4.2 implements and validates authenticated, bounded `wp-auto-media-upload` with persistent idempotency, optional authorized draft-parent association, Core image validation, and a fifteen-tool Direct MCP allowlist when this implementation lands on `main`. Phase 1.4.3 Media Metadata Update is next.
+Phase 1.3 is complete and formally sealed on `main`: its contract, Post/Page Create Draft, sentinel compatibility, Draft Update, mutation security architecture, and full real-WordPress integration matrix all passed. Phase 1.4.0 froze the image-only Media contracts and ADR-005 safety boundary; Phase 1.4.1 sealed bounded Media Search/Get; and Phase 1.4.2 sealed authenticated, bounded Media Upload with persistent idempotency and an exact fifteen-tool runtime. Phase 1.4.3 implements and validates permission-aware `wp-auto-media-update` for title, alt text, caption, and description with best-effort concurrency, protected attachment invariants, bounded private audit, and an exact sixteen-tool Direct MCP allowlist when this implementation lands on `main`. Phase 1.4.4 Featured Image Assignment is next.
 
 Start with:
 
@@ -25,6 +25,7 @@ Start with:
 - `docs/PHASE_1_4_0_VALIDATION.md`
 - `docs/PHASE_1_4_1_VALIDATION.md`
 - `docs/PHASE_1_4_2_VALIDATION.md`
+- `docs/PHASE_1_4_3_VALIDATION.md`
 - `docs/WORDPRESS_ORG_COMPLIANCE.md`
 - `docs/CODEX_FIRST_PROMPT.md`
 

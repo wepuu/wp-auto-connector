@@ -159,6 +159,17 @@ and may release the exact initial claim; any possible Core/file/audit ambiguity
 retains ownership and fails closed. Media attribution is separate, fixed-schema,
 and bounded to the newest 20 events per attachment.
 
+Phase 1.4.3 Metadata Update repeats `upload_files` and attachment `edit_post`,
+then re-fetches the supported image immediately before comparing the raw Core
+GMT concurrency token. An operation-scoped Core guard preserves attachment
+identity and forbidden row fields while only title, caption, and description
+enter `wp_update_post()`; alt text maps only to Core's fixed
+`_wp_attachment_image_alt` key. The service re-reads the image, verifies file,
+MIME, parent, author, status, GUID, and omitted fields, and returns the shared
+full Media record. Because post and alt-meta writes are not transactional, any
+possible partial application fails closed as `wp_auto_media_state_uncertain`
+without a blind rollback.
+
 Remote image import adds a dedicated policy layer before the WordPress HTTP
 API. It validates public DNS destinations and every redirect, fixes ports and
 resource limits, prevents filters from relaxing the WP-Auto boundary, and then

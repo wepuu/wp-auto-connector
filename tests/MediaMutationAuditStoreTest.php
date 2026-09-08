@@ -68,6 +68,26 @@ final class MediaMutationAuditStoreTest extends TestCase {
 		self::assertSame( 0, $GLOBALS['wp_auto_test_update_meta_calls'] );
 	}
 
+	/** Upload and update events may share one exact bounded container. */
+	public function test_accepts_exact_update_event_without_text_content(): void {
+		$store = new MediaMutationAuditStore();
+		$event = array(
+			'version'               => 1,
+			'operation'             => 'update',
+			'ability'               => 'wp-auto/media-update',
+			'actor_user_id'         => 7,
+			'target_object_id'      => 11,
+			'timestamp_gmt'         => '2026-09-08 01:00:02',
+			'expected_modified_gmt' => '0000-00-00 00:00:00',
+			'result_modified_gmt'   => '2026-09-08 01:00:01',
+		);
+
+		self::assertTrue( $store->append( 11, $event ) );
+		self::assertSame( array( $event ), get_post_meta( 11, MediaMutationAuditStore::meta_key(), true ) );
+		$event['caption'] = 'must not persist';
+		self::assertFalse( $store->append( 11, $event ) );
+	}
+
 	/** Sparse persisted audit containers are ambiguous and rejected. */
 	public function test_rejects_sparse_persisted_container(): void {
 		$event = $this->event( 11, 'sparse' );

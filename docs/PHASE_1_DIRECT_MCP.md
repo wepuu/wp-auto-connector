@@ -67,7 +67,9 @@ Phase 1.4.0 freezes the detailed image-only contracts in
 authorization, idempotency, concurrency, cleanup, audit, and disclosure
 decisions in `ADR-005-MEDIA-SAFETY.md`. Phase 1.4.1 implements image Search/Get;
 Phase 1.4.2 implements bounded authenticated Base64 Upload without any outbound
-request. Remote import remains deferred to its later checkpoint.
+request. Phase 1.4.3 adds only an authorized, concurrency-checked update of
+image title, alt text, caption, and description. Remote import remains deferred
+to its later checkpoint.
 
 ## Phase 1 final acceptance scenario
 
