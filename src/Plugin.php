@@ -16,6 +16,9 @@ use WPAuto\Connector\Abilities\Content\PostGetAbility;
 use WPAuto\Connector\Abilities\Content\PostCreateDraftAbility;
 use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Content\PostUpdateAbility;
+use WPAuto\Connector\Abilities\Media\MediaAbilityCategory;
+use WPAuto\Connector\Abilities\Media\MediaGetAbility;
+use WPAuto\Connector\Abilities\Media\MediaSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
@@ -80,6 +83,7 @@ final class Plugin {
 	 */
 	public function boot(): void {
 		( new ContentAbilityCategory() )->register();
+		( new MediaAbilityCategory() )->register();
 		( new TaxonomyAbilityCategory() )->register();
 		( new SiteHealthAbility() )->register();
 		( new SiteInfoAbility() )->register();
@@ -93,6 +97,8 @@ final class Plugin {
 		( new PageUpdateAbility() )->register();
 		( new CategoriesListAbility() )->register();
 		( new TagsListAbility() )->register();
+		( new MediaSearchAbility() )->register();
+		( new MediaGetAbility() )->register();
 		( new McpServerRegistrar() )->register();
 		McpAdapterLoader::initialize();
 

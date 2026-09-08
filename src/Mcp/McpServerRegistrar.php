@@ -15,6 +15,8 @@ use WPAuto\Connector\Abilities\Content\PostGetAbility;
 use WPAuto\Connector\Abilities\Content\PostCreateDraftAbility;
 use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Content\PostUpdateAbility;
+use WPAuto\Connector\Abilities\Media\MediaGetAbility;
+use WPAuto\Connector\Abilities\Media\MediaSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
@@ -76,6 +78,8 @@ final class McpServerRegistrar {
 				PageCreateDraftAbility::NAME,
 				PostUpdateAbility::NAME,
 				PageUpdateAbility::NAME,
+				MediaSearchAbility::NAME,
+				MediaGetAbility::NAME,
 			),
 			array(),
 			array(),

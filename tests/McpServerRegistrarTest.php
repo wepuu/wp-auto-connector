@@ -22,6 +22,8 @@ use WPAuto\Connector\Abilities\Content\PostUpdateAbility;
 use WPAuto\Connector\Abilities\Content\PostsSearchAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
+use WPAuto\Connector\Abilities\Media\MediaGetAbility;
+use WPAuto\Connector\Abilities\Media\MediaSearchAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagsListAbility;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
@@ -101,10 +103,12 @@ final class McpServerRegistrarTest extends TestCase {
 				PageCreateDraftAbility::NAME,
 				PostUpdateAbility::NAME,
 				PageUpdateAbility::NAME,
+				MediaSearchAbility::NAME,
+				MediaGetAbility::NAME,
 			),
 			$adapter->arguments[9]
 		);
-		self::assertCount( 12, $adapter->arguments[9] );
+		self::assertCount( 14, $adapter->arguments[9] );
 		self::assertSame( array(), $adapter->arguments[10] );
 		self::assertSame( array(), $adapter->arguments[11] );
 		self::assertIsCallable( $adapter->arguments[12] );

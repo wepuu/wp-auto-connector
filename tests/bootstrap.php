@@ -38,6 +38,9 @@ namespace {
 	$GLOBALS['wp_auto_test_posts']                = array();
 	$GLOBALS['wp_auto_test_terms']                = array();
 	$GLOBALS['wp_auto_test_thumbnail_ids']        = array();
+	$GLOBALS['wp_auto_test_attachment_urls']      = array();
+	$GLOBALS['wp_auto_test_attached_files']       = array();
+	$GLOBALS['wp_auto_test_attachment_metadata']  = array();
 	$GLOBALS['wp_auto_test_last_query_args']      = array();
 	$GLOBALS['wp_auto_test_query_args_history']   = array();
 	$GLOBALS['wp_auto_test_object_capabilities']  = array();
@@ -411,6 +414,13 @@ namespace {
 					static function ( WP_Post $post ) use ( $args ): bool {
 						if ( $post->post_type !== $args['post_type'] || $post->post_status !== $args['post_status'] ) {
 							return false;
+						}
+
+						if ( isset( $args['post_mime_type'] ) ) {
+							$mime_types = is_array( $args['post_mime_type'] ) ? $args['post_mime_type'] : array( $args['post_mime_type'] );
+							if ( ! in_array( $post->post_mime_type, $mime_types, true ) ) {
+								return false;
+							}
 						}
 
 						if ( isset( $args['author'] ) && $post->post_author !== (int) $args['author'] ) {
@@ -1117,8 +1127,21 @@ namespace {
 			$GLOBALS['wp_auto_test_get_post_type_object_exception'] = null;
 			throw $exception;
 		}
-		if ( ! in_array( $post_type, array( 'post', 'page' ), true ) ) {
+		if ( ! in_array( $post_type, array( 'post', 'page', 'attachment' ), true ) ) {
 			return null;
+		}
+		if ( 'attachment' === $post_type ) {
+			return (object) array(
+				'cap' => (object) array(
+					'read'                 => 'read',
+					'edit_posts'           => 'upload_files',
+					'create_posts'         => 'upload_files',
+					'read_private_posts'   => 'upload_files',
+					'edit_private_posts'   => 'upload_files',
+					'edit_others_posts'    => 'upload_files',
+					'edit_published_posts' => 'upload_files',
+				),
+			);
 		}
 
 		$suffix = 'page' === $post_type ? 'pages' : 'posts';
@@ -1162,6 +1185,22 @@ namespace {
 
 	function get_post_thumbnail_id( int $post_id ): int {
 		return (int) ( $GLOBALS['wp_auto_test_thumbnail_ids'][ $post_id ] ?? 0 );
+	}
+
+	function wp_get_attachment_url( int $attachment_id ) {
+		return $GLOBALS['wp_auto_test_attachment_urls'][ $attachment_id ] ?? false;
+	}
+
+	function get_attached_file( int $attachment_id ) {
+		return $GLOBALS['wp_auto_test_attached_files'][ $attachment_id ] ?? false;
+	}
+
+	function wp_get_attachment_metadata( int $attachment_id ) {
+		return $GLOBALS['wp_auto_test_attachment_metadata'][ $attachment_id ] ?? false;
+	}
+
+	function wp_basename( string $path ): string {
+		return basename( str_replace( '\\', '/', $path ) );
 	}
 
 	function get_terms( array $args ) {
@@ -1349,6 +1388,35 @@ namespace WPAuto\Connector\Abilities\Taxonomy {
 	}
 }
 
+namespace WPAuto\Connector\Abilities\Media {
+	function add_action( string $hook, callable $callback ): void {
+		$GLOBALS['wp_auto_test_hooks'][ $hook ] = $callback;
+		$GLOBALS['wp_auto_test_hook_history'][ $hook ][] = $callback;
+	}
+
+	function wp_register_ability( string $name, array $args ): void {
+		$GLOBALS['wp_auto_test_registered_ability'] = array(
+			'name' => $name,
+			'args' => $args,
+		);
+	}
+
+	function wp_register_ability_category( string $slug, array $args ): void {
+		$GLOBALS['wp_auto_test_registered_category'] = array(
+			'slug' => $slug,
+			'args' => $args,
+		);
+	}
+
+	function current_user_can( string $capability ): bool {
+		return \wp_auto_test_user_can( $capability );
+	}
+
+	function __( string $text ): string {
+		return $text;
+	}
+}
+
 namespace WPAuto\Connector\Taxonomy {
 	function is_wp_error( $value ): bool {
 		return \is_wp_error( $value );
@@ -1419,6 +1487,16 @@ namespace WPAuto\Connector\Content {
 	}
 }
 
+namespace WPAuto\Connector\Media {
+	function current_user_can( string $capability, int $object_id = 0 ): bool {
+		return \wp_auto_test_user_can( $capability, $object_id );
+	}
+
+	function __( string $text ): string {
+		return $text;
+	}
+}
+
 namespace WPAuto\Connector\Diagnostics {
 	function get_bloginfo( string $show ): string {
 		return 'version' === $show ? '6.9-test' : '';
@@ -1466,6 +1544,8 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Content/CreateIdempotencyStore.php';
 	require_once dirname( __DIR__ ) . '/src/Content/MutationAuditStore.php';
 	require_once dirname( __DIR__ ) . '/src/Content/ContentMutationService.php';
+	require_once dirname( __DIR__ ) . '/src/Media/MediaReadContract.php';
+	require_once dirname( __DIR__ ) . '/src/Media/MediaReadService.php';
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyReadService.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteHealthAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteInfoAbility.php';
@@ -1478,6 +1558,9 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Abilities/Content/PageCreateDraftAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Content/PostUpdateAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Content/PageUpdateAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaAbilityCategory.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaSearchAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaGetAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TaxonomyAbilityCategory.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/CategoriesListAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TagsListAbility.php';

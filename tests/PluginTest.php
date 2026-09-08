@@ -10,12 +10,14 @@ namespace WPAuto\Connector\Tests;
 use PHPUnit\Framework\TestCase;
 use WPAuto\Connector\Abilities\Content\PageUpdateAbility;
 use WPAuto\Connector\Abilities\Content\PostUpdateAbility;
+use WPAuto\Connector\Abilities\Media\MediaGetAbility;
+use WPAuto\Connector\Abilities\Media\MediaSearchAbility;
 use WPAuto\Connector\Plugin;
 
-/** Covers production registration of the Phase 1.3.2 abilities. */
+/** Covers production registration of the Phase 1.4.1 abilities. */
 final class PluginTest extends TestCase {
-	/** The boot path registers both Update abilities. */
-	public function test_boot_registers_both_update_abilities(): void {
+	/** The boot path registers Update and Media read abilities. */
+	public function test_boot_registers_current_abilities(): void {
 		$GLOBALS['wp_auto_test_hook_history'] = array();
 
 		Plugin::instance()->boot();
@@ -28,6 +30,8 @@ final class PluginTest extends TestCase {
 
 		self::assertContains( PostUpdateAbility::class, $classes );
 		self::assertContains( PageUpdateAbility::class, $classes );
-		self::assertCount( 12, $callbacks );
+		self::assertContains( MediaSearchAbility::class, $classes );
+		self::assertContains( MediaGetAbility::class, $classes );
+		self::assertCount( 14, $callbacks );
 	}
 }

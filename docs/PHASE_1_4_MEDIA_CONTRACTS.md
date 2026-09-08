@@ -1,13 +1,13 @@
 # Phase 1.4 Media Contracts
 
-Status: **Phase 1.4.0 contract frozen when this document lands on `main`; runtime not implemented**
+Status: **Phase 1.4.0 frozen; Phase 1.4.1 Search/Get implemented and validated when its implementation lands on `main`**
 
 Contract date: 2026-09-08
 
 This is the authoritative public contract for Phase 1.4 media Abilities.
-Phase 1.4.0 changes no PHP runtime, MCP allowlist, dependency, external request
-behavior, or WordPress state. The Direct MCP runtime remains exactly twelve
-tools until a later implementation checkpoint adds a tool defined here.
+Phase 1.4.0 changed no PHP runtime, MCP allowlist, dependency, external request
+behavior, or WordPress state. Phase 1.4.1 adds only the two read-only Search/Get
+tools defined here, producing an exact fourteen-tool Direct MCP runtime.
 
 ## Goals and architecture
 
@@ -350,5 +350,6 @@ third-party tool.
 7. **1.4.6:** complete automated, wp-env, Streamable HTTP, Plugin Check where
    available, security, state-integrity, cleanup, and exact-allowlist gates.
 
-Phase 1.4.0 authorizes no production PHP, test stub, Ability registration,
-dependency, external request, media write, later roadmap work, or release.
+Phase 1.4.1 authorizes only Search/Get production PHP, test support, Ability
+registration, and the exact fourteen-tool allowlist. It adds no dependency,
+external request, media write, later roadmap work, or release authorization.

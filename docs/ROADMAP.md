@@ -87,15 +87,15 @@ Scope:
 
 Delivery checkpoints:
 
-1. **Phase 1.4.0 - Media Contract and Security Architecture Freeze (complete when the documentation lands on `main`):** freezes the six future Ability/tool names, exact schemas, image-only MIME/size policy, capability and privacy rules, persistent ingestion idempotency, update/featured preconditions, bounded local audit, independent SSRF policy, error semantics, side effects, and exact allowlist progression. It adds no runtime tool or external request.
-2. **Phase 1.4.1 - Media Search/Get (next):** implement only bounded, permission-aware supported-image discovery/retrieval and expand the explicit allowlist to fourteen tools.
+1. **Phase 1.4.0 - Media Contract and Security Architecture Freeze (complete; formally sealed):** froze the six future Ability/tool names, exact schemas, image-only MIME/size policy, capability and privacy rules, persistent ingestion idempotency, update/featured preconditions, bounded local audit, independent SSRF policy, error semantics, side effects, and exact allowlist progression. It added no runtime tool or external request.
+2. **Phase 1.4.1 - Media Search/Get (complete when the implementation lands on `main`):** implements bounded, permission-aware supported-image discovery/retrieval, validates the real Streamable HTTP surface, and expands the explicit allowlist to exactly fourteen tools.
 3. **Phase 1.4.2 - Authenticated Image Upload:** implement one bounded Base64 image upload, optional authorized draft parent association, persistent idempotency, Core validation, and the fifteen-tool allowlist.
 4. **Phase 1.4.3 - Media Metadata Update:** implement allowlisted image title/alt/caption/description updates with best-effort concurrency and the sixteen-tool allowlist.
 5. **Phase 1.4.4 - Featured Image Assignment:** implement idempotent assignment for authorized Post/Page drafts and the seventeen-tool allowlist.
 6. **Phase 1.4.5 - Remote URL Import:** implement the open-world downloader last, with the frozen SSRF/DNS/redirect/time/byte/MIME policy and the eighteen-tool allowlist.
 7. **Phase 1.4.6 - Integration/Security Validation:** validate automated and live wp-env/Streamable HTTP behavior, exact schemas/permissions/privacy/allowlist, ingestion concurrency, filesystem cleanup, SSRF matrix, state integrity, Plugin Check where available, and seal Phase 1.4.
 
-The authoritative contract is `docs/PHASE_1_4_MEDIA_CONTRACTS.md`; the accepted safety decision is `docs/ADR-005-MEDIA-SAFETY.md`; the checkpoint evidence is `docs/PHASE_1_4_0_VALIDATION.md`. Phase 1.4 remains image-only and does not authorize publishing, deletion, generic file/network access, taxonomy mutation, SEO, Cloud, telemetry, or later roadmap work.
+The authoritative contract is `docs/PHASE_1_4_MEDIA_CONTRACTS.md`; the accepted safety decision is `docs/ADR-005-MEDIA-SAFETY.md`; checkpoint evidence is recorded in `docs/PHASE_1_4_0_VALIDATION.md` and `docs/PHASE_1_4_1_VALIDATION.md`. Phase 1.4 remains image-only and does not authorize publishing, deletion, generic file/network access, taxonomy mutation, SEO, Cloud, telemetry, or later roadmap work.
 
 ### Phase 1.5 - Taxonomy
 
