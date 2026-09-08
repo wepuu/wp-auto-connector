@@ -38,6 +38,11 @@ namespace {
 	$GLOBALS['wp_auto_test_posts']                = array();
 	$GLOBALS['wp_auto_test_terms']                = array();
 	$GLOBALS['wp_auto_test_thumbnail_ids']        = array();
+	$GLOBALS['wp_auto_test_set_thumbnail_calls']  = 0;
+	$GLOBALS['wp_auto_test_set_thumbnail_result'] = null;
+	$GLOBALS['wp_auto_test_set_thumbnail_exception'] = null;
+	$GLOBALS['wp_auto_test_set_thumbnail_after_exception'] = null;
+	$GLOBALS['wp_auto_test_before_set_thumbnail'] = null;
 	$GLOBALS['wp_auto_test_attachment_urls']      = array();
 	$GLOBALS['wp_auto_test_attached_files']       = array();
 	$GLOBALS['wp_auto_test_original_image_paths'] = array();
@@ -1205,6 +1210,31 @@ namespace {
 		return (int) ( $GLOBALS['wp_auto_test_thumbnail_ids'][ $post_id ] ?? 0 );
 	}
 
+	function set_post_thumbnail( int $post_id, int $thumbnail_id ) {
+		++$GLOBALS['wp_auto_test_set_thumbnail_calls'];
+		if ( $GLOBALS['wp_auto_test_set_thumbnail_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_set_thumbnail_exception'];
+			$GLOBALS['wp_auto_test_set_thumbnail_exception'] = null;
+			throw $exception;
+		}
+		if ( is_callable( $GLOBALS['wp_auto_test_before_set_thumbnail'] ) ) {
+			$callback = $GLOBALS['wp_auto_test_before_set_thumbnail'];
+			$GLOBALS['wp_auto_test_before_set_thumbnail'] = null;
+			$callback( $post_id, $thumbnail_id );
+		}
+		if ( false !== $GLOBALS['wp_auto_test_set_thumbnail_result'] ) {
+			$GLOBALS['wp_auto_test_thumbnail_ids'][ $post_id ] = $thumbnail_id;
+		}
+		if ( $GLOBALS['wp_auto_test_set_thumbnail_after_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_set_thumbnail_after_exception'];
+			$GLOBALS['wp_auto_test_set_thumbnail_after_exception'] = null;
+			throw $exception;
+		}
+		return null !== $GLOBALS['wp_auto_test_set_thumbnail_result']
+			? $GLOBALS['wp_auto_test_set_thumbnail_result']
+			: $thumbnail_id;
+	}
+
 	function wp_get_attachment_url( int $attachment_id ) {
 		return $GLOBALS['wp_auto_test_attachment_urls'][ $attachment_id ] ?? false;
 	}
@@ -1679,6 +1709,8 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Media/MediaUploadService.php';
 	require_once dirname( __DIR__ ) . '/src/Media/MediaUpdateContract.php';
 	require_once dirname( __DIR__ ) . '/src/Media/MediaUpdateService.php';
+	require_once dirname( __DIR__ ) . '/src/Media/MediaFeaturedContract.php';
+	require_once dirname( __DIR__ ) . '/src/Media/MediaFeaturedService.php';
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyReadService.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteHealthAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteInfoAbility.php';
@@ -1696,6 +1728,7 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaGetAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaUploadAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaUpdateAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaSetFeaturedAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TaxonomyAbilityCategory.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/CategoriesListAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TagsListAbility.php';

@@ -88,6 +88,26 @@ final class MediaMutationAuditStoreTest extends TestCase {
 		self::assertFalse( $store->append( 11, $event ) );
 	}
 
+	/** Featured events use the target draft and only expected/result IDs. */
+	public function test_accepts_exact_featured_event_without_content_or_media_details(): void {
+		$store = new MediaMutationAuditStore();
+		$event = array(
+			'version'                    => 1,
+			'operation'                  => 'set_featured',
+			'ability'                    => 'wp-auto/media-set-featured',
+			'actor_user_id'              => 7,
+			'target_object_id'           => 101,
+			'timestamp_gmt'              => '2026-09-08 01:00:02',
+			'expected_featured_media_id' => 0,
+			'result_featured_media_id'   => 41,
+		);
+
+		self::assertTrue( $store->append( 101, $event ) );
+		self::assertSame( array( $event ), get_post_meta( 101, MediaMutationAuditStore::meta_key(), true ) );
+		$event['filename'] = 'must not persist';
+		self::assertFalse( $store->append( 101, $event ) );
+	}
+
 	/** Sparse persisted audit containers are ambiguous and rejected. */
 	public function test_rejects_sparse_persisted_container(): void {
 		$event = $this->event( 11, 'sparse' );

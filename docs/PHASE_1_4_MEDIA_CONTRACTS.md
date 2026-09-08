@@ -1,6 +1,6 @@
 # Phase 1.4 Media Contracts
 
-Status: **Phase 1.4.0 through Phase 1.4.2 sealed; Phase 1.4.3 Metadata Update implemented and validated when its implementation lands on `main`**
+Status: **Phase 1.4.0 through Phase 1.4.3 sealed; Phase 1.4.4 Featured Image Assignment in progress**
 
 Contract date: 2026-09-08
 
@@ -296,7 +296,8 @@ belong to the attachment; featured events belong to the target draft.
 
 Every event stores only version, operation, Ability, actor ID, target ID, and
 GMT timestamp. Ingestion adds request fingerprint; update adds expected/result
-timestamps; featured adds expected/result IDs. Never store bytes, Base64, URL,
+timestamps; featured uses operation set_featured and adds expected/result IDs.
+Never store bytes, Base64, URL,
 filename, text fields, bodies, headers, credentials, raw keys, paths, IP/DNS,
 or HTTP data. Audit is attribution, not idempotency authority. Safe replays and
 featured no-ops add no event. Uncertain audit finalization fails closed.
@@ -352,8 +353,8 @@ third-party tool.
 7. **1.4.6:** complete automated, wp-env, Streamable HTTP, Plugin Check where
    available, security, state-integrity, cleanup, and exact-allowlist gates.
 
-Phase 1.4.3 authorizes only Metadata Update production PHP, test support,
-extension of the existing private media audit event schema, Ability
-registration, and the exact sixteen-tool allowlist. It adds no dependency,
-external request, URL import, featured mutation, new persistent state family,
-later roadmap work, or release authorization.
+Phase 1.4.4 authorizes only draft Featured Image Assignment production PHP,
+test support, extension of the existing private media audit event schema,
+Ability registration, and the exact seventeen-tool allowlist. It adds no
+dependency, external request, URL import, publishing, deletion, new persistent
+state family, later roadmap work, or release authorization.

@@ -37,7 +37,7 @@ final class MediaMutationAuditStore {
 	/**
 	 * Append and verify one exact media event.
 	 *
-	 * @param int                  $post_id Target attachment ID.
+	 * @param int                  $post_id Audited object ID.
 	 * @param array<string, mixed> $event Attribution event.
 	 */
 	public function append( int $post_id, array $event ): bool {
@@ -145,6 +145,8 @@ final class MediaMutationAuditStore {
 			$expected = array_merge( $base, array( 'fingerprint' ) );
 		} elseif ( 'update' === ( $event['operation'] ?? null ) ) {
 			$expected = array_merge( $base, array( 'expected_modified_gmt', 'result_modified_gmt' ) );
+		} elseif ( 'set_featured' === ( $event['operation'] ?? null ) ) {
+			$expected = array_merge( $base, array( 'expected_featured_media_id', 'result_featured_media_id' ) );
 		} else {
 			return false;
 		}
@@ -166,11 +168,19 @@ final class MediaMutationAuditStore {
 				&& 1 === preg_match( '/^[0-9a-f]{64}$/D', $event['fingerprint'] );
 		}
 
-		return 'wp-auto/media-update' === $event['ability']
-			&& is_string( $event['expected_modified_gmt'] )
-			&& $this->valid_concurrency_timestamp( $event['expected_modified_gmt'] )
-			&& is_string( $event['result_modified_gmt'] )
-			&& $this->valid_concurrency_timestamp( $event['result_modified_gmt'] );
+		if ( 'update' === $event['operation'] ) {
+			return 'wp-auto/media-update' === $event['ability']
+				&& is_string( $event['expected_modified_gmt'] )
+				&& $this->valid_concurrency_timestamp( $event['expected_modified_gmt'] )
+				&& is_string( $event['result_modified_gmt'] )
+				&& $this->valid_concurrency_timestamp( $event['result_modified_gmt'] );
+		}
+
+		return 'wp-auto/media-set-featured' === $event['ability']
+			&& is_int( $event['expected_featured_media_id'] )
+			&& $event['expected_featured_media_id'] >= 0
+			&& is_int( $event['result_featured_media_id'] )
+			&& $event['result_featured_media_id'] >= 1;
 	}
 
 	/**
@@ -201,7 +211,7 @@ final class MediaMutationAuditStore {
 	/**
 	 * Build the shared per-site, per-object audit lock name.
 	 *
-	 * @param int $post_id Target attachment ID.
+	 * @param int $post_id Audited object ID.
 	 */
 	private function lock_name( int $post_id ): string {
 		return 'wp_auto_connector_mutation_audit_lock_' . hash( 'sha256', get_current_blog_id() . "\0" . $post_id );
