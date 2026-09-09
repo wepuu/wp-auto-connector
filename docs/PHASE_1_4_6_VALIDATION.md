@@ -1,6 +1,6 @@
 # Phase 1.4.6 Media Integration and Security Validation
 
-Status: candidate validation complete; formal Phase 1.4 seal remains pending landing on `main` and the exact-main release review.
+Status: implementation is merged on `main`; exact-main validation is complete; formal Phase 1.4 seal remains pending Plugin Check where an audited environment is available.
 
 Validation date: 2026-09-09
 
@@ -34,7 +34,7 @@ No remote package, image, plugin, executable, or other code was downloaded. The 
 
 ## Security review
 
-The Codex Security prompt-only diff scan reviewed all 18 changed production files against `main@09d4268`. Result: zero findings, complete source coverage, and no reportable candidates. The sealed report is scan `7560e18d-a813-424b-be8e-e73eac47ea25`; the generated report and SARIF remain in the Codex Security temporary scan bundle.
+The candidate Codex Security prompt-only diff scan reviewed all 18 changed production files against `main@09d4268` with zero findings. After the fast-forward merge, the exact-main range `09d4268..e72bdb6` was reviewed again as scan `cdc2d267-c5b3-4a5b-ade6-6497dc420b12`: zero findings, complete source coverage, and no reportable candidates. Generated reports and SARIF remain in the Codex Security temporary scan bundles.
 
 The review covered transport and Ability authorization, URL/DNS/redirect handling, cURL destination pinning, transfer/time/MIME bounds, temporary-file lifecycle, atomic idempotency ownership, audit locking, bootstrap, and the eighteen-tool allowlist. TAC was checked once and was not granted; the local prompt-only review proceeded as authorized.
 
@@ -42,8 +42,8 @@ The review covered transport and Ability authorization, URL/DNS/redirect handlin
 
 - Plugin Check was unavailable in the cached disposable environment. It was not downloaded because repository policy prohibits remote executable packages.
 - A deterministic PHP-worker process-death harness around the Core sideload boundary was not run. The implementation fails closed with `wp_auto_media_state_uncertain` and retains the idempotency claim when durable state cannot be proven.
-- The candidate branch still needs exact-main review after integration. Until that review and merge, this document is evidence for the candidate implementation, not a release seal.
+- The implementation is now on `main` at `e72bdb6` and the exact-main review is complete. This document is still not a formal release seal because Plugin Check was unavailable.
 
 ## Verdict
 
-Phase 1.4.6 implementation and candidate validation evidence are complete. The media contract, eighteen-tool allowlist, automated suite, disposable live MCP matrix, state-integrity checks, cleanup checks, and security review all pass. Formal Phase 1.4 sealing should occur only after the candidate is landed on `main`, the exact-main diff is rechecked, and Plugin Check is run when an audited environment is available.
+Phase 1.4.6 implementation, main integration, and exact-main validation evidence are complete. The media contract, eighteen-tool allowlist, automated suite, disposable live MCP matrix, state-integrity checks, cleanup checks, and both security reviews pass. Formal Phase 1.4 sealing remains pending Plugin Check when an audited environment is available.

@@ -1,6 +1,6 @@
 # Phase 1.4 Media Contracts
 
-Status: **Phase 1.4.0 through Phase 1.4.4 sealed; Phase 1.4.5 implemented; Phase 1.4.6 candidate validation complete; formal seal pending**
+Status: **Phase 1.4.0 through Phase 1.4.4 sealed; Phase 1.4.5 implemented on main; Phase 1.4.6 exact-main validation complete; formal seal pending Plugin Check**
 
 Contract date: 2026-09-08
 
@@ -355,10 +355,10 @@ third-party tool.
 7. **1.4.6:** complete automated, wp-env, Streamable HTTP, Plugin Check where
    available, security, state-integrity, cleanup, and exact-allowlist gates.
 
-Phase 1.4.5 is implemented on the validation branch with only remote import
+Phase 1.4.5 is implemented on `main` with only remote import
 production PHP, test support, the exact eighteen-tool allowlist, and the
-required private ingestion state/audit extensions. Focused and full candidate
+required private ingestion state/audit extensions. Focused and exact-main
 Phase 1.4.6 integration, security, state-integrity, and cleanup validation
-passed; Plugin Check availability and exact-main review remain before release
-authorization. It adds no publishing, deletion, taxonomy mutation, SEO, Cloud,
-telemetry, or later roadmap work.
+passed; Plugin Check remains before release authorization. It adds no
+publishing, deletion, taxonomy mutation, SEO, Cloud, telemetry, or later
+roadmap work.
