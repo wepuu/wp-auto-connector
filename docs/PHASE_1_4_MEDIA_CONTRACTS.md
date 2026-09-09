@@ -1,6 +1,6 @@
 # Phase 1.4 Media Contracts
 
-Status: **Phase 1.4.0 through Phase 1.4.4 sealed; Phase 1.4.5 remains planned**
+Status: **Phase 1.4.0 through Phase 1.4.4 sealed; Phase 1.4.5 implemented; Phase 1.4.6 candidate validation complete; formal seal pending**
 
 Contract date: 2026-09-08
 
@@ -9,7 +9,9 @@ Phase 1.4.0 changed no PHP runtime, MCP allowlist, dependency, external request
 behavior, or WordPress state. Phase 1.4.1 added only the two read-only Search/Get
 tools defined here. Phase 1.4.2 added only authenticated image Upload. Phase
 1.4.3 adds only Media Metadata Update, producing an exact sixteen-tool Direct
-MCP runtime.
+MCP runtime. Phase 1.4.5 adds only caller-triggered remote URL import,
+producing the exact eighteen-tool candidate runtime; its final
+integration/security seal is tracked in Phase 1.4.6.
 
 ## Goals and architecture
 
@@ -353,9 +355,10 @@ third-party tool.
 7. **1.4.6:** complete automated, wp-env, Streamable HTTP, Plugin Check where
    available, security, state-integrity, cleanup, and exact-allowlist gates.
 
-Phase 1.4.4 is implemented and validated on main with only draft Featured Image
-Assignment production PHP, test support, extension of the existing private
-media audit event schema, Ability registration, and the exact seventeen-tool
-allowlist. It adds no dependency, external request, URL import, publishing,
-deletion, new persistent state family, later roadmap work, or release
-authorization.
+Phase 1.4.5 is implemented on the validation branch with only remote import
+production PHP, test support, the exact eighteen-tool allowlist, and the
+required private ingestion state/audit extensions. Focused and full candidate
+Phase 1.4.6 integration, security, state-integrity, and cleanup validation
+passed; Plugin Check availability and exact-main review remain before release
+authorization. It adds no publishing, deletion, taxonomy mutation, SEO, Cloud,
+telemetry, or later roadmap work.
