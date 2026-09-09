@@ -70,14 +70,22 @@ namespace {
 	$GLOBALS['wp_auto_test_filters']              = array();
 	$GLOBALS['wp_auto_test_taxonomy_terms']       = array();
 	$GLOBALS['wp_auto_test_taxonomies']           = array(
-		'category' => (object) array( 'cap' => (object) array( 'manage_terms' => 'manage_categories' ) ),
-		'post_tag' => (object) array( 'cap' => (object) array( 'manage_terms' => 'manage_categories' ) ),
+		'category' => (object) array( 'cap' => (object) array( 'manage_terms' => 'manage_categories', 'assign_terms' => 'assign_terms' ) ),
+		'post_tag' => (object) array( 'cap' => (object) array( 'manage_terms' => 'manage_categories', 'assign_terms' => 'assign_terms' ) ),
 	);
 	$GLOBALS['wp_auto_test_next_term_id']         = 3000;
 	$GLOBALS['wp_auto_test_last_insert_term_args'] = array();
 	$GLOBALS['wp_auto_test_insert_term_result']   = null;
 	$GLOBALS['wp_auto_test_insert_term_exception'] = null;
 	$GLOBALS['wp_auto_test_insert_term_calls']   = 0;
+	$GLOBALS['wp_auto_test_object_term_ids']     = array();
+	$GLOBALS['wp_auto_test_object_terms_result'] = null;
+	$GLOBALS['wp_auto_test_last_object_terms_args'] = array();
+	$GLOBALS['wp_auto_test_set_object_terms_calls'] = 0;
+	$GLOBALS['wp_auto_test_set_object_terms_result'] = null;
+	$GLOBALS['wp_auto_test_set_object_terms_exception'] = null;
+	$GLOBALS['wp_auto_test_before_set_object_terms'] = null;
+	$GLOBALS['wp_auto_test_after_set_object_terms'] = null;
 	$GLOBALS['wp_auto_test_get_terms_error']      = null;
 	$GLOBALS['wp_auto_test_last_term_query_args'] = array();
 	$GLOBALS['wp_auto_test_term_query_history']   = array();
@@ -410,7 +418,7 @@ namespace {
 		public object $cap;
 
 		public function __construct( string $manage_terms = 'manage_categories' ) {
-			$this->cap = (object) array( 'manage_terms' => $manage_terms );
+			$this->cap = (object) array( 'manage_terms' => $manage_terms, 'assign_terms' => 'assign_terms' );
 		}
 	}
 	class WP_Post {
@@ -426,6 +434,7 @@ namespace {
 		public int $post_parent;
 		public string $post_date;
 		public string $post_date_gmt;
+		public string $post_modified;
 		public string $post_modified_gmt;
 		public string $comment_status;
 		public string $ping_status;
@@ -449,6 +458,7 @@ namespace {
 			$this->post_parent        = (int) ( $data['post_parent'] ?? 0 );
 			$this->post_date          = (string) ( $data['post_date'] ?? '2026-01-01 08:00:00' );
 			$this->post_date_gmt      = (string) ( $data['post_date_gmt'] ?? '2026-01-01 00:00:00' );
+			$this->post_modified      = (string) ( $data['post_modified'] ?? $this->post_date );
 			$this->post_modified_gmt  = (string) ( $data['post_modified_gmt'] ?? $this->post_date_gmt );
 			$this->comment_status     = (string) ( $data['comment_status'] ?? 'closed' );
 			$this->ping_status        = (string) ( $data['ping_status'] ?? 'closed' );
@@ -910,12 +920,23 @@ namespace {
 		return null;
 	}
 
-	function get_post_meta( int $post_id, string $meta_key, bool $single = false ) {
+	function get_post_meta( int $post_id, string $meta_key = '', bool $single = false ) {
 		if ( $GLOBALS['wp_auto_test_get_post_meta_exception'] instanceof \Throwable ) {
 			$exception = $GLOBALS['wp_auto_test_get_post_meta_exception'];
 			$GLOBALS['wp_auto_test_get_post_meta_exception'] = null;
 			throw $exception;
 		}
+		if ( '' === $meta_key ) {
+			$all = array();
+			foreach ( $GLOBALS['wp_auto_test_post_meta'][ $post_id ] ?? array() as $key => $value ) {
+				$all[ $key ] = array( $value );
+			}
+			foreach ( $GLOBALS['wp_auto_test_post_meta_values'][ $post_id ] ?? array() as $key => $values ) {
+				$all[ $key ] = $values;
+			}
+			return $all;
+		}
+
 		if ( isset( $GLOBALS['wp_auto_test_post_meta_values'][ $post_id ][ $meta_key ] ) ) {
 			$values = $GLOBALS['wp_auto_test_post_meta_values'][ $post_id ][ $meta_key ];
 			return $single ? ( $values[0] ?? array() ) : $values;
@@ -936,6 +957,10 @@ namespace {
 	}
 
 	function update_post_meta( int $post_id, string $meta_key, $value ) {
+		$check = apply_filters( 'update_post_metadata', null, $post_id, $meta_key, $value, null );
+		if ( null !== $check ) {
+			return (bool) $check;
+		}
 		++$GLOBALS['wp_auto_test_update_meta_calls'];
 		if ( $GLOBALS['wp_auto_test_update_meta_exception'] instanceof \Throwable ) {
 			$exception = $GLOBALS['wp_auto_test_update_meta_exception'];
@@ -959,6 +984,28 @@ namespace {
 			throw $exception;
 		}
 		return true;
+	}
+
+	function add_post_meta( int $post_id, string $meta_key, $value, bool $unique = false ): bool {
+		$check = apply_filters( 'add_post_metadata', null, $post_id, $meta_key, $value, $unique );
+		if ( null !== $check ) {
+			return (bool) $check;
+		}
+		if ( $unique && array_key_exists( $meta_key, $GLOBALS['wp_auto_test_post_meta'][ $post_id ] ?? array() ) ) {
+			return false;
+		}
+		$GLOBALS['wp_auto_test_post_meta'][ $post_id ][ $meta_key ] = wp_unslash( $value );
+		return true;
+	}
+
+	function delete_post_meta( int $post_id, string $meta_key, $meta_value = '' ): bool {
+		$check = apply_filters( 'delete_post_metadata', null, $post_id, $meta_key, $meta_value );
+		if ( null !== $check ) {
+			return (bool) $check;
+		}
+		$existed = array_key_exists( $meta_key, $GLOBALS['wp_auto_test_post_meta'][ $post_id ] ?? array() );
+		unset( $GLOBALS['wp_auto_test_post_meta'][ $post_id ][ $meta_key ], $GLOBALS['wp_auto_test_post_meta_values'][ $post_id ][ $meta_key ] );
+		return $existed;
 	}
 
 	function update_term_meta( int $term_id, string $meta_key, $value ) {
@@ -1287,6 +1334,56 @@ namespace {
 	function wp_get_post_terms( int $post_id, string $taxonomy, array $args ) {
 		unset( $args );
 		return $GLOBALS['wp_auto_test_terms'][ $post_id ][ $taxonomy ] ?? array();
+	}
+
+	function is_object_in_taxonomy( string $object_type, string $taxonomy ): bool {
+		return 'post' === $object_type && in_array( $taxonomy, array( 'category', 'post_tag' ), true );
+	}
+
+	function wp_get_object_terms( int $object_id, string $taxonomy, array $args = array() ) {
+		$GLOBALS['wp_auto_test_last_object_terms_args'] = array(
+			'object_id' => $object_id,
+			'taxonomy'  => $taxonomy,
+			'args'      => $args,
+		);
+		if ( null !== $GLOBALS['wp_auto_test_object_terms_result'] ) {
+			$result = $GLOBALS['wp_auto_test_object_terms_result'];
+			$GLOBALS['wp_auto_test_object_terms_result'] = null;
+			return $result;
+		}
+		$ids = $GLOBALS['wp_auto_test_object_term_ids'][ $object_id ][ $taxonomy ] ?? array();
+		$limit = (int) ( $args['number'] ?? count( $ids ) );
+		return array_slice( $ids, 0, $limit );
+	}
+
+	function wp_set_object_terms( int $object_id, array $term_ids, string $taxonomy, bool $append = false ) {
+		++$GLOBALS['wp_auto_test_set_object_terms_calls'];
+		$GLOBALS['wp_auto_test_last_set_object_terms_args'] = array(
+			'object_id' => $object_id,
+			'term_ids'  => $term_ids,
+			'taxonomy'  => $taxonomy,
+			'append'    => $append,
+		);
+		if ( $GLOBALS['wp_auto_test_set_object_terms_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_set_object_terms_exception'];
+			$GLOBALS['wp_auto_test_set_object_terms_exception'] = null;
+			throw $exception;
+		}
+		if ( is_callable( $GLOBALS['wp_auto_test_before_set_object_terms'] ) ) {
+			$callback = $GLOBALS['wp_auto_test_before_set_object_terms'];
+			$GLOBALS['wp_auto_test_before_set_object_terms'] = null;
+			$callback( $object_id, $term_ids, $taxonomy, $append );
+		}
+		$result = $GLOBALS['wp_auto_test_set_object_terms_result'];
+		if ( ! ( $result instanceof WP_Error ) && false !== $result ) {
+			$GLOBALS['wp_auto_test_object_term_ids'][ $object_id ][ $taxonomy ] = array_values( $term_ids );
+		}
+		if ( is_callable( $GLOBALS['wp_auto_test_after_set_object_terms'] ) ) {
+			$callback = $GLOBALS['wp_auto_test_after_set_object_terms'];
+			$GLOBALS['wp_auto_test_after_set_object_terms'] = null;
+			$callback( $object_id, $term_ids, $taxonomy, $append );
+		}
+		return null !== $result ? $result : array_values( $term_ids );
 	}
 
 	function get_post_thumbnail_id( int $post_id ): int {
@@ -1660,8 +1757,8 @@ namespace WPAuto\Connector\Abilities\Taxonomy {
 		);
 	}
 
-	function current_user_can( string $capability ): bool {
-		return \wp_auto_test_user_can( $capability );
+	function current_user_can( string $capability, int $object_id = 0 ): bool {
+		return \wp_auto_test_user_can( $capability, $object_id );
 	}
 
 	function __( string $text ): string {
@@ -1715,8 +1812,8 @@ namespace WPAuto\Connector\Taxonomy {
 		return \get_terms( $args );
 	}
 
-	function current_user_can( string $capability ): bool {
-		return \wp_auto_test_user_can( $capability );
+	function current_user_can( string $capability, int $object_id = 0 ): bool {
+		return \wp_auto_test_user_can( $capability, $object_id );
 	}
 
 	function __( string $text ): string {
@@ -1876,6 +1973,8 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/CategoryCreateContract.php';
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/TagCreateContract.php';
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyMutationService.php';
+	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyAssignContract.php';
+	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyAssignmentService.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteHealthAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteInfoAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Content/ContentAbilityCategory.php';
@@ -1899,6 +1998,7 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TagsListAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/CategoryCreateAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TagCreateAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TaxonomyAssignAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpAdapterLoader.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpServerRegistrar.php';
 	require_once dirname( __DIR__ ) . '/src/Plugin.php';

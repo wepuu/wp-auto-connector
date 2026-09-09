@@ -14,14 +14,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Maintains the private per-term taxonomy audit history.
+ * Maintains the private taxonomy audit history for terms and Posts.
  */
 final class TaxonomyMutationAuditStore {
 	private const META_KEY   = '_wp_auto_connector_taxonomy_mutation_audit';
 	private const MAX_EVENTS = 20;
 
 	/**
-	 * Atomic ownership primitive for per-term audit appends.
+	 * Atomic ownership primitive for taxonomy audit appends.
 	 *
 	 * @var AtomicOwnershipStore
 	 */
@@ -49,7 +49,7 @@ final class TaxonomyMutationAuditStore {
 
 		try {
 			$token   = wp_generate_uuid4();
-			$lock    = $this->lock_name( $term_id );
+			$lock    = $this->lock_name( $term_id, 'term' );
 			$acquire = $this->ownership->acquire( $lock, $token );
 		} catch ( \Throwable ) {
 			return false;
@@ -67,6 +67,51 @@ final class TaxonomyMutationAuditStore {
 				$events      = array_slice( $events, -self::MAX_EVENTS );
 				$updated     = update_term_meta( $term_id, self::META_KEY, $events );
 				$critical_ok = false !== $updated && $this->read_events( $term_id ) === $events;
+			}
+		} catch ( \Throwable ) {
+			$critical_ok = false;
+		} finally {
+			try {
+				$release = $this->ownership->release( $lock, $token );
+			} catch ( \Throwable ) {
+				$release = null;
+			}
+		}
+
+		return $critical_ok && 'released' === ( $release['status'] ?? null );
+	}
+
+	/**
+	 * Append and verify one exact built-in taxonomy Assignment event on a Post.
+	 *
+	 * @param int                  $post_id Audited Post ID.
+	 * @param array<string, mixed> $event Attribution event.
+	 */
+	public function append_assignment( int $post_id, array $event ): bool {
+		if ( $post_id < 1 || ! $this->is_valid_assignment_event( $event ) || $event['target_object_id'] !== $post_id ) {
+			return false;
+		}
+
+		try {
+			$token   = wp_generate_uuid4();
+			$lock    = $this->lock_name( $post_id, 'post' );
+			$acquire = $this->ownership->acquire( $lock, $token );
+		} catch ( \Throwable ) {
+			return false;
+		}
+		if ( 'acquired' !== ( $acquire['status'] ?? null ) ) {
+			return false;
+		}
+
+		$critical_ok = false;
+		$release     = null;
+		try {
+			$events = $this->read_post_events( $post_id );
+			if ( null !== $events ) {
+				$events[]    = $event;
+				$events      = array_slice( $events, -self::MAX_EVENTS );
+				$updated     = update_post_meta( $post_id, self::META_KEY, $events );
+				$critical_ok = false !== $updated && $this->read_post_events( $post_id ) === $events;
 			}
 		} catch ( \Throwable ) {
 			$critical_ok = false;
@@ -151,6 +196,37 @@ final class TaxonomyMutationAuditStore {
 	}
 
 	/**
+	 * Read one private Post audit container and reject physical duplicates.
+	 *
+	 * @param int $post_id Target Post ID.
+	 * @return array<int,mixed>|null
+	 */
+	private function read_post_events( int $post_id ): ?array {
+		$values = get_post_meta( $post_id, self::META_KEY, false );
+		if ( ! is_array( $values ) || count( $values ) > 1 ) {
+			return null;
+		}
+		if ( 0 === count( $values ) ) {
+			return array();
+		}
+		if ( ! is_array( $values[0] ) || count( $values[0] ) > self::MAX_EVENTS ) {
+			return null;
+		}
+		if ( ! empty( $values[0] ) && array_keys( $values[0] ) !== range( 0, count( $values[0] ) - 1 ) ) {
+			return null;
+		}
+
+		$events = array_values( $values[0] );
+		foreach ( $events as $event ) {
+			if ( ! is_array( $event ) || ( $event['target_object_id'] ?? null ) !== $post_id || ! $this->is_valid_assignment_event( $event ) ) {
+				return null;
+			}
+		}
+
+		return $events;
+	}
+
+	/**
 	 * Validate the exact built-in taxonomy Create event shape.
 	 *
 	 * @param array<string, mixed> $event Candidate event.
@@ -188,6 +264,59 @@ final class TaxonomyMutationAuditStore {
 	}
 
 	/**
+	 * Validate the exact built-in taxonomy Assignment event shape.
+	 *
+	 * @param array<string,mixed> $event Candidate event.
+	 */
+	private function is_valid_assignment_event( array $event ): bool {
+		$required = array( 'version', 'operation', 'ability', 'actor_user_id', 'target_object_id', 'taxonomy', 'timestamp_gmt', 'expected_term_ids', 'previous_term_ids', 'result_term_ids' );
+		$keys     = array_keys( $event );
+		$expected = $required;
+		sort( $keys );
+		sort( $expected );
+
+		return $keys === $expected
+			&& 1 === $event['version']
+			&& 'assign' === $event['operation']
+			&& 'wp-auto/taxonomy-assign' === $event['ability']
+			&& is_int( $event['actor_user_id'] )
+			&& $event['actor_user_id'] > 0
+			&& is_int( $event['target_object_id'] )
+			&& $event['target_object_id'] > 0
+			&& in_array( $event['taxonomy'], array( 'category', 'post_tag' ), true )
+			&& is_string( $event['timestamp_gmt'] )
+			&& $this->valid_timestamp( $event['timestamp_gmt'] )
+			&& $this->valid_id_set( $event['expected_term_ids'], 0 )
+			&& $this->valid_id_set( $event['previous_term_ids'], 0 )
+			&& $this->valid_id_set( $event['result_term_ids'], 1 );
+	}
+
+	/**
+	 * Validate one canonical bounded ID set.
+	 *
+	 * @param mixed $ids Candidate IDs.
+	 * @param int   $minimum_count Minimum length.
+	 */
+	private function valid_id_set( $ids, int $minimum_count ): bool {
+		if ( ! is_array( $ids ) || count( $ids ) < $minimum_count || count( $ids ) > 50 ) {
+			return false;
+		}
+		if ( ! empty( $ids ) && array_keys( $ids ) !== range( 0, count( $ids ) - 1 ) ) {
+			return false;
+		}
+
+		$previous = 0;
+		foreach ( $ids as $index => $id ) {
+			if ( ! is_int( $id ) || $id < 1 || ( $index > 0 && $id <= $previous ) ) {
+				return false;
+			}
+			$previous = $id;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Validate a real Gregorian GMT timestamp.
 	 *
 	 * @param string $value Timestamp.
@@ -210,10 +339,11 @@ final class TaxonomyMutationAuditStore {
 	/**
 	 * Build a domain-discriminated per-site, per-term audit lock.
 	 *
-	 * @param int $term_id Target term ID.
+	 * @param int    $object_id Target object ID.
+	 * @param string $domain Audit domain.
 	 */
-	private function lock_name( int $term_id ): string {
-		$scope = 'taxonomy-term' . "\0" . (string) get_current_blog_id() . "\0" . (string) $term_id;
+	private function lock_name( int $object_id, string $domain ): string {
+		$scope = 'taxonomy-' . $domain . "\0" . (string) get_current_blog_id() . "\0" . (string) $object_id;
 
 		return 'wp_auto_connector_mutation_audit_lock_' . hash( 'sha256', $scope );
 	}

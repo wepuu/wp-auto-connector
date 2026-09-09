@@ -187,10 +187,11 @@ capability with the built-in Post edit baseline and final `edit_post` check.
 
 Category Create and Tag Create now reuse ADR-003 ownership through a closed
 `AtomicOwnershipStore` allowlist and explicit-uninstall cleanup for one exact
-private taxonomy-idempotency family. Its audit is stored under one exact
-private termmeta key and verified during explicit uninstall. Assignment is ID-only exact
-replacement on a draft Post and uses a required expected current term set as a
-best-effort, explicitly non-CAS concurrency precondition. Direct runtime SQL
+private taxonomy-idempotency family. Create audit is stored under one exact
+private termmeta key; Assignment audit uses the same key in postmeta, both
+verified during explicit uninstall. Assignment is ID-only exact replacement on
+a draft Post and uses a required expected current term set as a best-effort,
+explicitly non-CAS concurrency precondition. Direct runtime SQL
 against Core taxonomy tables remains prohibited. See
 `docs/PHASE_1_5_TAXONOMY_CONTRACTS.md` and
 `docs/ADR-006-TAXONOMY-SAFETY.md`.

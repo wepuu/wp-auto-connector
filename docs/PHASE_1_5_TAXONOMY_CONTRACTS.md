@@ -1,13 +1,13 @@
 # Phase 1.5 Taxonomy Mutation Contracts
 
-Status: **PHASE 1.5.0–1.5.2 CONTRACTS; CATEGORY AND TAG CREATE IMPLEMENTED CANDIDATES; RUNTIME EXACTLY TWENTY TOOLS**
+Status: **PHASE 1.5.0–1.5.3 CONTRACTS; CATEGORY, TAG CREATE, AND TAXONOMY ASSIGN IMPLEMENTED CANDIDATES; RUNTIME EXACTLY TWENTY-ONE TOOLS**
 
 This document is the authoritative public contract for Phase 1.5 taxonomy
 mutation. It extends the sealed Phase 1.2 category/tag read contracts without
 changing them. Phase 1.5.0 was documentation-only; the separately authorized
 Phase 1.5.1 and 1.5.2 checkpoints implement Category Create and Tag Create and
-extend the runtime to exactly twenty tools. The assignment checkpoint remains
-unimplemented.
+extend the runtime to exactly twenty-one tools. The Phase 1.5.4 integration and
+security seal remains open.
 
 ## Fixed scope
 
@@ -310,10 +310,12 @@ is not authoritative idempotency state.
 
 The Phase 1.5.1 exposure extends explicit uninstall to remove and
 independently verify absence of the taxonomy-idempotency option family and the
-exact taxonomy audit key from termmeta. Core APIs perform deletion. Any direct
-SQL remains read-only, exact-key/prefix, bounded, and limited to uninstall
-verification under the ADR-004 amendment. Phase 1.5.0 itself granted no new
-runtime or uninstall SQL authority.
+exact taxonomy audit key from termmeta. Phase 1.5.3 also stores assignment
+events in postmeta, so uninstall removes and verifies the same exact key in
+both metadata domains. Core APIs perform deletion. Any direct SQL remains
+read-only, exact-key/prefix, bounded, and limited to uninstall verification
+under the ADR-004 amendment. Phase 1.5.0 itself granted no new runtime or
+uninstall SQL authority.
 
 ## Error contract
 
@@ -327,6 +329,7 @@ runtime or uninstall SQL authority.
 | `wp_auto_term_conflict` | 409 | Core term uniqueness conflicts with an independently existing term |
 | `wp_auto_taxonomy_conflict` | 409 | Latest canonical term set differs from `expected_term_ids` |
 | `wp_auto_taxonomy_set_too_large` | 409 | Current selected or protected non-target set exceeds the 50-term safety bound |
+| `wp_auto_taxonomy_query_failed` | 500 | A bounded relationship or target-state read failed before mutation |
 | `wp_auto_taxonomy_create_failed` | 500 | Proven no-term Core create failure |
 | `wp_auto_taxonomy_assign_failed` | 500 | Proven unapplied relationship replacement failure |
 | `wp_auto_taxonomy_state_uncertain` | 500 | A term/relationship or private finalization may have changed but cannot be verified |
@@ -376,5 +379,6 @@ REST proxy, or third-party tool.
 At the Phase 1.5.0 documentation checkpoint there was no placeholder Ability,
 production service, test stub, registrar change, private state, publishing,
 deletion, SEO, Cloud, telemetry, external request, or later-roadmap
-implementation. Phase 1.5.1 and 1.5.2 are the separately authorized Category
-Create and Tag Create checkpoints described above; Phase 1.5.3 remains pending.
+implementation. Phase 1.5.1 through 1.5.3 are the separately authorized
+Category Create, Tag Create, and draft-Post assignment checkpoints described
+above; Phase 1.5.4 remains pending.

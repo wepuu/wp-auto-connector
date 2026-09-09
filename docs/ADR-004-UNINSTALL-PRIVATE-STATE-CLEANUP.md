@@ -1,6 +1,6 @@
 # ADR-004: Uninstall Private-State Cleanup
 
-- Status: **Accepted, implemented, and included in the Phase 1.3.3 seal; Phase 1.5.1–1.5.2 amendment candidate**
+- Status: **Accepted, implemented, and included in the Phase 1.3.3 seal; Phase 1.5.1–1.5.3 amendment candidate**
 - Date: 2026-09-04
 - Decision scope: explicit uninstall cleanup of private mutation state and the four uninstall-only read-only SQL families
 
@@ -14,19 +14,19 @@ a tool, Composer dependencies, CI, plugin version, or any public contract.
 
 ADR-004 = ACCEPTED / IMPLEMENTED / VALIDATED / SEALED
 
-### Phase 1.5.1–1.5.2 amendment (working-tree candidate)
+### Phase 1.5.1–1.5.3 amendment (working-tree candidate)
 
 The Category Create checkpoint extends this closed uninstall inventory with
 the exact taxonomy idempotency option family
 `wp_auto_connector_taxonomy_idempotency_[0-9a-f]{64}` and the exact termmeta
 audit key `_wp_auto_connector_taxonomy_mutation_audit`. Category and Tag Create
-share these same families. It adds no runtime SQL authority: the taxonomy option
-is validated by `AtomicOwnershipStore`, while uninstall uses the Core term
-metadata deletion API (`delete_term_meta_by_key()` when available, otherwise
-`delete_metadata( 'term', 0, $meta_key, '', true )`) plus one bounded prepared
-`meta_id` verification read against trusted `$wpdb->termmeta`. This amendment
-changes the uninstall-only family count from three to four and leaves the
-Phase 1.3 runtime semantics unchanged.
+share these same families. Phase 1.5.3 also stores the exact taxonomy audit key
+in Post metadata for assignment events. It adds no runtime SQL authority: the
+taxonomy option is validated by `AtomicOwnershipStore`, while uninstall uses
+the Core metadata deletion APIs plus the existing bounded prepared `meta_id`
+verification reads against trusted `$wpdb->postmeta` and `$wpdb->termmeta`.
+This amendment changes no uninstall-only family count and leaves the Phase
+1.3 runtime semantics unchanged.
 
 ## Authoritative baseline and source architecture
 

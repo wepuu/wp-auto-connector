@@ -18,6 +18,7 @@ use WPAuto\Connector\Abilities\Media\MediaUpdateAbility;
 use WPAuto\Connector\Abilities\Media\MediaSetFeaturedAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
+use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAssignAbility;
 use WPAuto\Connector\Plugin;
 
 /** Covers production registration of the current Phase 1.5.1 abilities. */
@@ -44,6 +45,7 @@ final class PluginTest extends TestCase {
 		self::assertContains( MediaSetFeaturedAbility::class, $classes );
 		self::assertContains( CategoryCreateAbility::class, $classes );
 		self::assertContains( TagCreateAbility::class, $classes );
-		self::assertCount( 20, $callbacks );
+		self::assertContains( TaxonomyAssignAbility::class, $classes );
+		self::assertCount( 21, $callbacks );
 	}
 }

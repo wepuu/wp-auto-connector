@@ -28,6 +28,7 @@ use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
+use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAssignAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagsListAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAbilityCategory;
 use WPAuto\Connector\Admin\AdminPage;
@@ -105,6 +106,7 @@ final class Plugin {
 		( new TagsListAbility() )->register();
 		( new CategoryCreateAbility() )->register();
 		( new TagCreateAbility() )->register();
+		( new TaxonomyAssignAbility() )->register();
 		( new MediaSearchAbility() )->register();
 		( new MediaGetAbility() )->register();
 		( new MediaUploadAbility() )->register();

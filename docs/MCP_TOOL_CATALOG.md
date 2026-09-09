@@ -72,19 +72,19 @@ The fixed implementation order produces exact allowlist counts of 14, 15, 16, 17
 
 Phase 1.5.0 froze the public contracts in
 `docs/PHASE_1_5_TAXONOMY_CONTRACTS.md` and the safety model in
-`docs/ADR-006-TAXONOMY-SAFETY.md`. Phase 1.5.1 and 1.5.2 implement the first
-two named checkpoints, Category Create and Tag Create, and extend the Direct
-MCP runtime to exactly twenty tools.
+`docs/ADR-006-TAXONOMY-SAFETY.md`. Phase 1.5.1 through 1.5.3 implement the
+three named checkpoints, Category Create, Tag Create, and draft-Post Taxonomy
+Assignment, and extend the Direct MCP runtime to exactly twenty-one tools.
 
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
 | `wp-auto/category-create` | `wp-auto-category-create` | Term creation | fixed Category taxonomy object's actual `cap->manage_terms` | Implemented and validated — Phase 1.5.1 candidate |
 | `wp-auto/tag-create` | `wp-auto-tag-create` | Term creation | fixed Tag taxonomy object's actual `cap->manage_terms` | Implemented and validated — Phase 1.5.2 candidate |
-| `wp-auto/taxonomy-assign` | `wp-auto-taxonomy-assign` | Destructive relationship mutation | selected taxonomy `cap->assign_terms`; fixed Post edit baseline; target `edit_post` | Contract frozen for Phase 1.5.3; not implemented |
+| `wp-auto/taxonomy-assign` | `wp-auto-taxonomy-assign` | Destructive relationship mutation | selected taxonomy `cap->assign_terms`; fixed Post edit baseline; target `edit_post` | Implemented; validation candidate — Phase 1.5.3 |
 
-The current working-tree implementation status is Category Create and Tag
-Create implemented as validation candidates (exactly 20 tools); the assignment
-row remains design-only until Phase 1.5.3.
+The current working-tree implementation status is Category Create, Tag Create,
+and Taxonomy Assignment implemented as validation candidates (exactly 21
+tools). The Phase 1.5.4 integration/security seal remains open.
 
 The fixed implementation order appends only these tools, producing exact
 allowlist counts of 19, 20, and 21. Assignment is limited to one built-in

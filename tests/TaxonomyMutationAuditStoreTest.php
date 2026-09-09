@@ -16,6 +16,11 @@ final class TaxonomyMutationAuditStoreTest extends TestCase {
 	protected function setUp(): void {
 		$GLOBALS['wp_auto_test_term_meta']                      = array();
 		$GLOBALS['wp_auto_test_term_meta_values']               = array();
+		$GLOBALS['wp_auto_test_post_meta']                      = array();
+		$GLOBALS['wp_auto_test_post_meta_values']               = array();
+		$GLOBALS['wp_auto_test_fail_update_meta']               = false;
+		$GLOBALS['wp_auto_test_update_meta_exception']          = null;
+		$GLOBALS['wp_auto_test_update_meta_calls']              = 0;
 		$GLOBALS['wp_auto_test_fail_update_term_meta']          = false;
 		$GLOBALS['wp_auto_test_options']                        = array();
 		$GLOBALS['wp_auto_test_option_autoload']                = array();
@@ -97,6 +102,32 @@ final class TaxonomyMutationAuditStoreTest extends TestCase {
 		self::assertFalse( $store->append_create( 3001, $this->event( 3001, str_repeat( 'c', 64 ), 7 ) ) );
 	}
 
+	/** Assignment events use Post metadata and retain only the newest twenty entries. */
+	public function test_append_assignment_event_is_bounded_and_exact(): void {
+		$store = new TaxonomyMutationAuditStore();
+		for ( $index = 1; $index <= 21; ++$index ) {
+			$event = $this->assignment_event( 100, $index, 7 );
+			self::assertTrue( $store->append_assignment( 100, $event ) );
+		}
+
+		$events = $GLOBALS['wp_auto_test_post_meta'][100][ TaxonomyMutationAuditStore::meta_key() ];
+		self::assertCount( 20, $events );
+		self::assertSame( array( 2 ), $events[0]['expected_term_ids'] );
+		self::assertSame( array( 'version', 'operation', 'ability', 'actor_user_id', 'target_object_id', 'taxonomy', 'timestamp_gmt', 'expected_term_ids', 'previous_term_ids', 'result_term_ids' ), array_keys( $events[0] ) );
+		self::assertArrayNotHasKey( 'name', $events[0] );
+	}
+
+	/** Assignment events reject wrong target, unsorted IDs, and duplicate physical containers. */
+	public function test_assignment_event_validation_fails_closed(): void {
+		$store                    = new TaxonomyMutationAuditStore();
+		$event                    = $this->assignment_event( 100, 1, 7 );
+		$event['result_term_ids'] = array( 4, 3 );
+		self::assertFalse( $store->append_assignment( 100, $event ) );
+
+		$GLOBALS['wp_auto_test_post_meta_values'][100][ TaxonomyMutationAuditStore::meta_key() ] = array( array(), array() );
+		self::assertFalse( $store->append_assignment( 100, $this->assignment_event( 100, 1, 7 ) ) );
+	}
+
 	/**
 	 * Build one valid exact event.
 	 *
@@ -116,6 +147,28 @@ final class TaxonomyMutationAuditStoreTest extends TestCase {
 			'timestamp_gmt'  => '2026-09-01 12:00:00',
 			'fingerprint'    => $fingerprint,
 			'parent_id'      => 0,
+		);
+	}
+
+	/**
+	 * Build one valid exact assignment event.
+	 *
+	 * @param int $post_id  Target Post ID.
+	 * @param int $index    Event sequence number.
+	 * @param int $actor_id Actor user ID.
+	 */
+	private function assignment_event( int $post_id, int $index, int $actor_id ): array {
+		return array(
+			'version'           => 1,
+			'operation'         => 'assign',
+			'ability'           => 'wp-auto/taxonomy-assign',
+			'actor_user_id'     => $actor_id,
+			'target_object_id'  => $post_id,
+			'taxonomy'          => 'category',
+			'timestamp_gmt'     => '2026-09-01 12:00:00',
+			'expected_term_ids' => array( $index ),
+			'previous_term_ids' => array( $index ),
+			'result_term_ids'   => array( $index + 100 ),
 		);
 	}
 }

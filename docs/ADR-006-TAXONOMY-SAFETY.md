@@ -1,6 +1,6 @@
 # ADR-006: Taxonomy Mutation Safety Boundary
 
-Status: **Accepted safety boundary; Category Create (Phase 1.5.1) and Tag Create (Phase 1.5.2) implemented, integration seal pending**
+Status: **Accepted safety boundary; Category Create, Tag Create, and draft-Post assignment (Phase 1.5.1–1.5.3) implemented, integration seal pending**
 
 Date: 2026-09-09
 
@@ -27,11 +27,11 @@ Taxonomy writes have several non-obvious risks:
 
 ## Decision
 
-The Phase 1.5.1 Category Create and Phase 1.5.2 Tag Create checkpoints
-implement the two term-creation contracts in this ADR. They extend the exact
-AtomicOwnership option allowlist and ADR-004 uninstall verification to shared
-taxonomy idempotency and termmeta audit state. Exact assignment remains
-design-only until its named checkpoint.
+The Phase 1.5.1 Category Create, Phase 1.5.2 Tag Create, and Phase 1.5.3
+draft-Post assignment checkpoints implement the three contracts in this ADR.
+They extend the exact AtomicOwnership option allowlist and ADR-004 uninstall
+verification to shared taxonomy idempotency, termmeta Create audit state, and
+postmeta assignment audit state.
 
 Adopt three narrow Abilities: fixed Category Create, fixed Tag Create, and
 single-taxonomy exact assignment to built-in Post drafts. Their complete
@@ -130,10 +130,11 @@ newest 20 valid events per object; records exclude taxonomy text and request
 material. Audit cannot arbitrate idempotency.
 
 The Category Create runtime checkpoint extends explicit uninstall for the exact
-new option family and audit key. Deletion uses Core APIs. Independent
-verification may add one bounded, prepared, exact-key read against the active
-blog's termmeta table, but only through the ADR-004 amendment. This ADR does
-not expand active runtime SQL authority.
+new option family and audit key. Assignment uses the same exact key in
+postmeta. Deletion uses Core APIs. Independent verification may add one
+bounded, prepared, exact-key read against the active blog's postmeta and
+termmeta tables, but only through the ADR-004 amendment. This ADR does not
+expand active runtime SQL authority.
 
 ## Alternatives rejected
 

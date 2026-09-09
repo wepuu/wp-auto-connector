@@ -104,6 +104,10 @@ final class UninstallTest extends TestCase {
 			),
 			array(
 				'meta_id'  => '3',
+				'meta_key' => '_wp_auto_connector_taxonomy_mutation_audit',
+			),
+			array(
+				'meta_id'  => '4',
 				'meta_key' => '_unrelated_meta',
 			),
 		);
@@ -130,7 +134,7 @@ final class UninstallTest extends TestCase {
 		self::assertSame(
 			array(
 				array(
-					'meta_id'  => '3',
+					'meta_id'  => '4',
 					'meta_key' => '_unrelated_meta',
 				),
 			),
@@ -232,7 +236,7 @@ final class UninstallTest extends TestCase {
 	 */
 	public function test_false_audit_delete_with_verified_absence_is_complete(): void {
 		self::assertTrue( ( new PrivateStateCleanup() )->run() );
-		self::assertSame( 2, $GLOBALS['wp_auto_test_delete_post_meta_calls'] );
+		self::assertSame( 3, $GLOBALS['wp_auto_test_delete_post_meta_calls'] );
 	}
 
 	/**
@@ -282,7 +286,7 @@ final class UninstallTest extends TestCase {
 
 		self::assertFalse( ( new PrivateStateCleanup() )->run() );
 		self::assertFalse( $GLOBALS['wp_auto_test_db_suppress_state'] );
-		self::assertSame( array( true, false, true, false, true, false, true, false, true, false ), $GLOBALS['wp_auto_test_db_suppress_history'] );
+		self::assertSame( array( true, false, true, false, true, false, true, false, true, false, true, false ), $GLOBALS['wp_auto_test_db_suppress_history'] );
 	}
 
 	/**
@@ -320,7 +324,7 @@ final class UninstallTest extends TestCase {
 		self::assertFalse( $result );
 		self::assertSame( '', $output );
 		self::assertFalse( $GLOBALS['wp_auto_test_db_suppress_state'] );
-		self::assertSame( array( true, false, true, false, true, false, true, false, true, false ), $GLOBALS['wp_auto_test_db_suppress_history'] );
+		self::assertSame( array( true, false, true, false, true, false, true, false, true, false, true, false ), $GLOBALS['wp_auto_test_db_suppress_history'] );
 	}
 
 	/**
@@ -360,6 +364,10 @@ final class UninstallTest extends TestCase {
 				array(
 					'meta_id'  => '1',
 					'meta_key' => '_wp_auto_connector_mutation_audit',
+				),
+				array(
+					'meta_id'  => '2',
+					'meta_key' => '_wp_auto_connector_taxonomy_mutation_audit',
 				),
 			);
 			$GLOBALS['wp_auto_test_termmeta_rows'][ $blog_id ] = array(

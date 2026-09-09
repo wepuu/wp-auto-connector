@@ -19,7 +19,7 @@ final class PrivateStateCleanup {
 	private const MEDIA_IDEMPOTENCY_PREFIX    = 'wp_auto_connector_media_idempotency_';
 	private const TAXONOMY_IDEMPOTENCY_PREFIX = 'wp_auto_connector_taxonomy_idempotency_';
 	private const AUDIT_LOCK_PREFIX           = 'wp_auto_connector_mutation_audit_lock_';
-	private const AUDIT_META_KEYS             = array( '_wp_auto_connector_mutation_audit', '_wp_auto_connector_media_mutation_audit' );
+	private const AUDIT_META_KEYS             = array( '_wp_auto_connector_mutation_audit', '_wp_auto_connector_media_mutation_audit', '_wp_auto_connector_taxonomy_mutation_audit' );
 	private const TAXONOMY_AUDIT_META_KEY     = '_wp_auto_connector_taxonomy_mutation_audit';
 
 	private const IDEMPOTENCY_PATTERN          = '/\Awp_auto_connector_idempotency_[0-9a-f]{64}\z/';
@@ -187,6 +187,8 @@ final class PrivateStateCleanup {
 
 	/**
 	 * Remove and independently verify the exact taxonomy audit key in termmeta.
+	 * Assignment events use the postmeta pass above; Create events use this
+	 * termmeta pass.
 	 */
 	private function cleanup_term_audit_metadata(): bool {
 		$complete = true;

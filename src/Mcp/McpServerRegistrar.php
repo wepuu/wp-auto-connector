@@ -26,6 +26,7 @@ use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
+use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAssignAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagsListAbility;
 use WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
 use WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
@@ -92,6 +93,7 @@ final class McpServerRegistrar {
 				MediaImportUrlAbility::NAME,
 				CategoryCreateAbility::NAME,
 				TagCreateAbility::NAME,
+				TaxonomyAssignAbility::NAME,
 			),
 			array(),
 			array(),

@@ -59,6 +59,8 @@ require_once WP_AUTO_CONNECTOR_DIR . 'src/Taxonomy/TaxonomyMutationAuditStore.ph
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Taxonomy/CategoryCreateContract.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Taxonomy/TagCreateContract.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Taxonomy/TaxonomyMutationService.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Taxonomy/TaxonomyAssignContract.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Taxonomy/TaxonomyAssignmentService.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Site/SiteHealthAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Site/SiteInfoAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Content/ContentAbilityCategory.php';
@@ -82,6 +84,7 @@ require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Taxonomy/CategoriesListAbili
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Taxonomy/TagsListAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Taxonomy/CategoryCreateAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Taxonomy/TagCreateAbility.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Taxonomy/TaxonomyAssignAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Mcp/McpAdapterLoader.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Mcp/McpServerRegistrar.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Admin/AdminPage.php';
