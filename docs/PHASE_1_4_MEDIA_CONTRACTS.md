@@ -1,6 +1,6 @@
 # Phase 1.4 Media Contracts
 
-Status: **Phase 1.4.0 through Phase 1.4.4 sealed; Phase 1.4.5 implemented on main; Phase 1.4.6 exact-main validation complete; formal seal blocked by Plugin Check**
+Status: **Phase 1.4.0 through Phase 1.4.4 sealed; Phase 1.4.5 implemented on main; Phase 1.4.6 exact-main and WordPress 7.1 validation complete; formal seal pending product identity decision**
 
 Contract date: 2026-09-08
 
@@ -358,8 +358,9 @@ third-party tool.
 Phase 1.4.5 is implemented on `main` with only remote import
 production PHP, test support, the exact eighteen-tool allowlist, and the
 required private ingestion state/audit extensions. Focused and exact-main
-Phase 1.4.6 integration, security, state-integrity, and cleanup validation
-passed; Plugin Check 2.1.0 ran against the release-like build but its
-tested-version error blocks formal sealing and release authorization. It adds no
+Phase 1.4.6 integration, security, state-integrity, cleanup, and WordPress 7.1
+compatibility validation passed. The repaired release-like package passes
+Plugin Check 2.1.0 with no errors; three product-identity trademark warnings
+remain for an explicit name/slug or WordPress.org review decision. It adds no
 publishing, deletion, taxonomy mutation, SEO, Cloud, telemetry, or later
 roadmap work.

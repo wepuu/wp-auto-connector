@@ -1,10 +1,10 @@
 # Phase 1.4.6 Media Integration and Security Validation
 
-Status: implementation is merged on `main`; exact-main validation is complete; formal Phase 1.4 seal is blocked by the audited Plugin Check result.
+Status: implementation is merged on `main`; exact-main validation is complete; WordPress 7.1 compatibility is verified; formal Phase 1.4 seal remains blocked by product-identity Plugin Check warnings.
 
 Validation date: 2026-09-09
 
-This checkpoint validates the Phase 1.4 media surface through automated tests, a disposable WordPress 6.9/PHP 8.1 Streamable HTTP runtime, and a prompt-driven security diff scan. The runtime contains exactly eighteen explicitly allowlisted tools, with `wp-auto/media-import-url` as the final tool. No publishing, deletion, taxonomy mutation, SEO, Cloud, telemetry, generic URL fetching, or arbitrary filesystem/code execution was added.
+This checkpoint validates the Phase 1.4 media surface through automated tests, disposable WordPress 6.9/PHP 8.1 and WordPress 7.1/PHP 8.1 runtimes, and a prompt-driven security diff scan. The runtime contains exactly eighteen explicitly allowlisted tools, with `wp-auto/media-import-url` as the final tool. No publishing, deletion, taxonomy mutation, SEO, Cloud, telemetry, generic URL fetching, or arbitrary filesystem/code execution was added.
 
 ## Automated quality gates
 
@@ -19,6 +19,22 @@ This checkpoint validates the Phase 1.4 media surface through automated tests, a
 The test stack used locally cached Docker images equivalent to the official wp-env baseline: WordPress 6.9, PHP 8.1.34, Docker Engine 29.6.1, MariaDB 11.8.9, and MCP Adapter 0.6.1. It ran with `WP_ENVIRONMENT_TYPE=local` and the real Streamable HTTP route `/index.php?rest_route=/wp-auto/mcp` on loopback port 8899.
 
 No remote package, image, plugin, executable, or other code was downloaded. The plugin was mounted from the validation worktree. The front-end request path initially exposed a Core-loading gap (`wp_tempnam()` was unavailable); the downloader now loads `wp-admin/includes/file.php` on demand and the real import path passes.
+
+## WordPress 7.1 compatibility
+
+Because a `wordpress:7.1-php8.1-apache` Docker tag was not available, an isolated
+WordPress 6.9/PHP 8.1 Apache container was upgraded with the official WordPress
+7.1 core files while retaining a read-only plugin mount. The compatibility smoke
+test then passed:
+
+- `wp core version` returned `7.1`;
+- the release-like plugin activated successfully and its main class returned
+  `BOOT_OK`;
+- the site-health diagnostics reported WordPress `7.1`, PHP `8.1.34`, Abilities
+  API available, MCP Adapter `0.6.1` available, and REST API available;
+- the Abilities registry contained 24 entries: the 18 expected WP-Auto abilities
+  plus the documented three Core and three Adapter entries; and
+- the REST server exposed `/wp-auto/mcp`.
 
 ## Live MCP matrix
 
@@ -40,25 +56,21 @@ The review covered transport and Ability authorization, URL/DNS/redirect handlin
 
 ## Plugin Check result
 
-An isolated Docker environment ran official Plugin Check 2.1.0 against a release-like copy of `main@be12037` on WordPress 6.9 and PHP 8.1.34. The copy contained the production entry files, `src`, `readme.txt`, `LICENSE`, and the locked three-package production Composer build; development files and the nested MCP Adapter plugin entry file excluded by `.distignore` were absent.
+An isolated Docker environment ran official Plugin Check 2.1.0 against a release-like copy of the repaired build on WordPress 6.9 and PHP 8.1.34. The copy contained the production entry files, `src`, `readme.txt`, `LICENSE`, `composer.json`, `composer.lock`, and the locked three-package production Composer build; development files and the nested MCP Adapter plugin entry file excluded by `.distignore` were absent.
 
-Both the default static WP-CLI scan and the documented runtime-enabled scan using `--require=/var/www/html/wp-content/plugins/plugin-check/cli.php` completed. The release-like plugin also activated successfully and its production bootstrap returned `BOOT_OK`. Both scans reported the same one error and seven warnings:
+Both the default static WP-CLI scan and the documented runtime-enabled scan using `--require=/var/www/html/wp-content/plugins/plugin-check/cli.php` completed. The release-like plugin also activated successfully and its production bootstrap returned `BOOT_OK`. The pre-repair scan reported one error and seven warnings. The repair removed the missing Composer manifest, nonexistent Domain Path, and two reviewed DirectDB warnings. After updating `Tested up to` to 7.1, the static and runtime-enabled scans report no errors and only three product-identity warnings:
 
-- error: `outdated_tested_upto_header` because `Tested up to: 6.9` is behind the checker current version, WordPress 7.1;
-- three warnings: the existing WP-Auto name and `wp-auto-connector` slug trademark checks;
-- warning: `missing_composer_json_file` because the release-like package contains the production `vendor` tree while `.distignore` excludes `composer.json`;
-- warning: the declared `/languages` domain path does not yet exist in the release-like package; and
-- two warnings: the already reviewed ADR-003 and ADR-004 prepared DirectDB boundaries in `AtomicOwnershipStore` and `PrivateStateCleanup`.
+- three `trademarked_term` warnings: the existing `WP-Auto` display name and `wp-auto-connector` slug checks.
 
-The tested-version error is a formal sealing blocker. This validation does not silently claim WordPress 7.1 compatibility, rename the approved product/slug, change the dependency packaging contract, add release-only structure, or rewrite the approved SQL boundaries. Those findings require an explicit release-readiness decision and, where changed, fresh compatibility and packaging validation.
+The tested-version error and packaging/code-quality warnings are resolved. This validation does not silently rename the approved product/slug; the remaining identity warnings require an explicit product-name/slug decision (or WordPress.org review outcome) before formal Phase 1.4 sealing.
 
 The Plugin Check package, test site, credentials, containers, volumes, network, and release-like copy were deleted after the scan; exact-name follow-up queries returned zero Docker resources.
 
 ## Environment limitations and residual gates
 
 - A deterministic PHP-worker process-death harness around the Core sideload boundary was not run. The implementation fails closed with `wp_auto_media_state_uncertain` and retains the idempotency claim when durable state cannot be proven.
-- The implementation is on `main`, the exact-main review is complete, and Plugin Check was run against `main@be12037`. This document is not a formal release seal because the Plugin Check error remains unresolved.
+- The implementation is on `main`, the exact-main review is complete, and the repaired release-like build passes Plugin Check with no errors. This document is not a formal release seal because the three product-identity warnings remain unresolved.
 
 ## Verdict
 
-Phase 1.4.6 implementation, main integration, and exact-main runtime/security validation evidence are complete. The media contract, eighteen-tool allowlist, automated suite, disposable live MCP matrix, state-integrity checks, cleanup checks, and both security reviews pass. Official Plugin Check ran successfully as a tool but did not pass the release gate: its tested-version error blocks formal Phase 1.4 sealing until the release-readiness findings are resolved and the checker is rerun.
+Phase 1.4.6 implementation, main integration, exact-main runtime/security validation, WordPress 7.1 compatibility, and repaired release-like packaging evidence are complete. The media contract, eighteen-tool allowlist, automated suite, disposable live MCP matrices, state-integrity checks, cleanup checks, and both security reviews pass. Official Plugin Check now reports no errors; formal Phase 1.4 sealing awaits an explicit product identity/slug decision for the three remaining trademark warnings.
