@@ -1,6 +1,6 @@
 # Phase 1.5.3 Draft Post Taxonomy Assignment Validation
 
-Status: **IMPLEMENTED; VALIDATION CANDIDATE IN WORKING TREE**
+Status: **IMPLEMENTED; VALIDATION CANDIDATE ON FEATURE BRANCH**
 
 Validation date: 2026-09-09
 
@@ -78,5 +78,6 @@ Assignment audit + uninstall cleanup = PASS
 Plugin Check 2.1.0 = BLOCKED BY REMOTE-PLUGIN DOWNLOAD POLICY
 Direct MCP tools = 21
 Phase 1.5.3 = VALIDATION CANDIDATE
+Phase 1.5.4 evidence = `docs/PHASE_1_5_4_VALIDATION.md`
 Next checkpoint = Phase 1.5.4 integration and security seal
 ```
