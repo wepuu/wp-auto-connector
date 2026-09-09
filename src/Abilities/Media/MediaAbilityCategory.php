@@ -28,8 +28,8 @@ final class MediaAbilityCategory {
 		wp_register_ability_category(
 			self::SLUG,
 			array(
-				'label'       => __( 'WP-Auto Media', 'wp-auto-connector' ),
-				'description' => __( 'WP-Auto abilities for safe WordPress media access.', 'wp-auto-connector' ),
+				'label'       => __( 'WP-Auto Media', 'wepuu-auto-connector' ),
+				'description' => __( 'WP-Auto abilities for safe WordPress media access.', 'wepuu-auto-connector' ),
 			)
 		);
 	}

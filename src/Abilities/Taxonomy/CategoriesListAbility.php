@@ -37,8 +37,8 @@ final class CategoriesListAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Categories List', 'wp-auto-connector' ),
-				'description'         => __( 'Lists WordPress categories using bounded pagination.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Categories List', 'wepuu-auto-connector' ),
+				'description'         => __( 'Lists WordPress categories using bounded pagination.', 'wepuu-auto-connector' ),
 				'category'            => TaxonomyAbilityCategory::SLUG,
 				'input_schema'        => $this->input_schema(),
 				'output_schema'       => $this->output_schema(),

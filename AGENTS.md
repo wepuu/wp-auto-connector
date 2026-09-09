@@ -1,8 +1,8 @@
-# WP-Auto Connector - Codex Repository Instructions
+# WePuu Auto Connector - Codex Repository Instructions
 
 ## Mission
 
-Build a secure, WordPress.org-compliant WordPress connector that gives compatible AI agents direct MCP access to explicitly exposed WordPress abilities. The free plugin must be useful on its own. Paid WP-Auto value belongs to substantive hosted services such as hosted MCP, Skills, automation, analytics, and multi-site orchestration.
+Build a secure, WordPress.org-compliant WordPress connector that gives compatible AI agents direct MCP access to explicitly exposed WordPress abilities. The public plugin name is WePuu Auto Connector. The free plugin must be useful on its own. Paid WP-Auto value belongs to substantive hosted services such as hosted MCP, Skills, automation, analytics, and multi-site orchestration.
 
 ## Current development phase
 
@@ -12,13 +12,13 @@ Phase 1.1 is complete: the direct MCP server foundation proves the authenticated
 
 Phase 1.2 is complete: all eight read-only tools passed the frozen contract, permission, privacy, schema, bounded-query, and live MCP validation gates.
 
-Phase 1.3.0 through Phase 1.3.4 and Phase 1.4.0 through Phase 1.4.4 are formally sealed on `main`. Phase 1.3.3 resolved SEC-1, SEC-2, and SEC-3; landed the ADR-003 atomic ownership runtime and ADR-004 uninstall cleanup; enforced HTTPS for remote Direct MCP with an exact local-development exception; and completed a zero-finding exact-main security audit. Phase 1.3.4 then completed full real-WordPress and Streamable HTTP mutation integration validation without changing the exact twelve-tool runtime. Phase 1.4.0 froze the Media contracts and ADR-005 safety model, and Phase 1.4.1 through Phase 1.4.4 implemented and validated Media Search/Get, authenticated image upload, metadata update, and draft featured-image assignment through an exact seventeen-tool runtime. Phase 1.4.5 remote URL import and Phase 1.4.6 integration/security validation are merged on `main`; candidate and exact-main security reviews found zero findings. The repaired release-like build passes official Plugin Check 2.1.0 with no errors, and WordPress 7.1 compatibility is verified. Three product-identity trademark warnings remain; do not implement Phase 1.5 or later Phase 1.4 checkpoints, publishing, deletion, taxonomy mutation, SEO, Cloud, or later roadmap work until the identity decision is resolved and Phase 1.4 is formally sealed or an explicit later task authorizes it.
+Phase 1.3.0 through Phase 1.3.4 and Phase 1.4.0 through Phase 1.4.6 are formally sealed on `main`. Phase 1.3.3 resolved SEC-1, SEC-2, and SEC-3; landed the ADR-003 atomic ownership runtime and ADR-004 uninstall cleanup; enforced HTTPS for remote Direct MCP with an exact local-development exception; and completed a zero-finding exact-main security audit. Phase 1.3.4 then completed full real-WordPress and Streamable HTTP mutation integration validation without changing the exact twelve-tool runtime. Phase 1.4 implemented and validated the image-only Media surface through an exact eighteen-tool runtime. The approved public identity is `WePuu Auto Connector` with slug, main-file basename, and text domain `wepuu-auto-connector`; official Plugin Check 2.1.0 passes without errors or warnings, WordPress 6.9 and 7.1 activation succeeds, and the identity security diff review found zero findings. Do not implement Phase 1.5, publishing, deletion, taxonomy mutation, SEO, Cloud, or later roadmap work unless an explicit later task authorizes it.
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
 ## Phase 1 product acceptance target
 
-A site administrator installs WP-Auto Connector, configures an authenticated direct MCP connection, and a compatible MCP client can:
+A site administrator installs WePuu Auto Connector, configures an authenticated direct MCP connection, and a compatible MCP client can:
 
 1. connect to the WordPress site;
 2. discover WP-Auto tools;
@@ -51,7 +51,7 @@ Phase 1 is not complete until at least Claude Code and one additional standard M
 16. Draft creation and publishing must remain separate abilities and separate MCP tools.
 17. Destructive and publish abilities are opt-in and disabled by default.
 18. Secrets must never be logged, rendered in admin HTML, returned from tools, or included in exceptions.
-19. Use `wp-auto-connector` as the plugin slug/text domain unless an approved naming decision changes it before WordPress.org submission.
+19. Use `wepuu-auto-connector` as the plugin slug, main-file basename, and text domain. The approved public plugin name is `WePuu Auto Connector`.
 20. MCP protocol/adaptation code must stay separate from WordPress domain abilities.
 
 ## MCP architecture rules
@@ -279,7 +279,7 @@ Use semantic versions and annotated tags named `vX.Y.Z`.
 5. Create and push the immutable annotated tag:
 
 ```bash
-git tag -a vX.Y.Z -m "WP-Auto Connector vX.Y.Z"
+git tag -a vX.Y.Z -m "WePuu Auto Connector vX.Y.Z"
 git push origin vX.Y.Z
 ```
 

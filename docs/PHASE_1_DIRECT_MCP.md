@@ -2,7 +2,7 @@
 
 ## User outcome
 
-After installing WP-Auto Connector, a site administrator can connect a compatible MCP client directly to the WordPress site and perform explicitly permitted operations using normal WordPress authorization.
+After installing WePuu Auto Connector, a site administrator can connect a compatible MCP client directly to the WordPress site and perform explicitly permitted operations using normal WordPress authorization.
 
 ## Transport target
 
@@ -35,7 +35,7 @@ Purpose: prove ability registration, MCP exposure, transport authentication, per
 Initial result should contain only non-secret operational fields needed to verify the connector, for example:
 - WordPress version;
 - PHP version;
-- WP-Auto Connector version;
+- WePuu Auto Connector version;
 - Abilities API availability;
 - MCP Adapter availability/version;
 - REST API availability;

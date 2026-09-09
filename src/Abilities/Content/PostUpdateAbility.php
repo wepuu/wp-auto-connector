@@ -34,8 +34,8 @@ final class PostUpdateAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Post Update', 'wp-auto-connector' ),
-				'description'         => __( 'Updates allowlisted fields on one existing WordPress post draft.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Post Update', 'wepuu-auto-connector' ),
+				'description'         => __( 'Updates allowlisted fields on one existing WordPress post draft.', 'wepuu-auto-connector' ),
 				'category'            => ContentAbilityCategory::SLUG,
 				'input_schema'        => UpdateDraftContract::input_schema(),
 				'output_schema'       => UpdateDraftContract::output_schema( 'post' ),

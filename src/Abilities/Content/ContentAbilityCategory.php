@@ -35,8 +35,8 @@ final class ContentAbilityCategory {
 		wp_register_ability_category(
 			self::SLUG,
 			array(
-				'label'       => __( 'WP-Auto Content', 'wp-auto-connector' ),
-				'description' => __( 'WP-Auto abilities for WordPress content.', 'wp-auto-connector' ),
+				'label'       => __( 'WP-Auto Content', 'wepuu-auto-connector' ),
+				'description' => __( 'WP-Auto abilities for WordPress content.', 'wepuu-auto-connector' ),
 			)
 		);
 	}

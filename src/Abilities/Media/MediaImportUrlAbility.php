@@ -31,8 +31,8 @@ final class MediaImportUrlAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Media Import', 'wp-auto-connector' ),
-				'description'         => __( 'Imports one bounded, validated image from a caller-selected public URL.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Media Import', 'wepuu-auto-connector' ),
+				'description'         => __( 'Imports one bounded, validated image from a caller-selected public URL.', 'wepuu-auto-connector' ),
 				'category'            => MediaAbilityCategory::SLUG,
 				'input_schema'        => MediaImportContract::input_schema(),
 				'output_schema'       => MediaImportContract::output_schema(),

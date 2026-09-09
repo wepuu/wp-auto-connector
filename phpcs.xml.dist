@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<ruleset name="WP-Auto Connector">
-	<description>WordPress.org-oriented coding standards for WP-Auto Connector.</description>
+<ruleset name="WePuu Auto Connector">
+	<description>WordPress.org-oriented coding standards for WePuu Auto Connector.</description>
 
-	<file>wp-auto-connector.php</file>
+	<file>wepuu-auto-connector.php</file>
 	<file>src</file>
 	<file>tests</file>
 	<file>uninstall.php</file>

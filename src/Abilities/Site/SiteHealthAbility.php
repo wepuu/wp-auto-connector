@@ -37,8 +37,8 @@ final class SiteHealthAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Site Health', 'wp-auto-connector' ),
-				'description'         => __( 'Returns a safe, read-only connector and WordPress runtime status summary.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Site Health', 'wepuu-auto-connector' ),
+				'description'         => __( 'Returns a safe, read-only connector and WordPress runtime status summary.', 'wepuu-auto-connector' ),
 				'category'            => 'site',
 				'input_schema'        => $this->input_schema(),
 				'output_schema'       => $this->output_schema(),

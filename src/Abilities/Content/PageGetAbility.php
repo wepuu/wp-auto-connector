@@ -37,8 +37,8 @@ final class PageGetAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Page Get', 'wp-auto-connector' ),
-				'description'         => __( 'Returns one readable WordPress page using the frozen content contract.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Page Get', 'wepuu-auto-connector' ),
+				'description'         => __( 'Returns one readable WordPress page using the frozen content contract.', 'wepuu-auto-connector' ),
 				'category'            => ContentAbilityCategory::SLUG,
 				'input_schema'        => $this->input_schema(),
 				'output_schema'       => $this->output_schema(),

@@ -1,6 +1,6 @@
 {
-  "name": "wp-auto/wp-auto-connector",
-  "description": "Development tooling for the WP-Auto Connector WordPress plugin.",
+  "name": "wepuu/wepuu-auto-connector",
+  "description": "Development tooling for the WePuu Auto Connector WordPress plugin.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "require": {

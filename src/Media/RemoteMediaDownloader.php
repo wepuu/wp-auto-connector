@@ -234,6 +234,6 @@ final class RemoteMediaDownloader implements RemoteMediaDownloaderInterface {
 
 	/** Return the sanitized remote policy error. */
 	private function rejected(): WP_Error {
-		return new WP_Error( 'wp_auto_remote_media_rejected', __( 'The remote image request was rejected by policy.', 'wp-auto-connector' ), array( 'status' => 400 ) );
+		return new WP_Error( 'wp_auto_remote_media_rejected', __( 'The remote image request was rejected by policy.', 'wepuu-auto-connector' ), array( 'status' => 400 ) );
 	}
 }

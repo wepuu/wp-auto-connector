@@ -210,11 +210,11 @@ final class RemoteUrlPolicy {
 
 	/** Return the stable malformed URL error. */
 	private function invalid_request(): WP_Error {
-		return new WP_Error( 'wp_auto_invalid_request', __( 'The request parameters are invalid.', 'wp-auto-connector' ), array( 'status' => 400 ) );
+		return new WP_Error( 'wp_auto_invalid_request', __( 'The request parameters are invalid.', 'wepuu-auto-connector' ), array( 'status' => 400 ) );
 	}
 
 	/** Return the stable remote policy error. */
 	private function rejected(): WP_Error {
-		return new WP_Error( 'wp_auto_remote_media_rejected', __( 'The remote image request was rejected by policy.', 'wp-auto-connector' ), array( 'status' => 400 ) );
+		return new WP_Error( 'wp_auto_remote_media_rejected', __( 'The remote image request was rejected by policy.', 'wepuu-auto-connector' ), array( 'status' => 400 ) );
 	}
 }

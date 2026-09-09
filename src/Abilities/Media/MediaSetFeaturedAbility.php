@@ -31,8 +31,8 @@ final class MediaSetFeaturedAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Set Featured Image', 'wp-auto-connector' ),
-				'description'         => __( 'Sets one authorized image as the featured image of a draft post or page.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Set Featured Image', 'wepuu-auto-connector' ),
+				'description'         => __( 'Sets one authorized image as the featured image of a draft post or page.', 'wepuu-auto-connector' ),
 				'category'            => MediaAbilityCategory::SLUG,
 				'input_schema'        => MediaFeaturedContract::input_schema(),
 				'output_schema'       => MediaFeaturedContract::output_schema(),

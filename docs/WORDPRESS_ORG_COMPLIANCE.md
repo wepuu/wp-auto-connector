@@ -2,6 +2,13 @@
 
 This is an engineering checklist, not legal advice.
 
+## Approved plugin identity
+
+- [x] Public name: `WePuu Auto Connector`.
+- [x] WordPress.org slug: `wepuu-auto-connector`.
+- [x] Main-file basename, package root, admin page slug, and text domain match the approved slug.
+- [x] Existing `wp-auto` MCP/REST identifiers and `wp_auto_connector_*` private-state keys remain unchanged for compatibility.
+
 ## Distribution and licensing
 
 - [ ] GPL-2.0-or-later compatible code/assets only.

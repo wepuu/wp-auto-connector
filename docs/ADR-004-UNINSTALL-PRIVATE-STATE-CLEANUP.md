@@ -57,7 +57,7 @@ The current runtime remains read and draft-mutation tooling already approved by 
 
 ## Context
 
-WP-Auto Connector stores private mutation-safety state while the plugin is active. Explicit uninstall must be able to remove only those records owned by WP-Auto. WordPress Core does not provide an option-prefix enumeration API, so a narrow read-only database query is needed to discover dynamic option names without trusting a caller. Core APIs remain the deletion authority and retain their cache behavior.
+WePuu Auto Connector stores private mutation-safety state while the plugin is active. Explicit uninstall must be able to remove only those records owned by WP-Auto. WordPress Core does not provide an option-prefix enumeration API, so a narrow read-only database query is needed to discover dynamic option names without trusting a caller. Core APIs remain the deletion authority and retain their cache behavior.
 
 The approved lifecycle policy is Policy A:
 

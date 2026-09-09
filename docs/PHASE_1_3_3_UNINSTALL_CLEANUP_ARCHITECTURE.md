@@ -5,7 +5,7 @@ Final Consolidated Security / Normative Review: APPROVED
 
 ## 1. Purpose and review boundary
 
-This document is the approved normative architecture for the Phase 1.3.3 GOV-2 uninstall-cleanup decision. It defines how WP-Auto Connector private mutation state would be removed when WordPress explicitly uninstalls the plugin. It does not authorize or implement runtime behavior.
+This document is the approved normative architecture for the Phase 1.3.3 GOV-2 uninstall-cleanup decision. It defines how WePuu Auto Connector private mutation state would be removed when WordPress explicitly uninstalls the plugin. It does not authorize or implement runtime behavior.
 
 Final Consolidated Security / Normative Review: APPROVED
 

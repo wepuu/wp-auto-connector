@@ -1,6 +1,6 @@
 # Phase 1.4 Media Contracts
 
-Status: **Phase 1.4.0 through Phase 1.4.4 sealed; Phase 1.4.5 implemented on main; Phase 1.4.6 exact-main and WordPress 7.1 validation complete; formal seal pending product identity decision**
+Status: **Phase 1.4.0 through Phase 1.4.6 complete and formally sealed on main**
 
 Contract date: 2026-09-08
 
@@ -355,12 +355,13 @@ third-party tool.
 7. **1.4.6:** complete automated, wp-env, Streamable HTTP, Plugin Check where
    available, security, state-integrity, cleanup, and exact-allowlist gates.
 
-Phase 1.4.5 is implemented on `main` with only remote import
-production PHP, test support, the exact eighteen-tool allowlist, and the
-required private ingestion state/audit extensions. Focused and exact-main
-Phase 1.4.6 integration, security, state-integrity, cleanup, and WordPress 7.1
-compatibility validation passed. The repaired release-like package passes
-Plugin Check 2.1.0 with no errors; three product-identity trademark warnings
-remain for an explicit name/slug or WordPress.org review decision. It adds no
-publishing, deletion, taxonomy mutation, SEO, Cloud, telemetry, or later
-roadmap work.
+Phase 1.4.5 is implemented on `main` with only remote import production PHP,
+test support, the exact eighteen-tool allowlist, and the required private
+ingestion state/audit extensions. Phase 1.4.6 integration, security,
+state-integrity, cleanup, and WordPress 6.9/7.1 compatibility validation pass.
+The approved `WePuu Auto Connector` / `wepuu-auto-connector` distribution
+identity clears the former product-identity warnings, and the release-like
+package passes Plugin Check 2.1.0 with no errors or warnings. All existing
+`wp-auto` MCP and `wp_auto_connector_*` private-state contracts remain frozen.
+Phase 1.4 is formally sealed and adds no publishing, deletion, taxonomy
+mutation, SEO, Cloud, telemetry, or later roadmap work.

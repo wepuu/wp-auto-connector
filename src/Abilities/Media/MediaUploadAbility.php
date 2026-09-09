@@ -31,8 +31,8 @@ final class MediaUploadAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Media Upload', 'wp-auto-connector' ),
-				'description'         => __( 'Uploads one bounded, validated image to WordPress.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Media Upload', 'wepuu-auto-connector' ),
+				'description'         => __( 'Uploads one bounded, validated image to WordPress.', 'wepuu-auto-connector' ),
 				'category'            => MediaAbilityCategory::SLUG,
 				'input_schema'        => MediaUploadContract::input_schema(),
 				'output_schema'       => MediaUploadContract::output_schema(),

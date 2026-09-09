@@ -5,7 +5,7 @@
 	beStrictAboutOutputDuringTests="true"
 >
 	<testsuites>
-		<testsuite name="WP-Auto Connector">
+		<testsuite name="WePuu Auto Connector">
 			<directory suffix="Test.php">tests</directory>
 		</testsuite>
 	</testsuites>

@@ -1,16 +1,16 @@
 <?php
 /**
- * Plugin Name:       WP-Auto Connector
+ * Plugin Name:       WePuu Auto Connector
  * Plugin URI:        https://wp-auto.com/
  * Description:       Connect WordPress to compatible AI clients through secure, permission-aware capabilities.
  * Version:           0.1.0
  * Requires at least: 6.9
  * Requires PHP:      8.1
- * Author:            WP-Auto
+ * Author:            WePuu
  * Author URI:        https://wp-auto.com/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       wp-auto-connector
+ * Text Domain:       wepuu-auto-connector
  *
  * @package WPAutoConnector
  */

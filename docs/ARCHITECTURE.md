@@ -1,4 +1,4 @@
-# WP-Auto Connector Architecture
+# WePuu Auto Connector Architecture
 
 ## Current target: Direct MCP first
 
@@ -133,7 +133,7 @@ WP-Auto therefore treats MCP Adapter as a replaceable integration dependency. Se
 AI clients
     | direct MCP                       | cloud MCP
     v                                  v
-WP-Auto Connector <-------------- WP-Auto Cloud Gateway
+WePuu Auto Connector <----------- WP-Auto Cloud Gateway
        |
        v
 WP-Auto Ability Layer

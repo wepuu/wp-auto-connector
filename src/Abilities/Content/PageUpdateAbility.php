@@ -34,8 +34,8 @@ final class PageUpdateAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Page Update', 'wp-auto-connector' ),
-				'description'         => __( 'Updates allowlisted fields on one existing WordPress page draft.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Page Update', 'wepuu-auto-connector' ),
+				'description'         => __( 'Updates allowlisted fields on one existing WordPress page draft.', 'wepuu-auto-connector' ),
 				'category'            => ContentAbilityCategory::SLUG,
 				'input_schema'        => UpdateDraftContract::input_schema(),
 				'output_schema'       => UpdateDraftContract::output_schema( 'page' ),

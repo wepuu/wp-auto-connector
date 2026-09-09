@@ -35,8 +35,8 @@ final class SiteInfoAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Site Info', 'wp-auto-connector' ),
-				'description'         => __( 'Returns safe, basic WordPress site configuration information.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Site Info', 'wepuu-auto-connector' ),
+				'description'         => __( 'Returns safe, basic WordPress site configuration information.', 'wepuu-auto-connector' ),
 				'category'            => 'site',
 				'input_schema'        => $this->input_schema(),
 				'output_schema'       => $this->output_schema(),

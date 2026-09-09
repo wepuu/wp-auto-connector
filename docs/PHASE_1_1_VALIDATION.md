@@ -4,12 +4,12 @@
 
 - WordPress 6.9 or later and PHP 8.1 or later.
 - A production dependency install has been run with `composer install --no-dev --optimize-autoloader`, and `vendor/` is present in the installed plugin.
-- WP-Auto Connector is active.
+- WePuu Auto Connector is active.
 - Pretty permalinks/REST API requests work.
 - The remote site uses HTTPS.
 - A WordPress user with the `read` capability has an Application Password.
 
-Open **Settings > WP-Auto Connector** and confirm the endpoint is:
+Open **Settings > WePuu Auto Connector** and confirm the endpoint is:
 
 ```text
 https://example.com/wp-json/wp-auto/mcp

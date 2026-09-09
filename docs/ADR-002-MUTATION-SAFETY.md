@@ -6,7 +6,7 @@
 
 ## Context
 
-WP-Auto Connector needs to create and edit WordPress drafts through the same WordPress Abilities layer used by Direct MCP and future optional Cloud MCP. Mutation magnifies risks that do not exist in the Phase 1.2 read-only surface: duplicate creates, lost updates, capability mistakes, Core hook side effects, partial failures, and accidentally exposing publishing or generic WordPress write access.
+WePuu Auto Connector needs to create and edit WordPress drafts through the same WordPress Abilities layer used by Direct MCP and future optional Cloud MCP. Mutation magnifies risks that do not exist in the Phase 1.2 read-only surface: duplicate creates, lost updates, capability mistakes, Core hook side effects, partial failures, and accidentally exposing publishing or generic WordPress write access.
 
 WordPress post updates are not a database compare-and-swap API. Core modification timestamps have second-level precision, filters and hooks execute inside the write path, and successful Core writes can be followed by failures in connector bookkeeping. The architecture must represent those limits honestly while providing useful retry and attribution behavior.
 

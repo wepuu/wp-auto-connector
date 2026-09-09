@@ -1,4 +1,4 @@
-=== WP-Auto Connector ===
+=== WePuu Auto Connector ===
 Contributors: wpauto
 Tags: mcp, ai, automation, remote management, developer tools
 Requires at least: 6.9
@@ -12,7 +12,7 @@ Connect WordPress to compatible AI clients through secure, permission-aware capa
 
 == Description ==
 
-WP-Auto Connector is the free WordPress-side connector for WP-Auto.
+WePuu Auto Connector is the free WordPress-side connector for WP-Auto.
 
 The project is designed to expose carefully scoped WordPress capabilities to compatible AI clients while preserving WordPress permissions and providing a path to optional WP-Auto cloud automation services.
 
@@ -32,9 +32,9 @@ Future optional cloud features will require explicit administrator action before
 
 == Installation ==
 
-1. Upload the `wp-auto-connector` directory to `/wp-content/plugins/` or install the plugin ZIP through WordPress Admin.
-2. Activate WP-Auto Connector.
-3. Open Settings > WP-Auto Connector.
+1. Upload the `wepuu-auto-connector` directory to `/wp-content/plugins/` or install the plugin ZIP through WordPress Admin.
+2. Activate WePuu Auto Connector.
+3. Open Settings > WePuu Auto Connector.
 4. Confirm that Abilities API, MCP Adapter, REST API, and HTTPS diagnostics are available.
 5. Create a WordPress Application Password for the account that will connect, then configure the MCP client with `https://example.com/wp-json/wp-auto/mcp`.
 

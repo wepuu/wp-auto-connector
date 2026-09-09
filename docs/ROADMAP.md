@@ -1,4 +1,4 @@
-# WP-Auto Connector Iterative Roadmap
+# WePuu Auto Connector Iterative Roadmap
 
 ## Phase 0 - Repository foundation (complete)
 
@@ -8,7 +8,7 @@ Status: complete baseline.
 
 ## Phase 1 - Direct WordPress MCP MVP (current)
 
-Goal: a user can install WP-Auto Connector and connect a compatible MCP client directly to the WordPress site to perform safe, permission-aware WordPress operations.
+Goal: a user can install WePuu Auto Connector and connect a compatible MCP client directly to the WordPress site to perform safe, permission-aware WordPress operations.
 
 ### Phase 1.1 - MCP server foundation (complete)
 
@@ -76,7 +76,7 @@ Delivery checkpoints:
 
 The authoritative contract is `docs/PHASE_1_3_MUTATION_CONTRACTS.md`; the accepted mutation safety decision is `docs/ADR-002-MUTATION-SAFETY.md`, with the landed internal ownership amendment in `docs/ADR-003-ATOMIC-OWNERSHIP.md` and uninstall decision in `docs/ADR-004-UNINSTALL-PRIVATE-STATE-CLEANUP.md`. Phase 1.3.0 through Phase 1.3.4 are complete and formally sealed on `main`. The completion evidence is `docs/PHASE_1_3_4_VALIDATION.md`.
 
-### Phase 1.4 - Media (current)
+### Phase 1.4 - Media (complete; formally sealed)
 
 Scope:
 - media search/get;
@@ -92,10 +92,10 @@ Delivery checkpoints:
 3. **Phase 1.4.2 - Authenticated Image Upload (complete; formally sealed):** implements one bounded Base64 image upload, optional authorized draft parent association, persistent idempotency, Core validation, private bounded audit, uninstall cleanup, and the fifteen-tool allowlist.
 4. **Phase 1.4.3 - Media Metadata Update (complete; formally sealed):** implements and validates allowlisted image title/alt/caption/description updates with object authorization, best-effort concurrency, protected attachment invariants, private bounded audit, and the sixteen-tool allowlist.
 5. **Phase 1.4.4 - Featured Image Assignment (complete; formally sealed):** implemented and validated idempotent assignment for authorized Post/Page drafts and the seventeen-tool allowlist.
-6. **Phase 1.4.5 - Remote URL Import (implemented on `main`; exact-main validation complete):** implemented the open-world downloader last, with the frozen SSRF/DNS/redirect/time/byte/MIME policy and the exact eighteen-tool allowlist. The release-like package now includes the Composer manifests required for review and no longer declares a nonexistent Domain Path.
-7. **Phase 1.4.6 - Integration/Security Validation (exact-main complete; formal seal pending identity decision):** automated and live wp-env-equivalent/Streamable HTTP behavior, exact schemas/permissions/privacy/allowlist, ingestion concurrency, filesystem cleanup, SSRF matrix, state integrity, WordPress 7.1 compatibility, and two zero-finding security reviews all pass. Official Plugin Check 2.1.0 now reports no errors after the tested-version, packaging, and reviewed DirectDB findings were repaired; three product-identity trademark warnings remain for explicit name/slug or WordPress.org review resolution.
+6. **Phase 1.4.5 - Remote URL Import (complete; formally sealed):** implemented the open-world downloader last, with the frozen SSRF/DNS/redirect/time/byte/MIME policy and the exact eighteen-tool allowlist. The release-like package includes the Composer manifests required for review and excludes the dependency's standalone plugin entrypoint.
+7. **Phase 1.4.6 - Integration/Security Validation (complete; formally sealed):** automated and live wp-env-equivalent/Streamable HTTP behavior, exact schemas/permissions/privacy/allowlist, ingestion concurrency, filesystem cleanup, SSRF matrix, state integrity, WordPress 6.9/7.1 compatibility, and zero-finding security reviews all pass. The approved `WePuu Auto Connector` / `wepuu-auto-connector` identity resolves the former trademark warnings; official Plugin Check 2.1.0 reports no errors or warnings against the release-like package.
 
-The authoritative contract is `docs/PHASE_1_4_MEDIA_CONTRACTS.md`; the accepted safety decision is `docs/ADR-005-MEDIA-SAFETY.md`; checkpoint evidence is recorded in `docs/PHASE_1_4_0_VALIDATION.md` through `docs/PHASE_1_4_6_VALIDATION.md`. Phase 1.4 remains image-only and does not authorize publishing, deletion, generic file/network access, taxonomy mutation, SEO, Cloud, telemetry, or later roadmap work.
+The authoritative contract is `docs/PHASE_1_4_MEDIA_CONTRACTS.md`; the accepted safety decision is `docs/ADR-005-MEDIA-SAFETY.md`; checkpoint evidence is recorded in `docs/PHASE_1_4_0_VALIDATION.md` through `docs/PHASE_1_4_6_VALIDATION.md`. Phase 1.4 is formally sealed with the exact eighteen-tool runtime. It remains image-only and does not authorize publishing, deletion, generic file/network access, taxonomy mutation, SEO, Cloud, telemetry, or later roadmap work.
 
 ### Phase 1.5 - Taxonomy
 
@@ -190,7 +190,7 @@ WP-Auto Cloud:
 ## WordPress.org release gate
 
 Before first public directory release:
-- confirm plugin name/slug;
+- use the confirmed `WePuu Auto Connector` name and `wepuu-auto-connector` slug;
 - re-check MCP Adapter WordPress.org availability and packaging strategy;
 - run Plugin Check;
 - validate readme;

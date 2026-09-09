@@ -1,6 +1,6 @@
 # Phase 1.4.6 Media Integration and Security Validation
 
-Status: implementation is merged on `main`; exact-main validation is complete; WordPress 7.1 compatibility is verified; formal Phase 1.4 seal remains blocked by product-identity Plugin Check warnings.
+Status: complete and formally sealed on `main`; the approved distribution identity resolves the final Plugin Check warnings.
 
 Validation date: 2026-09-09
 
@@ -8,11 +8,12 @@ This checkpoint validates the Phase 1.4 media surface through automated tests, d
 
 ## Automated quality gates
 
-- PHPUnit: 390 tests, 2,012 assertions, passing.
+- PHPUnit: 393 tests, 2,144 assertions, passing.
 - `composer validate --strict`: passing.
-- `composer lint`: 101/101 files passing.
+- `composer lint`: 102/102 files passing.
 - `git diff --check`: passing.
 - New seam coverage covers in-progress idempotency ownership, completed-payload conflicts, claim retention after Core uncertainty, redirect pivots, redirect loops, non-identity encodings, effective upload-size overflow, and temporary-file cleanup.
+- Three identity regression tests cover the approved plugin header/readme/Composer identity, all production gettext domains, and preservation of the MCP, REST, Ability, and persistent-state compatibility identifiers.
 
 ## Disposable live runtime
 
@@ -54,23 +55,32 @@ The candidate Codex Security prompt-only diff scan reviewed all 18 changed produ
 
 The review covered transport and Ability authorization, URL/DNS/redirect handling, cURL destination pinning, transfer/time/MIME bounds, temporary-file lifecycle, atomic idempotency ownership, audit locking, bootstrap, and the eighteen-tool allowlist. TAC was checked once and was not granted; the local prompt-only review proceeded as authorized.
 
+The product-identity working-tree diff received a separate complete prompt-only review as scan `38547def-5392-45d1-b437-6f99803429ba`. All 37 production review items were covered in the parent thread, the baseline-to-candidate normalization proved the PHP changes were limited to the authorized name/text-domain substitutions, and the scan completed with zero findings. It specifically reviewed bootstrap/package identity, MCP and Ability registration, all changed domain services, and Composer production metadata. TAC remained not granted and was advisory only, as previously authorized.
+
+## Product identity resolution
+
+The approved public identity is:
+
+- plugin name: `WePuu Auto Connector`;
+- WordPress.org slug and package root: `wepuu-auto-connector`;
+- main file: `wepuu-auto-connector.php`;
+- text domain and Settings page slug: `wepuu-auto-connector`; and
+- Composer root package: `wepuu/wepuu-auto-connector`.
+
+The migration intentionally preserves `WPAuto\Connector`, all `WP_AUTO_CONNECTOR_*` constants, every `wp-auto/*` Ability, every `wp-auto-*` MCP tool, the `wp-auto-direct` server ID, `/wp-auto/mcp`, all `wp_auto_connector_*` options/errors/hooks, and existing audit/post-meta keys. This avoids breaking clients or orphaning installed mutation-safety state.
+
 ## Plugin Check result
 
 An isolated Docker environment ran official Plugin Check 2.1.0 against a release-like copy of the repaired build on WordPress 6.9 and PHP 8.1.34. The copy contained the production entry files, `src`, `readme.txt`, `LICENSE`, `composer.json`, `composer.lock`, and the locked three-package production Composer build; development files and the nested MCP Adapter plugin entry file excluded by `.distignore` were absent.
 
-Both the default static WP-CLI scan and the documented runtime-enabled scan using `--require=/var/www/html/wp-content/plugins/plugin-check/cli.php` completed. The release-like plugin also activated successfully and its production bootstrap returned `BOOT_OK`. The pre-repair scan reported one error and seven warnings. The repair removed the missing Composer manifest, nonexistent Domain Path, and two reviewed DirectDB warnings. After updating `Tested up to` to 7.1, the static and runtime-enabled scans report no errors and only three product-identity warnings:
+Both the default static WP-CLI scan and the documented runtime-enabled scan using `--require=/var/www/html/wp-content/plugins/plugin-check/cli.php` completed. The release-like plugin also activated successfully and its production bootstrap returned `BOOT_OK`. The pre-repair scan reported one error and seven warnings. Packaging/code-quality repairs reduced that result to only three product-identity warnings. The approved identity migration then removed those warnings: Plugin Check 2.1.0 reports `Success: Checks complete. No errors found.` for both static and runtime-enabled scans, with no warning rows emitted.
 
-- three `trademarked_term` warnings: the existing `WP-Auto` display name and `wp-auto-connector` slug checks.
-
-The tested-version error and packaging/code-quality warnings are resolved. This validation does not silently rename the approved product/slug; the remaining identity warnings require an explicit product-name/slug decision (or WordPress.org review outcome) before formal Phase 1.4 sealing.
-
-The Plugin Check package, test site, credentials, containers, volumes, network, and release-like copy were deleted after the scan; exact-name follow-up queries returned zero Docker resources.
+The identity candidate was packaged under the exact `wepuu-auto-connector/` root with `wepuu-auto-connector.php`, production source, readme/license/Composer manifests, and the locked three-package production vendor build. The nested MCP Adapter standalone plugin entrypoint and all development-only files were absent. The generated `wepuu-auto-connector.zip` is retained as validation evidence; the Plugin Check site, credentials, containers, volumes, and network were deleted, and exact-name follow-up queries returned zero Docker resources.
 
 ## Environment limitations and residual gates
 
 - A deterministic PHP-worker process-death harness around the Core sideload boundary was not run. The implementation fails closed with `wp_auto_media_state_uncertain` and retains the idempotency claim when durable state cannot be proven.
-- The implementation is on `main`, the exact-main review is complete, and the repaired release-like build passes Plugin Check with no errors. This document is not a formal release seal because the three product-identity warnings remain unresolved.
 
 ## Verdict
 
-Phase 1.4.6 implementation, main integration, exact-main runtime/security validation, WordPress 7.1 compatibility, and repaired release-like packaging evidence are complete. The media contract, eighteen-tool allowlist, automated suite, disposable live MCP matrices, state-integrity checks, cleanup checks, and both security reviews pass. Official Plugin Check now reports no errors; formal Phase 1.4 sealing awaits an explicit product identity/slug decision for the three remaining trademark warnings.
+Phase 1.4.6 implementation, main integration, exact-main runtime/security validation, WordPress 6.9/7.1 compatibility, approved identity migration, and release-like packaging evidence are complete. The media contract, exact eighteen-tool allowlist, automated suite, disposable live MCP matrices, state-integrity checks, cleanup checks, and security reviews pass. Official Plugin Check reports no errors or warnings for `WePuu Auto Connector` / `wepuu-auto-connector`. Phase 1.4 is formally sealed; Phase 1.5 still requires an explicit future task.

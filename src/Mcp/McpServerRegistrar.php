@@ -104,7 +104,7 @@ final class McpServerRegistrar {
 		if ( ! $this->is_supported_transport() || ! function_exists( 'wp_is_application_passwords_supported' ) || ! wp_is_application_passwords_supported() ) {
 			return new WP_Error(
 				'wp_auto_connector_authentication_required',
-				__( 'WordPress authentication is required for the WP-Auto MCP server.', 'wp-auto-connector' ),
+				__( 'WordPress authentication is required for the WP-Auto MCP server.', 'wepuu-auto-connector' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -112,7 +112,7 @@ final class McpServerRegistrar {
 		if ( ! is_user_logged_in() ) {
 			return new WP_Error(
 				'wp_auto_connector_authentication_required',
-				__( 'WordPress authentication is required for the WP-Auto MCP server.', 'wp-auto-connector' ),
+				__( 'WordPress authentication is required for the WP-Auto MCP server.', 'wepuu-auto-connector' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -120,7 +120,7 @@ final class McpServerRegistrar {
 		if ( ! current_user_can( 'read' ) ) {
 			return new WP_Error(
 				'wp_auto_connector_insufficient_capability',
-				__( 'The authenticated WordPress user cannot read site data.', 'wp-auto-connector' ),
+				__( 'The authenticated WordPress user cannot read site data.', 'wepuu-auto-connector' ),
 				array( 'status' => 403 )
 			);
 		}

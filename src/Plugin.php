@@ -65,8 +65,8 @@ final class Plugin {
 		if ( version_compare( PHP_VERSION, '8.1', '<' ) ) {
 			deactivate_plugins( plugin_basename( WP_AUTO_CONNECTOR_FILE ) );
 			wp_die(
-				esc_html__( 'WP-Auto Connector requires PHP 8.1 or later.', 'wp-auto-connector' ),
-				esc_html__( 'Plugin activation failed', 'wp-auto-connector' ),
+				esc_html__( 'WePuu Auto Connector requires PHP 8.1 or later.', 'wepuu-auto-connector' ),
+				esc_html__( 'Plugin activation failed', 'wepuu-auto-connector' ),
 				array( 'back_link' => true )
 			);
 		}
@@ -75,8 +75,8 @@ final class Plugin {
 		if ( version_compare( $wp_version, '6.9', '<' ) ) {
 			deactivate_plugins( plugin_basename( WP_AUTO_CONNECTOR_FILE ) );
 			wp_die(
-				esc_html__( 'WP-Auto Connector requires WordPress 6.9 or later.', 'wp-auto-connector' ),
-				esc_html__( 'Plugin activation failed', 'wp-auto-connector' ),
+				esc_html__( 'WePuu Auto Connector requires WordPress 6.9 or later.', 'wepuu-auto-connector' ),
+				esc_html__( 'Plugin activation failed', 'wepuu-auto-connector' ),
 				array( 'back_link' => true )
 			);
 		}

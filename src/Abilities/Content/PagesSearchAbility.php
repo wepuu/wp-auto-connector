@@ -37,8 +37,8 @@ final class PagesSearchAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Pages Search', 'wp-auto-connector' ),
-				'description'         => __( 'Searches readable WordPress pages using bounded pagination.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Pages Search', 'wepuu-auto-connector' ),
+				'description'         => __( 'Searches readable WordPress pages using bounded pagination.', 'wepuu-auto-connector' ),
 				'category'            => ContentAbilityCategory::SLUG,
 				'input_schema'        => $this->input_schema(),
 				'output_schema'       => $this->output_schema(),

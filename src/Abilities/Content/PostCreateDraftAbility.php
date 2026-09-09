@@ -38,8 +38,8 @@ final class PostCreateDraftAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Post Create Draft', 'wp-auto-connector' ),
-				'description'         => __( 'Creates one WordPress post draft with a persistent idempotency key.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Post Create Draft', 'wepuu-auto-connector' ),
+				'description'         => __( 'Creates one WordPress post draft with a persistent idempotency key.', 'wepuu-auto-connector' ),
 				'category'            => ContentAbilityCategory::SLUG,
 				'input_schema'        => CreateDraftContract::input_schema(),
 				'output_schema'       => CreateDraftContract::output_schema( 'post' ),

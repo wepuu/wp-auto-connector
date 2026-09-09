@@ -35,8 +35,8 @@ final class TaxonomyAbilityCategory {
 		wp_register_ability_category(
 			self::SLUG,
 			array(
-				'label'       => __( 'WP-Auto Taxonomy', 'wp-auto-connector' ),
-				'description' => __( 'Read-only WP-Auto abilities for WordPress categories and tags.', 'wp-auto-connector' ),
+				'label'       => __( 'WP-Auto Taxonomy', 'wepuu-auto-connector' ),
+				'description' => __( 'Read-only WP-Auto abilities for WordPress categories and tags.', 'wepuu-auto-connector' ),
 			)
 		);
 	}

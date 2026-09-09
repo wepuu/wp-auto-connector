@@ -31,8 +31,8 @@ final class MediaSearchAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Media Search', 'wp-auto-connector' ),
-				'description'         => __( 'Searches readable WordPress images using bounded pagination.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Media Search', 'wepuu-auto-connector' ),
+				'description'         => __( 'Searches readable WordPress images using bounded pagination.', 'wepuu-auto-connector' ),
 				'category'            => MediaAbilityCategory::SLUG,
 				'input_schema'        => MediaReadContract::search_input_schema(),
 				'output_schema'       => MediaReadContract::search_output_schema(),

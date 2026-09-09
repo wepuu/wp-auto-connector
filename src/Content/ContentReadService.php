@@ -438,7 +438,7 @@ final class ContentReadService {
 	private function invalid_request(): WP_Error {
 		return new WP_Error(
 			'wp_auto_invalid_request',
-			__( 'The request parameters are invalid.', 'wp-auto-connector' ),
+			__( 'The request parameters are invalid.', 'wepuu-auto-connector' ),
 			array( 'status' => 400 )
 		);
 	}
@@ -449,7 +449,7 @@ final class ContentReadService {
 	private function content_not_found(): WP_Error {
 		return new WP_Error(
 			'wp_auto_content_not_found',
-			__( 'The requested content was not found.', 'wp-auto-connector' ),
+			__( 'The requested content was not found.', 'wepuu-auto-connector' ),
 			array( 'status' => 404 )
 		);
 	}
@@ -460,7 +460,7 @@ final class ContentReadService {
 	private function pagination_window_exceeded(): WP_Error {
 		return new WP_Error(
 			'wp_auto_pagination_window_exceeded',
-			__( 'The requested page exceeds the supported search window.', 'wp-auto-connector' ),
+			__( 'The requested page exceeds the supported search window.', 'wepuu-auto-connector' ),
 			array( 'status' => 400 )
 		);
 	}

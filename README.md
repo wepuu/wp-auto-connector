@@ -1,14 +1,14 @@
-# WP-Auto Connector
+# WePuu Auto Connector
 
-Development repository for the free WordPress.org WP-Auto Connector.
+Development repository for the free WordPress.org WePuu Auto Connector.
 
 ## Current objective
 
-Phase 1 is Direct WordPress MCP. The plugin should let compatible AI agents connect directly to a WordPress site and invoke explicitly exposed, permission-aware WordPress abilities.
+Phase 1 is Direct WordPress MCP. WePuu Auto Connector should let compatible AI agents connect directly to a WordPress site and invoke explicitly exposed, permission-aware WordPress abilities.
 
 Phase 1.2 is complete: eight read-only site, content, and taxonomy abilities passed the frozen contract and full integration/security validation. The dedicated endpoint is `/wp-json/wp-auto/mcp`, and the exposed MCP tools are `wp-auto-site-health`, `wp-auto-site-info`, `wp-auto-posts-search`, `wp-auto-post-get`, `wp-auto-pages-search`, `wp-auto-page-get`, `wp-auto-categories-list`, and `wp-auto-tags-list`.
 
-Phase 1.3 is complete and formally sealed on `main`: its contract, Post/Page Create Draft, sentinel compatibility, Draft Update, mutation security architecture, and full real-WordPress integration matrix all passed. Phase 1.4.0 froze the image-only Media contracts and ADR-005 safety boundary; Phase 1.4.1 through 1.4.4 sealed Media Search/Get, authenticated Upload, metadata Update, and draft Featured Image Assignment. Phase 1.4.5 implements caller-triggered `wp-auto-media-import-url` with independent SSRF/DNS/redirect/byte/MIME validation and an exact eighteen-tool Direct MCP allowlist; exact-main integration/security validation is complete, while the formal Phase 1.4 seal is blocked by the audited Plugin Check release-readiness result.
+Phase 1.3 and Phase 1.4 are complete and formally sealed on `main`. The image-only Media surface includes Search/Get, authenticated Upload, metadata Update, draft Featured Image Assignment, and caller-triggered `wp-auto-media-import-url` with independent SSRF/DNS/redirect/byte/MIME validation. The exact eighteen-tool Direct MCP allowlist, WordPress 6.9/7.1 activation, production packaging, security review, and official Plugin Check 2.1.0 all pass. The approved WordPress.org identity is `WePuu Auto Connector` / `wepuu-auto-connector`; existing `wp-auto` MCP contracts remain unchanged.
 
 Start with:
 

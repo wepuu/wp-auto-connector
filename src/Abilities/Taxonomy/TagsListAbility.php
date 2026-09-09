@@ -37,8 +37,8 @@ final class TagsListAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Tags List', 'wp-auto-connector' ),
-				'description'         => __( 'Lists WordPress tags using bounded pagination.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Tags List', 'wepuu-auto-connector' ),
+				'description'         => __( 'Lists WordPress tags using bounded pagination.', 'wepuu-auto-connector' ),
 				'category'            => TaxonomyAbilityCategory::SLUG,
 				'input_schema'        => $this->input_schema(),
 				'output_schema'       => $this->output_schema(),

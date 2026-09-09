@@ -19,7 +19,7 @@ final class AtomicOwnershipStoreTest extends TestCase {
 	 */
 	public function test_production_entrypoint_loads_ownership_before_consumers(): void {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$entrypoint = file_get_contents( dirname( __DIR__ ) . '/wp-auto-connector.php' );
+		$entrypoint = file_get_contents( dirname( __DIR__ ) . '/wepuu-auto-connector.php' );
 		self::assertIsString( $entrypoint );
 
 		$atomic  = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/AtomicOwnershipStore.php';" );

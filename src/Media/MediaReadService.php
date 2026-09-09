@@ -322,21 +322,21 @@ final class MediaReadService {
 
 	/** Return the stable invalid-input error. */
 	private function invalid_request(): WP_Error {
-		return new WP_Error( 'wp_auto_invalid_request', __( 'The request parameters are invalid.', 'wp-auto-connector' ), array( 'status' => 400 ) );
+		return new WP_Error( 'wp_auto_invalid_request', __( 'The request parameters are invalid.', 'wepuu-auto-connector' ), array( 'status' => 400 ) );
 	}
 
 	/** Return the existence-hiding media error. */
 	private function media_not_found(): WP_Error {
-		return new WP_Error( 'wp_auto_media_not_found', __( 'The requested media was not found.', 'wp-auto-connector' ), array( 'status' => 404 ) );
+		return new WP_Error( 'wp_auto_media_not_found', __( 'The requested media was not found.', 'wepuu-auto-connector' ), array( 'status' => 404 ) );
 	}
 
 	/** Return the stable media representation error. */
 	private function media_read_failed(): WP_Error {
-		return new WP_Error( 'wp_auto_media_read_failed', __( 'The media could not be read.', 'wp-auto-connector' ), array( 'status' => 500 ) );
+		return new WP_Error( 'wp_auto_media_read_failed', __( 'The media could not be read.', 'wepuu-auto-connector' ), array( 'status' => 500 ) );
 	}
 
 	/** Return the stable bounded-scanner error. */
 	private function pagination_window_exceeded(): WP_Error {
-		return new WP_Error( 'wp_auto_pagination_window_exceeded', __( 'The requested page exceeds the supported search window.', 'wp-auto-connector' ), array( 'status' => 400 ) );
+		return new WP_Error( 'wp_auto_pagination_window_exceeded', __( 'The requested page exceeds the supported search window.', 'wepuu-auto-connector' ), array( 'status' => 400 ) );
 	}
 }

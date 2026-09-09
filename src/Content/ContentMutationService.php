@@ -813,62 +813,62 @@ final class ContentMutationService {
 	 * Return the stable invalid-input error.
 	 */
 	private function invalid_request(): WP_Error {
-		return new WP_Error( 'wp_auto_invalid_request', __( 'The request parameters are invalid.', 'wp-auto-connector' ), array( 'status' => 400 ) );
+		return new WP_Error( 'wp_auto_invalid_request', __( 'The request parameters are invalid.', 'wepuu-auto-connector' ), array( 'status' => 400 ) );
 	}
 
 	/**
 	 * Return the stable idempotency conflict error.
 	 */
 	private function idempotency_conflict(): WP_Error {
-		return new WP_Error( 'wp_auto_idempotency_conflict', __( 'The idempotency request cannot be replayed safely.', 'wp-auto-connector' ), array( 'status' => 409 ) );
+		return new WP_Error( 'wp_auto_idempotency_conflict', __( 'The idempotency request cannot be replayed safely.', 'wepuu-auto-connector' ), array( 'status' => 409 ) );
 	}
 
 	/**
 	 * Return the stable in-progress error.
 	 */
 	private function idempotency_in_progress(): WP_Error {
-		return new WP_Error( 'wp_auto_idempotency_in_progress', __( 'The idempotency request is still in progress.', 'wp-auto-connector' ), array( 'status' => 409 ) );
+		return new WP_Error( 'wp_auto_idempotency_in_progress', __( 'The idempotency request is still in progress.', 'wepuu-auto-connector' ), array( 'status' => 409 ) );
 	}
 
 	/**
 	 * Return the stable confirmed-create-failure error.
 	 */
 	private function create_failed(): WP_Error {
-		return new WP_Error( 'wp_auto_content_create_failed', __( 'The draft could not be created.', 'wp-auto-connector' ), array( 'status' => 500 ) );
+		return new WP_Error( 'wp_auto_content_create_failed', __( 'The draft could not be created.', 'wepuu-auto-connector' ), array( 'status' => 500 ) );
 	}
 
 	/**
 	 * Return the existence-hiding target error.
 	 */
 	private function content_not_found(): WP_Error {
-		return new WP_Error( 'wp_auto_content_not_found', __( 'The requested content could not be found.', 'wp-auto-connector' ), array( 'status' => 404 ) );
+		return new WP_Error( 'wp_auto_content_not_found', __( 'The requested content could not be found.', 'wepuu-auto-connector' ), array( 'status' => 404 ) );
 	}
 
 	/**
 	 * Return the authorized non-draft status conflict.
 	 */
 	private function content_status_conflict(): WP_Error {
-		return new WP_Error( 'wp_auto_content_status_conflict', __( 'Only draft content can be updated.', 'wp-auto-connector' ), array( 'status' => 409 ) );
+		return new WP_Error( 'wp_auto_content_status_conflict', __( 'Only draft content can be updated.', 'wepuu-auto-connector' ), array( 'status' => 409 ) );
 	}
 
 	/**
 	 * Return the stale-write conflict.
 	 */
 	private function content_conflict(): WP_Error {
-		return new WP_Error( 'wp_auto_content_conflict', __( 'The draft changed since it was read.', 'wp-auto-connector' ), array( 'status' => 409 ) );
+		return new WP_Error( 'wp_auto_content_conflict', __( 'The draft changed since it was read.', 'wepuu-auto-connector' ), array( 'status' => 409 ) );
 	}
 
 	/**
 	 * Return the stable confirmed-update-failure error.
 	 */
 	private function update_failed(): WP_Error {
-		return new WP_Error( 'wp_auto_content_update_failed', __( 'The draft could not be updated.', 'wp-auto-connector' ), array( 'status' => 500 ) );
+		return new WP_Error( 'wp_auto_content_update_failed', __( 'The draft could not be updated.', 'wepuu-auto-connector' ), array( 'status' => 500 ) );
 	}
 
 	/**
 	 * Return the stable uncertain-state error.
 	 */
 	private function uncertain(): WP_Error {
-		return new WP_Error( 'wp_auto_mutation_state_uncertain', __( 'The draft operation state could not be confirmed.', 'wp-auto-connector' ), array( 'status' => 500 ) );
+		return new WP_Error( 'wp_auto_mutation_state_uncertain', __( 'The draft operation state could not be confirmed.', 'wepuu-auto-connector' ), array( 'status' => 500 ) );
 	}
 }

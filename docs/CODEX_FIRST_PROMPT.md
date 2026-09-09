@@ -4,7 +4,7 @@ Paste the following prompt into Codex after opening the repository root.
 
 ---
 
-You are implementing Phase 1.1 of WP-Auto Connector: Direct MCP Server Foundation.
+You are implementing Phase 1.1 of WePuu Auto Connector: Direct MCP Server Foundation.
 
 Before changing files, read these completely:
 
@@ -29,7 +29,7 @@ Requirements:
 2. Keep the adapter integration isolated behind small WP-Auto classes. Prefer an already loaded compatible MCP Adapter and avoid double initialization/conflicting copies.
 3. Register the `wp-auto/site-health` WordPress ability on the correct Abilities API hook.
 4. The ability must be read-only and require `current_user_can( 'read' )` or an equivalently narrow WordPress permission check.
-5. Its output must contain only safe diagnostics needed for the Phase 1 proof: WordPress version, PHP version, WP-Auto Connector version, Abilities API availability, MCP Adapter availability/version, REST API availability, and HTTPS state. Do not expose usernames, admin email, filesystem paths, DB details, secrets, plugin inventory, or server environment dumps.
+5. Its output must contain only safe diagnostics needed for the Phase 1 proof: WordPress version, PHP version, WePuu Auto Connector version, Abilities API availability, MCP Adapter availability/version, REST API availability, and HTTPS state. Do not expose usernames, admin email, filesystem paths, DB details, secrets, plugin inventory, or server environment dumps.
 6. Create/register a WP-Auto MCP server using the official adapter. Target the direct endpoint `/wp-json/wp-auto/mcp` if the current adapter API supports that namespace/route model. If upstream behavior differs, document the exact endpoint and explain why; do not invent a second MCP implementation.
 7. Expose only the Phase 1.1 site-health ability through the WP-Auto server. Do not expose every WordPress REST route or every registered ability.
 8. Remote/private access must be authenticated according to the official adapter/WordPress transport model. Do not implement custom password storage, JWT, OAuth, or cloud pairing in this task. Application Password compatibility is the intended Phase 1 baseline.

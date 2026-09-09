@@ -265,31 +265,31 @@ final class MediaFeaturedService {
 
 	/** Return the stable invalid-input error. */
 	private function invalid_request(): WP_Error {
-		return new WP_Error( 'wp_auto_invalid_request', __( 'The request parameters are invalid.', 'wp-auto-connector' ), array( 'status' => 400 ) );
+		return new WP_Error( 'wp_auto_invalid_request', __( 'The request parameters are invalid.', 'wepuu-auto-connector' ), array( 'status' => 400 ) );
 	}
 
 	/** Return the existence-hiding target error. */
 	private function content_not_found(): WP_Error {
-		return new WP_Error( 'wp_auto_content_not_found', __( 'The requested content was not found.', 'wp-auto-connector' ), array( 'status' => 404 ) );
+		return new WP_Error( 'wp_auto_content_not_found', __( 'The requested content was not found.', 'wepuu-auto-connector' ), array( 'status' => 404 ) );
 	}
 
 	/** Return the existence-hiding media error. */
 	private function media_not_found(): WP_Error {
-		return new WP_Error( 'wp_auto_media_not_found', __( 'The requested media was not found.', 'wp-auto-connector' ), array( 'status' => 404 ) );
+		return new WP_Error( 'wp_auto_media_not_found', __( 'The requested media was not found.', 'wepuu-auto-connector' ), array( 'status' => 404 ) );
 	}
 
 	/** Return the stale featured relationship error. */
 	private function featured_conflict(): WP_Error {
-		return new WP_Error( 'wp_auto_featured_media_conflict', __( 'The featured image changed after it was read.', 'wp-auto-connector' ), array( 'status' => 409 ) );
+		return new WP_Error( 'wp_auto_featured_media_conflict', __( 'The featured image changed after it was read.', 'wepuu-auto-connector' ), array( 'status' => 409 ) );
 	}
 
 	/** Return the proven-unapplied assignment error. */
 	private function update_failed(): WP_Error {
-		return new WP_Error( 'wp_auto_featured_media_update_failed', __( 'The featured image could not be assigned.', 'wp-auto-connector' ), array( 'status' => 500 ) );
+		return new WP_Error( 'wp_auto_featured_media_update_failed', __( 'The featured image could not be assigned.', 'wepuu-auto-connector' ), array( 'status' => 500 ) );
 	}
 
 	/** Return the possible-partial-state error. */
 	private function uncertain(): WP_Error {
-		return new WP_Error( 'wp_auto_media_state_uncertain', __( 'The media operation state could not be confirmed.', 'wp-auto-connector' ), array( 'status' => 500 ) );
+		return new WP_Error( 'wp_auto_media_state_uncertain', __( 'The media operation state could not be confirmed.', 'wepuu-auto-connector' ), array( 'status' => 500 ) );
 	}
 }

@@ -246,7 +246,7 @@ final class TaxonomyReadService {
 	private function invalid_request(): WP_Error {
 		return new WP_Error(
 			'wp_auto_invalid_request',
-			__( 'The request parameters are invalid.', 'wp-auto-connector' ),
+			__( 'The request parameters are invalid.', 'wepuu-auto-connector' ),
 			array( 'status' => 400 )
 		);
 	}
@@ -257,7 +257,7 @@ final class TaxonomyReadService {
 	private function pagination_window_exceeded(): WP_Error {
 		return new WP_Error(
 			'wp_auto_pagination_window_exceeded',
-			__( 'The requested page exceeds the supported search window.', 'wp-auto-connector' ),
+			__( 'The requested page exceeds the supported search window.', 'wepuu-auto-connector' ),
 			array( 'status' => 400 )
 		);
 	}
@@ -268,7 +268,7 @@ final class TaxonomyReadService {
 	private function query_failed(): WP_Error {
 		return new WP_Error(
 			'wp_auto_taxonomy_query_failed',
-			__( 'The taxonomy terms could not be retrieved.', 'wp-auto-connector' ),
+			__( 'The taxonomy terms could not be retrieved.', 'wepuu-auto-connector' ),
 			array( 'status' => 500 )
 		);
 	}

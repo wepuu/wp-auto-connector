@@ -31,8 +31,8 @@ final class MediaGetAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Media Get', 'wp-auto-connector' ),
-				'description'         => __( 'Returns one readable WordPress image using the frozen media contract.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Media Get', 'wepuu-auto-connector' ),
+				'description'         => __( 'Returns one readable WordPress image using the frozen media contract.', 'wepuu-auto-connector' ),
 				'category'            => MediaAbilityCategory::SLUG,
 				'input_schema'        => MediaReadContract::get_input_schema(),
 				'output_schema'       => MediaReadContract::get_output_schema(),

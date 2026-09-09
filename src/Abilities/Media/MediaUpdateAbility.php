@@ -31,8 +31,8 @@ final class MediaUpdateAbility {
 		wp_register_ability(
 			self::NAME,
 			array(
-				'label'               => __( 'WP-Auto Media Metadata Update', 'wp-auto-connector' ),
-				'description'         => __( 'Updates allowlisted presentation fields on one authorized image.', 'wp-auto-connector' ),
+				'label'               => __( 'WP-Auto Media Metadata Update', 'wepuu-auto-connector' ),
+				'description'         => __( 'Updates allowlisted presentation fields on one authorized image.', 'wepuu-auto-connector' ),
 				'category'            => MediaAbilityCategory::SLUG,
 				'input_schema'        => MediaUpdateContract::input_schema(),
 				'output_schema'       => MediaUpdateContract::output_schema(),

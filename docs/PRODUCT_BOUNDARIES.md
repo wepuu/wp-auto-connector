@@ -1,6 +1,6 @@
 # Product Boundaries
 
-## Free WP-Auto Connector (WordPress.org)
+## Free WePuu Auto Connector (WordPress.org)
 
 The free plugin is a real WordPress MCP product, not a teaser for the SaaS.
 

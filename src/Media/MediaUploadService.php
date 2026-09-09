@@ -415,31 +415,31 @@ final class MediaUploadService {
 
 	/** Return the stable invalid request error. */
 	private function invalid_request(): WP_Error {
-		return new WP_Error( 'wp_auto_invalid_request', __( 'The request parameters are invalid.', 'wp-auto-connector' ), array( 'status' => 400 ) );
+		return new WP_Error( 'wp_auto_invalid_request', __( 'The request parameters are invalid.', 'wepuu-auto-connector' ), array( 'status' => 400 ) );
 	}
 
 	/** Return the existence-hiding parent error. */
 	private function content_not_found(): WP_Error {
-		return new WP_Error( 'wp_auto_content_not_found', __( 'The requested content could not be found.', 'wp-auto-connector' ), array( 'status' => 404 ) );
+		return new WP_Error( 'wp_auto_content_not_found', __( 'The requested content could not be found.', 'wepuu-auto-connector' ), array( 'status' => 404 ) );
 	}
 
 	/** Return the idempotency conflict error. */
 	private function idempotency_conflict(): WP_Error {
-		return new WP_Error( 'wp_auto_idempotency_conflict', __( 'The idempotency key conflicts with another request.', 'wp-auto-connector' ), array( 'status' => 409 ) );
+		return new WP_Error( 'wp_auto_idempotency_conflict', __( 'The idempotency key conflicts with another request.', 'wepuu-auto-connector' ), array( 'status' => 409 ) );
 	}
 
 	/** Return the live or unresolved claim error. */
 	private function idempotency_in_progress(): WP_Error {
-		return new WP_Error( 'wp_auto_idempotency_in_progress', __( 'The idempotent request is still in progress.', 'wp-auto-connector' ), array( 'status' => 409 ) );
+		return new WP_Error( 'wp_auto_idempotency_in_progress', __( 'The idempotent request is still in progress.', 'wepuu-auto-connector' ), array( 'status' => 409 ) );
 	}
 
 	/** Return the proven no-object creation failure. */
 	private function create_failed(): WP_Error {
-		return new WP_Error( 'wp_auto_media_create_failed', __( 'The image could not be created.', 'wp-auto-connector' ), array( 'status' => 500 ) );
+		return new WP_Error( 'wp_auto_media_create_failed', __( 'The image could not be created.', 'wepuu-auto-connector' ), array( 'status' => 500 ) );
 	}
 
 	/** Return the fail-closed possible-write error. */
 	private function uncertain(): WP_Error {
-		return new WP_Error( 'wp_auto_media_state_uncertain', __( 'The media operation may have changed state and requires review.', 'wp-auto-connector' ), array( 'status' => 500 ) );
+		return new WP_Error( 'wp_auto_media_state_uncertain', __( 'The media operation may have changed state and requires review.', 'wepuu-auto-connector' ), array( 'status' => 500 ) );
 	}
 }
