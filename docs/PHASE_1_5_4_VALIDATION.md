@@ -67,6 +67,15 @@ Category precondition was rejected with the generic relationship-divergence
 message, proving that Core default Category assignment is not silently
 overwritten.
 
+Two independent authenticated Streamable HTTP sessions were then used for
+cross-request Create arbitration. For Category Create, one request observed
+`wp_auto_idempotency_in_progress` while the other completed; a later matching
+request returned `idempotency_replayed=true`, and a same-key different-payload
+request returned the idempotency conflict. The exact Category name mapped to
+one Term. For Tag Create, two concurrent sessions converged on one Term with
+one fresh result and one `idempotency_replayed=true` result. These checks
+confirmed the shared persistent ownership path across real HTTP requests.
+
 All temporary Application Passwords, fixtures, containers, volumes, and the
 network were confined to the disposable environment and removed afterward.
 
@@ -91,9 +100,9 @@ environment.
    downloading and executing a remote PHP plugin during this run. A supported
    local official artifact is required; no Plugin Check result is inferred
    from PHPUnit, lint, or the MCP smoke test.
-3. The full cross-request concurrency, state-integrity, multisite, and
-   exact-diff security matrix still needs to be executed on the merged `main`
-   baseline.
+3. Assignment race behavior, the complete state-integrity and multisite
+   matrix, and the final exact-diff security review still need to be executed
+   on the merged `main` baseline.
 
 ## Verdict
 
@@ -102,6 +111,7 @@ Automated quality gates = PASS
 WordPress 6.9 activation + taxonomy smoke = PASS
 Authenticated Streamable HTTP discovery = PASS (exactly 21 tools)
 Permission and stale-precondition smoke = PASS
+Cross-request Create idempotency (Category + Tag) = PASS
 Uninstall private-state cleanup = PASS
 WordPress 7.1 compatibility = BLOCKED (image unavailable)
 Plugin Check 2.1.0 = BLOCKED (approved local artifact unavailable)
