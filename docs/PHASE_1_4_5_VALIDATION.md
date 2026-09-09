@@ -48,10 +48,10 @@ No package, image, plugin, or executable was downloaded. A front-end-only regres
 - no downloader-owned temporary file remained; and
 - all temporary WordPress Application Passwords were deleted (`0` remained).
 
-Plugin Check was not installed in the cached environment and was not downloaded for this focused checkpoint. It remains a Phase 1.4.6/pre-release gate.
+Plugin Check was not installed in the cached environment and was not downloaded for this focused checkpoint. Phase 1.4.6 subsequently ran official Plugin Check 2.1.0 against the release-like main build and recorded the unresolved release-readiness result.
 
 ## Follow-up
 
-The broader automated/live/security matrix and residual-risk record are documented in
-`docs/PHASE_1_4_6_VALIDATION.md`. Plugin Check and exact-main review remain
-environment/release gates; TAC is not required.
+The broader automated/live/security matrix, exact-main review, Plugin Check result,
+and residual-risk record are documented in `docs/PHASE_1_4_6_VALIDATION.md`.
+The Plugin Check error blocks formal Phase 1.4 sealing; TAC is not required.

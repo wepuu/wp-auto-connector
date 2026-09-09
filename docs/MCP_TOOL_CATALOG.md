@@ -64,7 +64,7 @@ Phase 1.4.0 froze the public contracts in `docs/PHASE_1_4_MEDIA_CONTRACTS.md` an
 | `wp-auto/media-upload` | `wp-auto-media-upload` | Image creation | `upload_files`; optional draft Post/Page parent `edit_post` | Implemented and validated — Phase 1.4.2 |
 | `wp-auto/media-update` | `wp-auto-media-update` | Mutation | `upload_files`, attachment `edit_post` | Implemented and validated — Phase 1.4.3 |
 | `wp-auto/media-set-featured` | `wp-auto-media-set-featured` | Mutation | fixed type baseline plus target `edit_post`; attachment `read_post` | Implemented and validated — Phase 1.4.4 |
-| `wp-auto/media-import-url` | `wp-auto-media-import-url` | Mutation/open-world | `upload_files`; optional parent `edit_post`; SSRF/media policy | Implemented and exact-main validated; formal Phase 1.4 seal pending Plugin Check |
+| `wp-auto/media-import-url` | `wp-auto-media-import-url` | Mutation/open-world | `upload_files`; optional parent `edit_post`; SSRF/media policy | Implemented and exact-main validated; formal Phase 1.4 seal blocked by Plugin Check |
 
 The fixed implementation order produces exact allowlist counts of 14, 15, 16, 17, and 18. The eighteen-tool implementation ends with Media Search, Media Get, Media Upload, Media Update, Media Set Featured, and Media Import URL. No generic media, file, URL-fetch, REST, filesystem, arbitrary metadata, resource, prompt, or third-party capability is authorized.
 
