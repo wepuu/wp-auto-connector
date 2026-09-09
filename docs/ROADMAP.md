@@ -104,6 +104,16 @@ Scope:
 - category/tag create with capabilities;
 - assign terms to supported content.
 
+Delivery checkpoints:
+
+1. **Phase 1.5.0 - Taxonomy Contract and Security Architecture Freeze (complete):** froze the three future Ability/tool names, strict schemas, fixed built-in taxonomy scope, actual taxonomy/object capability composition, persistent Create idempotency, exact-replacement concurrency semantics, private bounded audit, uninstall requirements, errors, side effects, and allowlist progression. It added no runtime tool or persistent state; the Direct MCP runtime remained exactly eighteen tools.
+2. **Phase 1.5.1 - Category Create (implemented; validation candidate):** implements built-in Category creation, optional validated parent, taxonomy idempotency/audit/uninstall foundations, and the exact nineteen-tool allowlist. Automated, real WordPress, and Plugin Check evidence is recorded in `docs/PHASE_1_5_1_VALIDATION.md`; the authenticated Streamable HTTP, concurrency, state-integrity, and security matrix remains required for the Phase 1.5.4 seal.
+3. **Phase 1.5.2 - Tag Create (implemented; validation candidate):** implements built-in Tag creation on the frozen shared safety foundation and the exact twenty-tool allowlist. Automated, real WordPress, and Plugin Check evidence is recorded in `docs/PHASE_1_5_2_VALIDATION.md`; the authenticated Streamable HTTP, concurrency, state-integrity, and security matrix remains required for the Phase 1.5.4 seal.
+4. **Phase 1.5.3 - Draft Post Taxonomy Assignment:** implements bounded ID-only exact Category/Tag replacement on authorized built-in Post drafts with expected-set concurrency, invariant verification, and the exact twenty-one-tool allowlist.
+5. **Phase 1.5.4 - Integration and Security Seal:** completes automated, real WordPress, authenticated Streamable HTTP, idempotency/concurrency, state-integrity, uninstall, Plugin Check, exact-allowlist, and security validation without adding tools.
+
+The authoritative contract is `docs/PHASE_1_5_TAXONOMY_CONTRACTS.md`; the safety decision is `docs/ADR-006-TAXONOMY-SAFETY.md`. Phase 1.5.0 is documentation-only. Category/Tag updates or deletion, custom taxonomies/post types, Pages, empty-set clearing, publishing, content/media/SEO mutation, Cloud, telemetry, and external requests remain outside this phase.
+
 ### Phase 1.6 - SEO abstraction
 
 Scope:

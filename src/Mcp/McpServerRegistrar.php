@@ -24,6 +24,8 @@ use WPAuto\Connector\Abilities\Media\MediaSetFeaturedAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
+use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
+use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagsListAbility;
 use WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
 use WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
@@ -88,6 +90,8 @@ final class McpServerRegistrar {
 				MediaUpdateAbility::NAME,
 				MediaSetFeaturedAbility::NAME,
 				MediaImportUrlAbility::NAME,
+				CategoryCreateAbility::NAME,
+				TagCreateAbility::NAME,
 			),
 			array(),
 			array(),

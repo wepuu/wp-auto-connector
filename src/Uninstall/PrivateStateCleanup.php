@@ -12,17 +12,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Removes only the private persistent families approved by ADR-004/ADR-005.
+ * Removes only the private persistent families approved by ADR-004/ADR-005/ADR-006.
  */
 final class PrivateStateCleanup {
-	private const IDEMPOTENCY_PREFIX       = 'wp_auto_connector_idempotency_';
-	private const MEDIA_IDEMPOTENCY_PREFIX = 'wp_auto_connector_media_idempotency_';
-	private const AUDIT_LOCK_PREFIX        = 'wp_auto_connector_mutation_audit_lock_';
-	private const AUDIT_META_KEYS          = array( '_wp_auto_connector_mutation_audit', '_wp_auto_connector_media_mutation_audit' );
+	private const IDEMPOTENCY_PREFIX          = 'wp_auto_connector_idempotency_';
+	private const MEDIA_IDEMPOTENCY_PREFIX    = 'wp_auto_connector_media_idempotency_';
+	private const TAXONOMY_IDEMPOTENCY_PREFIX = 'wp_auto_connector_taxonomy_idempotency_';
+	private const AUDIT_LOCK_PREFIX           = 'wp_auto_connector_mutation_audit_lock_';
+	private const AUDIT_META_KEYS             = array( '_wp_auto_connector_mutation_audit', '_wp_auto_connector_media_mutation_audit' );
+	private const TAXONOMY_AUDIT_META_KEY     = '_wp_auto_connector_taxonomy_mutation_audit';
 
-	private const IDEMPOTENCY_PATTERN       = '/\Awp_auto_connector_idempotency_[0-9a-f]{64}\z/';
-	private const MEDIA_IDEMPOTENCY_PATTERN = '/\Awp_auto_connector_media_idempotency_[0-9a-f]{64}\z/';
-	private const AUDIT_LOCK_PATTERN        = '/\Awp_auto_connector_mutation_audit_lock_[0-9a-f]{64}\z/';
+	private const IDEMPOTENCY_PATTERN          = '/\Awp_auto_connector_idempotency_[0-9a-f]{64}\z/';
+	private const MEDIA_IDEMPOTENCY_PATTERN    = '/\Awp_auto_connector_media_idempotency_[0-9a-f]{64}\z/';
+	private const TAXONOMY_IDEMPOTENCY_PATTERN = '/\Awp_auto_connector_taxonomy_idempotency_[0-9a-f]{64}\z/';
+	private const AUDIT_LOCK_PATTERN           = '/\Awp_auto_connector_mutation_audit_lock_[0-9a-f]{64}\z/';
 
 	private const OPTION_BATCH_SIZE    = 100;
 	private const SITE_BATCH_SIZE      = 50;
@@ -70,8 +73,9 @@ final class PrivateStateCleanup {
 		$deletion_complete = $this->walk_options( true );
 		$options_absent    = $this->walk_options( false );
 		$audit_absent      = $this->cleanup_audit_metadata();
+		$term_audit_absent = $this->cleanup_term_audit_metadata();
 
-		return $deletion_complete && $options_absent && $audit_absent;
+		return $deletion_complete && $options_absent && $audit_absent && $term_audit_absent;
 	}
 
 	/**
@@ -129,15 +133,17 @@ final class PrivateStateCleanup {
 	 */
 	private function read_option_batch( int $cursor ): ?array {
 		try {
-			$idempotency_like       = $this->wpdb->esc_like( self::IDEMPOTENCY_PREFIX ) . '%';
-			$media_idempotency_like = $this->wpdb->esc_like( self::MEDIA_IDEMPOTENCY_PREFIX ) . '%';
-			$audit_lock_like        = $this->wpdb->esc_like( self::AUDIT_LOCK_PREFIX ) . '%';
-			$prepared               = $this->wpdb->prepare(
+			$idempotency_like          = $this->wpdb->esc_like( self::IDEMPOTENCY_PREFIX ) . '%';
+			$media_idempotency_like    = $this->wpdb->esc_like( self::MEDIA_IDEMPOTENCY_PREFIX ) . '%';
+			$taxonomy_idempotency_like = $this->wpdb->esc_like( self::TAXONOMY_IDEMPOTENCY_PREFIX ) . '%';
+			$audit_lock_like           = $this->wpdb->esc_like( self::AUDIT_LOCK_PREFIX ) . '%';
+			$prepared                  = $this->wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT option_id, option_name FROM {$this->wpdb->options} WHERE option_id > %d AND ( option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s ) ORDER BY option_id ASC LIMIT %d",
+				"SELECT option_id, option_name FROM {$this->wpdb->options} WHERE option_id > %d AND ( option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s ) ORDER BY option_id ASC LIMIT %d",
 				$cursor,
 				$idempotency_like,
 				$media_idempotency_like,
+				$taxonomy_idempotency_like,
 				$audit_lock_like,
 				self::OPTION_BATCH_SIZE
 			);
@@ -177,6 +183,49 @@ final class PrivateStateCleanup {
 		}
 
 		return $complete;
+	}
+
+	/**
+	 * Remove and independently verify the exact taxonomy audit key in termmeta.
+	 */
+	private function cleanup_term_audit_metadata(): bool {
+		$complete = true;
+		try {
+			$this->delete_term_meta_by_key( self::TAXONOMY_AUDIT_META_KEY );
+		} catch ( \Throwable ) {
+			$complete = false;
+		}
+
+		try {
+			$prepared = $this->wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT meta_id FROM {$this->wpdb->termmeta} WHERE meta_key = %s ORDER BY meta_id ASC LIMIT 1",
+				self::TAXONOMY_AUDIT_META_KEY
+			);
+		} catch ( \Throwable ) {
+			return false;
+		}
+
+		$rows = $this->read_rows( $prepared, array( 'meta_id' ), 1 );
+		return $complete && null !== $rows && 0 === count( $rows );
+	}
+
+	/**
+	 * Delete a term metadata key across the current blog.
+	 *
+	 * WordPress does not expose a delete_term_meta_by_key() helper in every
+	 * supported Core release. Prefer it when available, and otherwise use the
+	 * Core generic metadata API with delete_all enabled.
+	 *
+	 * @param string $meta_key Exact private metadata key.
+	 */
+	private function delete_term_meta_by_key( string $meta_key ): void {
+		if ( function_exists( 'delete_term_meta_by_key' ) ) {
+			delete_term_meta_by_key( $meta_key );
+			return;
+		}
+
+		delete_metadata( 'term', 0, $meta_key, '', true );
 	}
 
 	/**
@@ -391,7 +440,7 @@ final class PrivateStateCleanup {
 		try {
 			$previous_suppress = $this->wpdb->suppress_errors( true );
 			try {
-				// Every caller constructs one of the three ADR-004 fixed read families.
+				// Every caller constructs one of the four ADR-004 fixed read families.
 				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Fixed prepared uninstall read approved by ADR-004.
 				$rows       = $this->wpdb->get_results( $prepared, ARRAY_A );
 				$last_error = (string) $this->wpdb->last_error;
@@ -459,6 +508,7 @@ final class PrivateStateCleanup {
 	private function is_owned_option_name( string $option_name ): bool {
 		return 1 === preg_match( self::IDEMPOTENCY_PATTERN, $option_name )
 			|| 1 === preg_match( self::MEDIA_IDEMPOTENCY_PATTERN, $option_name )
+			|| 1 === preg_match( self::TAXONOMY_IDEMPOTENCY_PATTERN, $option_name )
 			|| 1 === preg_match( self::AUDIT_LOCK_PATTERN, $option_name );
 	}
 }

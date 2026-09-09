@@ -64,17 +64,33 @@ Phase 1.4.0 froze the public contracts in `docs/PHASE_1_4_MEDIA_CONTRACTS.md` an
 | `wp-auto/media-upload` | `wp-auto-media-upload` | Image creation | `upload_files`; optional draft Post/Page parent `edit_post` | Implemented and validated — Phase 1.4.2 |
 | `wp-auto/media-update` | `wp-auto-media-update` | Mutation | `upload_files`, attachment `edit_post` | Implemented and validated — Phase 1.4.3 |
 | `wp-auto/media-set-featured` | `wp-auto-media-set-featured` | Mutation | fixed type baseline plus target `edit_post`; attachment `read_post` | Implemented and validated — Phase 1.4.4 |
-| `wp-auto/media-import-url` | `wp-auto-media-import-url` | Mutation/open-world | `upload_files`; optional parent `edit_post`; SSRF/media policy | Implemented and exact-main validated; formal Phase 1.4 seal blocked by Plugin Check |
+| `wp-auto/media-import-url` | `wp-auto-media-import-url` | Mutation/open-world | `upload_files`; optional parent `edit_post`; SSRF/media policy | Implemented and validated — Phase 1.4.5; Phase 1.4 formally sealed |
 
 The fixed implementation order produces exact allowlist counts of 14, 15, 16, 17, and 18. The eighteen-tool implementation ends with Media Search, Media Get, Media Upload, Media Update, Media Set Featured, and Media Import URL. No generic media, file, URL-fetch, REST, filesystem, arbitrary metadata, resource, prompt, or third-party capability is authorized.
 
 ## Phase 1.5
 
-| Ability | Type | WordPress capability baseline |
-| --- | --- | --- |
-| `wp-auto/category-create` | Mutation | taxonomy management capability |
-| `wp-auto/tag-create` | Mutation | taxonomy management capability |
-| `wp-auto/taxonomy-assign` | Mutation | target + term assignment capabilities |
+Phase 1.5.0 froze the public contracts in
+`docs/PHASE_1_5_TAXONOMY_CONTRACTS.md` and the safety model in
+`docs/ADR-006-TAXONOMY-SAFETY.md`. Phase 1.5.1 and 1.5.2 implement the first
+two named checkpoints, Category Create and Tag Create, and extend the Direct
+MCP runtime to exactly twenty tools.
+
+| Ability | MCP tool | Type | WordPress capability baseline | Status |
+| --- | --- | --- | --- | --- |
+| `wp-auto/category-create` | `wp-auto-category-create` | Term creation | fixed Category taxonomy object's actual `cap->manage_terms` | Implemented and validated — Phase 1.5.1 candidate |
+| `wp-auto/tag-create` | `wp-auto-tag-create` | Term creation | fixed Tag taxonomy object's actual `cap->manage_terms` | Implemented and validated — Phase 1.5.2 candidate |
+| `wp-auto/taxonomy-assign` | `wp-auto-taxonomy-assign` | Destructive relationship mutation | selected taxonomy `cap->assign_terms`; fixed Post edit baseline; target `edit_post` | Contract frozen for Phase 1.5.3; not implemented |
+
+The current working-tree implementation status is Category Create and Tag
+Create implemented as validation candidates (exactly 20 tools); the assignment
+row remains design-only until Phase 1.5.3.
+
+The fixed implementation order appends only these tools, producing exact
+allowlist counts of 19, 20, and 21. Assignment is limited to one built-in
+`category`/`post_tag` exact set on one authorized built-in Post draft. No
+generic taxonomy, custom content, term update/delete, implicit term creation,
+arbitrary metadata, resource, prompt, or third-party tool is authorized.
 
 ## Phase 1.6
 

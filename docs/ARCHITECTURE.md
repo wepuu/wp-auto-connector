@@ -176,3 +176,21 @@ resource limits, prevents filters from relaxing the WP-Auto boundary, and then
 passes the completed temporary file through the same Core media validation as
 local upload. It is not a generic HTTP client or proxy. See
 `docs/PHASE_1_4_MEDIA_CONTRACTS.md` and `docs/ADR-005-MEDIA-SAFETY.md`.
+
+## Phase 1.5 taxonomy boundary
+
+Phase 1.5 taxonomy writes remain fixed WordPress Abilities backed by a small
+taxonomy mutation service and Core term APIs. Only built-in `category` and
+`post_tag` are accepted. Create resolves the fixed taxonomy's actual
+`manage_terms` capability; Assignment composes its actual `assign_terms`
+capability with the built-in Post edit baseline and final `edit_post` check.
+
+Category Create and Tag Create now reuse ADR-003 ownership through a closed
+`AtomicOwnershipStore` allowlist and explicit-uninstall cleanup for one exact
+private taxonomy-idempotency family. Its audit is stored under one exact
+private termmeta key and verified during explicit uninstall. Assignment is ID-only exact
+replacement on a draft Post and uses a required expected current term set as a
+best-effort, explicitly non-CAS concurrency precondition. Direct runtime SQL
+against Core taxonomy tables remains prohibited. See
+`docs/PHASE_1_5_TAXONOMY_CONTRACTS.md` and
+`docs/ADR-006-TAXONOMY-SAFETY.md`.

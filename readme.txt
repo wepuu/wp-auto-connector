@@ -22,6 +22,8 @@ Phase 1.3 is formally sealed on `main` after contract, Create Draft, `modified_g
 
 Phase 1.4 adds bounded, permission-aware image Media Search/Get, authenticated image Upload, narrow metadata update, draft featured-image assignment, and caller-triggered remote image import. Upload and import accept only JPEG, PNG, GIF, WebP, or AVIF, enforce the smaller of the site's upload limit and 10 MiB, use WordPress Core media APIs, and support only an optional editable Post/Page draft parent. Remote import applies independent public-destination, DNS, redirect, timeout, byte, and real-file validation. Persistent idempotency prevents duplicate retries and private attribution is bounded.
 
+Phase 1.5.1 and Phase 1.5.2 add authenticated Category Create and Tag Create for the built-in `category` and `post_tag` taxonomies. Creation requires the current user's WordPress term-management capability, uses persistent idempotency, and records private bounded attribution. Categories accept an optional validated parent; Tags are non-hierarchical. Custom taxonomies, implicit term creation, and term update/delete are not exposed.
+
 No publish, delete, arbitrary content/file write, generic URL fetching, cloud, telemetry, or automation operation is included. Remote import runs only when an authenticated caller explicitly invokes it with a caller-selected URL; it is not a background or WP-Auto Cloud request.
 
 = Privacy and external services =
@@ -64,3 +66,5 @@ The WordPress connector is distributed under GPLv2 or later. Optional hosted WP-
 * Added permission-aware `wp-auto-media-update` for narrowly allowlisted image presentation metadata with optimistic concurrency.
 * Added authenticated transport and per-ability `read` capability checks.
 * Added caller-triggered `wp-auto-media-import-url` with bounded public URL, DNS, redirect, byte, and image validation.
+* Added authenticated `wp-auto-category-create` with capability checks, optional validated parents, persistent idempotency, and private bounded attribution.
+* Added authenticated `wp-auto-tag-create` with capability checks, persistent idempotency, and private bounded attribution.

@@ -22,21 +22,27 @@ final class AtomicOwnershipStoreTest extends TestCase {
 		$entrypoint = file_get_contents( dirname( __DIR__ ) . '/wepuu-auto-connector.php' );
 		self::assertIsString( $entrypoint );
 
-		$atomic  = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/AtomicOwnershipStore.php';" );
-		$create  = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/CreateIdempotencyStore.php';" );
-		$audit   = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/MutationAuditStore.php';" );
-		$service = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/ContentMutationService.php';" );
-		$media   = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Media/MediaIngestionIdempotencyStore.php';" );
+		$atomic           = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/AtomicOwnershipStore.php';" );
+		$create           = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/CreateIdempotencyStore.php';" );
+		$audit            = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/MutationAuditStore.php';" );
+		$service          = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Content/ContentMutationService.php';" );
+		$media            = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Media/MediaIngestionIdempotencyStore.php';" );
+		$taxonomy         = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Taxonomy/TaxonomyCreateIdempotencyStore.php';" );
+		$taxonomy_service = strpos( $entrypoint, "require_once WP_AUTO_CONNECTOR_DIR . 'src/Taxonomy/TaxonomyMutationService.php';" );
 
 		self::assertNotFalse( $atomic );
 		self::assertNotFalse( $create );
 		self::assertNotFalse( $audit );
 		self::assertNotFalse( $service );
 		self::assertNotFalse( $media );
+		self::assertNotFalse( $taxonomy );
+		self::assertNotFalse( $taxonomy_service );
 		self::assertTrue( $atomic < $create );
 		self::assertTrue( $create < $audit );
 		self::assertTrue( $audit < $service );
 		self::assertTrue( $atomic < $media );
+		self::assertTrue( $atomic < $taxonomy );
+		self::assertTrue( $taxonomy < $taxonomy_service );
 	}
 
 	/**
@@ -189,6 +195,28 @@ final class AtomicOwnershipStoreTest extends TestCase {
 		self::assertSame( 'acquired', $store->acquire( $name, $record )['status'] );
 		self::assertSame( $record, $GLOBALS['wp_auto_test_options'][ $name ] );
 		self::assertSame( 'off', $GLOBALS['wp_auto_test_option_autoload'][ $name ] );
+	}
+
+	/** Taxonomy claims use a dedicated namespace and the exact Category Create Ability. */
+	public function test_taxonomy_idempotency_namespace_accepts_category_create_claims(): void {
+		$store  = new AtomicOwnershipStore();
+		$name   = $this->taxonomy_idempotency_name();
+		$record = $this->taxonomy_initial_record();
+
+		self::assertSame( 'acquired', $store->acquire( $name, $record )['status'] );
+		self::assertSame( $record, $GLOBALS['wp_auto_test_options'][ $name ] );
+		self::assertSame( 'off', $GLOBALS['wp_auto_test_option_autoload'][ $name ] );
+	}
+
+	/** The shared taxonomy namespace also accepts the exact Tag Create Ability. */
+	public function test_taxonomy_idempotency_namespace_accepts_tag_create_claims(): void {
+		$store             = new AtomicOwnershipStore();
+		$name              = $this->taxonomy_idempotency_name();
+		$record            = $this->taxonomy_initial_record();
+		$record['ability'] = 'wp-auto/tag-create';
+
+		self::assertSame( 'acquired', $store->acquire( $name, $record )['status'] );
+		self::assertSame( $record, $GLOBALS['wp_auto_test_options'][ $name ] );
 	}
 
 	/**
@@ -416,10 +444,22 @@ final class AtomicOwnershipStoreTest extends TestCase {
 		return 'wp_auto_connector_media_idempotency_' . str_repeat( 'c', 64 );
 	}
 
+	/** Return a deterministic taxonomy idempotency option name. */
+	private function taxonomy_idempotency_name(): string {
+		return 'wp_auto_connector_taxonomy_idempotency_' . str_repeat( 'd', 64 );
+	}
+
 	/** Return a valid initial media claim record. */
 	private function media_initial_record(): array {
 		$record            = $this->initial_record();
 		$record['ability'] = 'wp-auto/media-upload';
+		return $record;
+	}
+
+	/** Return a valid initial Category Create claim record. */
+	private function taxonomy_initial_record(): array {
+		$record            = $this->initial_record();
+		$record['ability'] = 'wp-auto/category-create';
 		return $record;
 	}
 

@@ -26,6 +26,8 @@ use WPAuto\Connector\Abilities\Media\MediaSetFeaturedAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
+use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
+use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagsListAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAbilityCategory;
 use WPAuto\Connector\Admin\AdminPage;
@@ -101,6 +103,8 @@ final class Plugin {
 		( new PageUpdateAbility() )->register();
 		( new CategoriesListAbility() )->register();
 		( new TagsListAbility() )->register();
+		( new CategoryCreateAbility() )->register();
+		( new TagCreateAbility() )->register();
 		( new MediaSearchAbility() )->register();
 		( new MediaGetAbility() )->register();
 		( new MediaUploadAbility() )->register();

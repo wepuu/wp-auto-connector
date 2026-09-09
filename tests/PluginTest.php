@@ -16,9 +16,11 @@ use WPAuto\Connector\Abilities\Media\MediaUploadAbility;
 use WPAuto\Connector\Abilities\Media\MediaImportUrlAbility;
 use WPAuto\Connector\Abilities\Media\MediaUpdateAbility;
 use WPAuto\Connector\Abilities\Media\MediaSetFeaturedAbility;
+use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
+use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
 use WPAuto\Connector\Plugin;
 
-/** Covers production registration of the Phase 1.4.1 abilities. */
+/** Covers production registration of the current Phase 1.5.1 abilities. */
 final class PluginTest extends TestCase {
 	/** The boot path registers Update and Media read abilities. */
 	public function test_boot_registers_current_abilities(): void {
@@ -40,6 +42,8 @@ final class PluginTest extends TestCase {
 		self::assertContains( MediaImportUrlAbility::class, $classes );
 		self::assertContains( MediaUpdateAbility::class, $classes );
 		self::assertContains( MediaSetFeaturedAbility::class, $classes );
-		self::assertCount( 18, $callbacks );
+		self::assertContains( CategoryCreateAbility::class, $classes );
+		self::assertContains( TagCreateAbility::class, $classes );
+		self::assertCount( 20, $callbacks );
 	}
 }

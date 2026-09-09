@@ -10,6 +10,8 @@ Phase 1.2 is complete: eight read-only site, content, and taxonomy abilities pas
 
 Phase 1.3 and Phase 1.4 are complete and formally sealed on `main`. The image-only Media surface includes Search/Get, authenticated Upload, metadata Update, draft Featured Image Assignment, and caller-triggered `wp-auto-media-import-url` with independent SSRF/DNS/redirect/byte/MIME validation. The exact eighteen-tool Direct MCP allowlist, WordPress 6.9/7.1 activation, production packaging, security review, and official Plugin Check 2.1.0 all pass. The approved WordPress.org identity is `WePuu Auto Connector` / `wepuu-auto-connector`; existing `wp-auto` MCP contracts remain unchanged.
 
+Phase 1.5.0 froze the taxonomy mutation contract and safety architecture. Phase 1.5.1 and Phase 1.5.2 implement the built-in `wp-auto-category-create` and `wp-auto-tag-create` tools. They create one Category or Tag with the fixed taxonomy `manage_terms` capability, Core-owned slug/description fields, persistent site/actor/key idempotency, and private bounded attribution. Categories accept an optional validated parent; Tags remain non-hierarchical. The Direct MCP allowlist is now exactly twenty tools. Draft Post taxonomy assignment remains a later checkpoint.
+
 Start with:
 
 - `AGENTS.md`
@@ -26,6 +28,9 @@ Start with:
 - `docs/PHASE_1_4_1_VALIDATION.md`
 - `docs/PHASE_1_4_2_VALIDATION.md`
 - `docs/PHASE_1_4_3_VALIDATION.md`
+- `docs/PHASE_1_5_TAXONOMY_CONTRACTS.md`
+- `docs/ADR-006-TAXONOMY-SAFETY.md`
+- `docs/PHASE_1_5_2_VALIDATION.md`
 - `docs/WORDPRESS_ORG_COMPLIANCE.md`
 - `docs/CODEX_FIRST_PROMPT.md`
 

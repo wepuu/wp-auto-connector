@@ -30,6 +30,8 @@ use WPAuto\Connector\Abilities\Media\MediaUpdateAbility;
 use WPAuto\Connector\Abilities\Media\MediaSetFeaturedAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagsListAbility;
+use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
+use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
 
 /**
@@ -113,10 +115,12 @@ final class McpServerRegistrarTest extends TestCase {
 				MediaUpdateAbility::NAME,
 				MediaSetFeaturedAbility::NAME,
 				MediaImportUrlAbility::NAME,
+				CategoryCreateAbility::NAME,
+				TagCreateAbility::NAME,
 			),
 			$adapter->arguments[9]
 		);
-		self::assertCount( 18, $adapter->arguments[9] );
+		self::assertCount( 20, $adapter->arguments[9] );
 		self::assertSame( array(), $adapter->arguments[10] );
 		self::assertSame( array(), $adapter->arguments[11] );
 		self::assertIsCallable( $adapter->arguments[12] );

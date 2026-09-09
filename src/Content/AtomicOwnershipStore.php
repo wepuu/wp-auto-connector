@@ -15,11 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Provides the private insert-if-absent and exact-value release primitive.
  */
 final class AtomicOwnershipStore {
-	private const IDEMPOTENCY_PATTERN       = '/^wp_auto_connector_idempotency_[0-9a-f]{64}$/D';
-	private const MEDIA_IDEMPOTENCY_PATTERN = '/^wp_auto_connector_media_idempotency_[0-9a-f]{64}$/D';
-	private const AUDIT_LOCK_PATTERN        = '/^wp_auto_connector_mutation_audit_lock_[0-9a-f]{64}$/D';
-	private const UUID_PATTERN              = '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/D';
-	private const TIMESTAMP_PATTERN         = '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/D';
+	private const IDEMPOTENCY_PATTERN          = '/^wp_auto_connector_idempotency_[0-9a-f]{64}$/D';
+	private const MEDIA_IDEMPOTENCY_PATTERN    = '/^wp_auto_connector_media_idempotency_[0-9a-f]{64}$/D';
+	private const TAXONOMY_IDEMPOTENCY_PATTERN = '/^wp_auto_connector_taxonomy_idempotency_[0-9a-f]{64}$/D';
+	private const AUDIT_LOCK_PATTERN           = '/^wp_auto_connector_mutation_audit_lock_[0-9a-f]{64}$/D';
+	private const UUID_PATTERN                 = '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/D';
+	private const TIMESTAMP_PATTERN            = '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$/D';
 
 	private const ACQUIRED   = 'acquired';
 	private const OCCUPIED   = 'occupied';
@@ -165,6 +166,10 @@ final class AtomicOwnershipStore {
 
 		if ( 1 === preg_match( self::MEDIA_IDEMPOTENCY_PATTERN, $option_name ) ) {
 			return is_array( $value ) && $this->valid_initial_record( $value, array( 'wp-auto/media-upload', 'wp-auto/media-import-url' ) ) ? 'idempotency' : null;
+		}
+
+		if ( 1 === preg_match( self::TAXONOMY_IDEMPOTENCY_PATTERN, $option_name ) ) {
+			return is_array( $value ) && $this->valid_initial_record( $value, array( 'wp-auto/category-create', 'wp-auto/tag-create' ) ) ? 'idempotency' : null;
 		}
 
 		if ( 1 === preg_match( self::AUDIT_LOCK_PATTERN, $option_name ) ) {

@@ -69,6 +69,15 @@ namespace {
 	$GLOBALS['wp_auto_test_object_capabilities']  = array();
 	$GLOBALS['wp_auto_test_filters']              = array();
 	$GLOBALS['wp_auto_test_taxonomy_terms']       = array();
+	$GLOBALS['wp_auto_test_taxonomies']           = array(
+		'category' => (object) array( 'cap' => (object) array( 'manage_terms' => 'manage_categories' ) ),
+		'post_tag' => (object) array( 'cap' => (object) array( 'manage_terms' => 'manage_categories' ) ),
+	);
+	$GLOBALS['wp_auto_test_next_term_id']         = 3000;
+	$GLOBALS['wp_auto_test_last_insert_term_args'] = array();
+	$GLOBALS['wp_auto_test_insert_term_result']   = null;
+	$GLOBALS['wp_auto_test_insert_term_exception'] = null;
+	$GLOBALS['wp_auto_test_insert_term_calls']   = 0;
 	$GLOBALS['wp_auto_test_get_terms_error']      = null;
 	$GLOBALS['wp_auto_test_last_term_query_args'] = array();
 	$GLOBALS['wp_auto_test_term_query_history']   = array();
@@ -131,6 +140,10 @@ namespace {
 	$GLOBALS['wp_auto_test_blog_options']        = array();
 	$GLOBALS['wp_auto_test_option_rows']         = array( 1 => array() );
 	$GLOBALS['wp_auto_test_postmeta_rows']       = array( 1 => array() );
+	$GLOBALS['wp_auto_test_termmeta_rows']       = array( 1 => array() );
+	$GLOBALS['wp_auto_test_term_meta']           = array();
+	$GLOBALS['wp_auto_test_term_meta_values']    = array();
+	$GLOBALS['wp_auto_test_fail_update_term_meta'] = false;
 	$GLOBALS['wp_auto_test_physical_blog_ids']   = array( 1 );
 	$GLOBALS['wp_auto_test_get_results_calls']   = 0;
 	$GLOBALS['wp_auto_test_get_results_history'] = array();
@@ -166,6 +179,7 @@ namespace {
 	class wpdb {
 		public string $options = 'wp_options';
 		public string $postmeta = 'wp_postmeta';
+		public string $termmeta = 'wp_termmeta';
 		public string $blogs = 'wp_blogs';
 		/** @var int|string */
 		public $blogid = 1;
@@ -228,7 +242,7 @@ namespace {
 			$args  = $prepared['args'];
 			if ( false !== stripos( $query, 'SELECT option_id, option_name' ) ) {
 				$cursor  = (int) ( $args[0] ?? 0 );
-				$limit   = (int) ( $args[4] ?? 0 );
+				$limit   = (int) ( $args[5] ?? $args[4] ?? 0 );
 				$blog_id = $GLOBALS['wp_auto_test_current_blog_id'];
 				$rows    = $GLOBALS['wp_auto_test_option_rows'][ $blog_id ] ?? array();
 				usort( $rows, static fn( array $left, array $right ): int => (int) $left['option_id'] <=> (int) $right['option_id'] );
@@ -238,11 +252,27 @@ namespace {
 						static function ( array $row ) use ( $cursor ): bool {
 							$name = (string) ( $row['option_name'] ?? '' );
 							return (int) ( $row['option_id'] ?? 0 ) > $cursor
-								&& ( str_starts_with( $name, 'wp_auto_connector_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_media_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_mutation_audit_lock_' ) );
+								&& ( str_starts_with( $name, 'wp_auto_connector_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_media_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_taxonomy_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_mutation_audit_lock_' ) );
 						}
 					)
 				);
 				return array_slice( $rows, 0, $limit );
+			}
+
+			if ( false !== stripos( $query, 'termmeta' ) ) {
+				$blog_id = $GLOBALS['wp_auto_test_current_blog_id'];
+				$key     = (string) ( $args[0] ?? '' );
+				$rows    = array_values(
+					array_filter(
+						$GLOBALS['wp_auto_test_termmeta_rows'][ $blog_id ] ?? array(),
+						static fn( array $row ): bool => (string) ( $row['meta_key'] ?? '' ) === $key
+					)
+				);
+				usort( $rows, static fn( array $left, array $right ): int => (int) $left['meta_id'] <=> (int) $right['meta_id'] );
+				return array_map(
+					static fn( array $row ): array => array( 'meta_id' => (string) $row['meta_id'] ),
+					array_slice( $rows, 0, 1 )
+				);
 			}
 
 			if ( false !== stripos( $query, 'SELECT meta_id' ) ) {
@@ -374,6 +404,13 @@ namespace {
 			$this->count       = (int) ( $data['count'] ?? 0 );
 			$this->parent      = (int) ( $data['parent'] ?? 0 );
 			$this->taxonomy    = (string) ( $data['taxonomy'] ?? 'category' );
+		}
+	}
+	class WP_Taxonomy {
+		public object $cap;
+
+		public function __construct( string $manage_terms = 'manage_categories' ) {
+			$this->cap = (object) array( 'manage_terms' => $manage_terms );
 		}
 	}
 	class WP_Post {
@@ -557,6 +594,7 @@ namespace {
 		$GLOBALS['wpdb']->prefix                 = $prefix;
 		$GLOBALS['wpdb']->options                = $prefix . 'options';
 		$GLOBALS['wpdb']->postmeta               = $prefix . 'postmeta';
+		$GLOBALS['wpdb']->termmeta               = $prefix . 'termmeta';
 	}
 
 	function switch_to_blog( int $blog_id ): bool {
@@ -887,6 +925,16 @@ namespace {
 		return $single ? $value : array( $value );
 	}
 
+	function get_term_meta( int $term_id, string $meta_key, bool $single = false ) {
+		if ( isset( $GLOBALS['wp_auto_test_term_meta_values'][ $term_id ][ $meta_key ] ) ) {
+			$values = $GLOBALS['wp_auto_test_term_meta_values'][ $term_id ][ $meta_key ];
+			return $single ? ( $values[0] ?? array() ) : $values;
+		}
+
+		$value = $GLOBALS['wp_auto_test_term_meta'][ $term_id ][ $meta_key ] ?? array();
+		return $single ? $value : array( $value );
+	}
+
 	function update_post_meta( int $post_id, string $meta_key, $value ) {
 		++$GLOBALS['wp_auto_test_update_meta_calls'];
 		if ( $GLOBALS['wp_auto_test_update_meta_exception'] instanceof \Throwable ) {
@@ -910,6 +958,15 @@ namespace {
 			$GLOBALS['wp_auto_test_update_meta_exception_after_write'] = null;
 			throw $exception;
 		}
+		return true;
+	}
+
+	function update_term_meta( int $term_id, string $meta_key, $value ) {
+		if ( $GLOBALS['wp_auto_test_fail_update_term_meta'] ) {
+			return false;
+		}
+
+		$GLOBALS['wp_auto_test_term_meta'][ $term_id ][ $meta_key ] = wp_unslash( $value );
 		return true;
 	}
 
@@ -947,6 +1004,28 @@ namespace {
 			$exception = $GLOBALS['wp_auto_test_delete_post_meta_exception_after'];
 			$GLOBALS['wp_auto_test_delete_post_meta_exception_after'] = null;
 			throw $exception;
+		}
+
+		return $deleted;
+	}
+
+	function delete_term_meta_by_key( string $meta_key ): bool {
+		$blog_id = get_current_blog_id();
+		$rows    = $GLOBALS['wp_auto_test_termmeta_rows'][ $blog_id ] ?? array();
+		$kept    = array_values(
+			array_filter(
+				$rows,
+				static fn( array $row ): bool => (string) ( $row['meta_key'] ?? '' ) !== $meta_key
+			)
+		);
+		$deleted = count( $kept ) !== count( $rows );
+		$GLOBALS['wp_auto_test_termmeta_rows'][ $blog_id ] = $kept;
+
+		foreach ( $GLOBALS['wp_auto_test_term_meta'] as $term_id => $metadata ) {
+			unset( $GLOBALS['wp_auto_test_term_meta'][ $term_id ][ $meta_key ] );
+		}
+		foreach ( $GLOBALS['wp_auto_test_term_meta_values'] as $term_id => $metadata ) {
+			unset( $GLOBALS['wp_auto_test_term_meta_values'][ $term_id ][ $meta_key ] );
 		}
 
 		return $deleted;
@@ -1409,6 +1488,67 @@ namespace {
 
 		return array_slice( $terms, $args['offset'], $args['number'] );
 	}
+
+	function get_taxonomy( string $taxonomy ) {
+		return $GLOBALS['wp_auto_test_taxonomies'][ $taxonomy ] ?? null;
+	}
+
+	function get_term( int $term_id, string $taxonomy = '' ) {
+		foreach ( $GLOBALS['wp_auto_test_taxonomy_terms'] as $term ) {
+			if ( $term instanceof WP_Term && $term->term_id === $term_id && ( '' === $taxonomy || $term->taxonomy === $taxonomy ) ) {
+				return $term;
+			}
+		}
+
+		return null;
+	}
+
+	function sanitize_title( string $title ): string {
+		$sanitized = strtolower( trim( preg_replace( '/[^A-Za-z0-9]+/', '-', $title ) ) );
+		return trim( $sanitized, '-' );
+	}
+
+	function wp_insert_term( string $term, string $taxonomy, array $args = array() ) {
+		++$GLOBALS['wp_auto_test_insert_term_calls'];
+		$GLOBALS['wp_auto_test_last_insert_term_args'] = array( 'term' => $term, 'taxonomy' => $taxonomy, 'args' => $args );
+
+		if ( $GLOBALS['wp_auto_test_insert_term_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_insert_term_exception'];
+			$GLOBALS['wp_auto_test_insert_term_exception'] = null;
+			throw $exception;
+		}
+		if ( $GLOBALS['wp_auto_test_insert_term_result'] instanceof WP_Error ) {
+			$result = $GLOBALS['wp_auto_test_insert_term_result'];
+			$GLOBALS['wp_auto_test_insert_term_result'] = null;
+			return $result;
+		}
+
+		$parent = (int) ( $args['parent'] ?? 0 );
+		if ( $parent > 0 && ! get_term( $parent, $taxonomy ) ) {
+			return new WP_Error( 'missing_parent', 'hidden' );
+		}
+		$slug = array_key_exists( 'slug', $args ) ? sanitize_title( (string) $args['slug'] ) : sanitize_title( $term );
+		foreach ( $GLOBALS['wp_auto_test_taxonomy_terms'] as $existing ) {
+			if ( $existing instanceof WP_Term && $existing->taxonomy === $taxonomy && ( strtolower( $existing->name ) === strtolower( $term ) || $existing->slug === $slug ) ) {
+				return new WP_Error( 'term_exists', 'hidden' );
+			}
+		}
+
+		$id = ++$GLOBALS['wp_auto_test_next_term_id'];
+		$GLOBALS['wp_auto_test_taxonomy_terms'][] = new WP_Term(
+			array(
+				'term_id'     => $id,
+				'name'        => $term,
+				'slug'        => $slug,
+				'description' => (string) ( $args['description'] ?? '' ),
+				'count'       => 0,
+				'parent'      => $parent,
+				'taxonomy'    => $taxonomy,
+			)
+		);
+
+		return array( 'term_id' => $id, 'term_taxonomy_id' => $id );
+	}
 }
 
 namespace WP\MCP\Core {
@@ -1575,6 +1715,10 @@ namespace WPAuto\Connector\Taxonomy {
 		return \get_terms( $args );
 	}
 
+	function current_user_can( string $capability ): bool {
+		return \wp_auto_test_user_can( $capability );
+	}
+
 	function __( string $text ): string {
 		return $text;
 	}
@@ -1727,6 +1871,11 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Media/MediaFeaturedContract.php';
 	require_once dirname( __DIR__ ) . '/src/Media/MediaFeaturedService.php';
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyReadService.php';
+	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyCreateIdempotencyStore.php';
+	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyMutationAuditStore.php';
+	require_once dirname( __DIR__ ) . '/src/Taxonomy/CategoryCreateContract.php';
+	require_once dirname( __DIR__ ) . '/src/Taxonomy/TagCreateContract.php';
+	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyMutationService.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteHealthAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteInfoAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Content/ContentAbilityCategory.php';
@@ -1748,6 +1897,8 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TaxonomyAbilityCategory.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/CategoriesListAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TagsListAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/CategoryCreateAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TagCreateAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpAdapterLoader.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpServerRegistrar.php';
 	require_once dirname( __DIR__ ) . '/src/Plugin.php';

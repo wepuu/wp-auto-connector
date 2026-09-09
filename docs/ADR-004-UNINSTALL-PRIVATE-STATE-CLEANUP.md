@@ -1,8 +1,8 @@
 # ADR-004: Uninstall Private-State Cleanup
 
-- Status: **Accepted, implemented, and included in the Phase 1.3.3 seal**
+- Status: **Accepted, implemented, and included in the Phase 1.3.3 seal; Phase 1.5.1–1.5.2 amendment candidate**
 - Date: 2026-09-04
-- Decision scope: explicit uninstall cleanup of private mutation state and the three uninstall-only read-only SQL families
+- Decision scope: explicit uninstall cleanup of private mutation state and the four uninstall-only read-only SQL families
 
 ## Status and scope
 
@@ -13,6 +13,20 @@ later landed on `main` in `223c845`, without changing the MCP server, an Ability
 a tool, Composer dependencies, CI, plugin version, or any public contract.
 
 ADR-004 = ACCEPTED / IMPLEMENTED / VALIDATED / SEALED
+
+### Phase 1.5.1–1.5.2 amendment (working-tree candidate)
+
+The Category Create checkpoint extends this closed uninstall inventory with
+the exact taxonomy idempotency option family
+`wp_auto_connector_taxonomy_idempotency_[0-9a-f]{64}` and the exact termmeta
+audit key `_wp_auto_connector_taxonomy_mutation_audit`. Category and Tag Create
+share these same families. It adds no runtime SQL authority: the taxonomy option
+is validated by `AtomicOwnershipStore`, while uninstall uses the Core term
+metadata deletion API (`delete_term_meta_by_key()` when available, otherwise
+`delete_metadata( 'term', 0, $meta_key, '', true )`) plus one bounded prepared
+`meta_id` verification read against trusted `$wpdb->termmeta`. This amendment
+changes the uninstall-only family count from three to four and leaves the
+Phase 1.3 runtime semantics unchanged.
 
 ## Authoritative baseline and source architecture
 
@@ -25,18 +39,19 @@ The accepted ADR is authored from the exact main baseline:
 
 The approved source architecture is docs/PHASE_1_3_3_UNINSTALL_CLEANUP_ARCHITECTURE.md. Its final corrected lifecycle, SQL, allowlist, deletion-proof, multisite, privacy, and residual-authority decisions are reproduced here without redesign. ADR-002-MUTATION-SAFETY.md, ADR-003-ATOMIC-OWNERSHIP.md, and PHASE_1_3_MUTATION_CONTRACTS.md remain authoritative for their existing scopes.
 
-Relevant WordPress Core lifecycle/API references include [Uninstall Methods](https://developer.wordpress.org/plugins/plugin-basics/uninstall-methods/), [delete_option()](https://developer.wordpress.org/reference/functions/delete_option/), [delete_post_meta_by_key()](https://developer.wordpress.org/reference/functions/delete_post_meta_by_key/), [wpdb::esc_like()](https://developer.wordpress.org/reference/classes/wpdb/esc_like/), [wpdb::prepare()](https://developer.wordpress.org/reference/classes/wpdb/prepare/), [switch_to_blog()](https://developer.wordpress.org/reference/functions/switch_to_blog/), [restore_current_blog()](https://developer.wordpress.org/reference/functions/restore_current_blog/), and [get_sites()](https://developer.wordpress.org/reference/functions/get_sites/). WordPress 6.9 behavior is the implementation target; those references do not authorize a runtime change in this ADR.
+Relevant WordPress Core lifecycle/API references include [Uninstall Methods](https://developer.wordpress.org/plugins/plugin-basics/uninstall-methods/), [delete_option()](https://developer.wordpress.org/reference/functions/delete_option/), [delete_post_meta_by_key()](https://developer.wordpress.org/reference/functions/delete_post_meta_by_key/), [delete_metadata()](https://developer.wordpress.org/reference/functions/delete_metadata/), [wpdb::esc_like()](https://developer.wordpress.org/reference/classes/wpdb/esc_like/), [wpdb::prepare()](https://developer.wordpress.org/reference/classes/wpdb/prepare/), [switch_to_blog()](https://developer.wordpress.org/reference/functions/switch_to_blog/), [restore_current_blog()](https://developer.wordpress.org/reference/functions/restore_current_blog/), and [get_sites()](https://developer.wordpress.org/reference/functions/get_sites/). WordPress 6.9 behavior is the implementation target; those references do not authorize a runtime change in this ADR.
 
 ## Decision summary
 
 Adopt a supplemental, uninstall-only lifecycle/database-boundary decision:
 
 - While the plugin runtime is active, direct SQL rules remain governed by ADR-003. AtomicOwnershipStore remains the sole runtime direct-SQL authority.
-- During explicit WordPress uninstall only, ADR-004 permits exactly three read-only query families:
+- During explicit WordPress uninstall only, ADR-004 permits exactly four read-only query families:
   1. bounded option-name enumeration and final verification on the current blog's options table;
   2. bounded exact-key audit-meta absence verification on the current blog's postmeta table;
-  3. bounded physical blog-ID enumeration on the trusted blogs table, only for multisite traversal.
-- Actual deletion is always delegated to WordPress Core through delete_option() and delete_post_meta_by_key().
+  3. bounded exact-key taxonomy-audit absence verification on the current blog's termmeta table;
+  4. bounded physical blog-ID enumeration on the trusted blogs table, only for multisite traversal.
+- Actual deletion is always delegated to WordPress Core through delete_option(), delete_post_meta_by_key(), and the term metadata deletion API (delete_term_meta_by_key() when available, otherwise delete_metadata() with delete_all enabled).
 - No direct SQL write, ownership-value read, arbitrary table read, client-selected query, retry loop, or new runtime state is introduced.
 - Cleanup classifications are COMPLETE or INCOMPLETE for validation and documentation. They are not a return channel consumed by WordPress plugin deletion.
 
@@ -73,10 +88,17 @@ The closed inventory is:
 
 1. Create idempotency and recovery site options whose complete names match:
    wp_auto_connector_idempotency_[0-9a-f]{64}
-2. Temporary mutation-audit lock site options whose complete names match:
+2. Media Create/import idempotency site options whose complete names match:
+   wp_auto_connector_media_idempotency_[0-9a-f]{64}
+3. Taxonomy Create idempotency site options whose complete names match:
+   wp_auto_connector_taxonomy_idempotency_[0-9a-f]{64}
+4. Temporary mutation-audit lock site options whose complete names match:
    wp_auto_connector_mutation_audit_lock_[0-9a-f]{64}
-3. Post metadata with the exact key:
+5. Post metadata with the exact keys:
    _wp_auto_connector_mutation_audit
+   _wp_auto_connector_media_mutation_audit
+6. Term metadata with the exact key:
+   _wp_auto_connector_taxonomy_mutation_audit
 
 Idempotency records can contain version, actor user ID, Ability, fingerprint, state, target ID, and GMT timestamps. Audit attribution can contain version, operation/Ability, actor user ID, target object ID, timestamp, Create fingerprint, and Update expected/result modified_gmt. Raw idempotency keys, content, request bodies, credentials, and authorization headers are not stored.
 
@@ -90,7 +112,7 @@ Cleanup is classified COMPLETE only as of one final verification point when all 
 
 - all exact-valid idempotency options;
 - all exact-valid audit-lock options;
-- all rows for the exact audit metadata key on every processed blog;
+- all rows for the exact postmeta and termmeta audit keys on every processed blog;
 - on multisite, the authoritative blog-ID traversal has reached its terminal empty batch and every enumerated blog completed both option passes and audit-meta verification without an unresolved failure.
 
 A COMPLETE classification means a reinstall begins without historical WP-Auto mutation authority because those authoritative records no longer exist. It is an as-of-final-verification classification, not a transactional guarantee against a later write from an already-running request.
@@ -137,6 +159,8 @@ WHERE option_id > %d
   AND (
        option_name LIKE %s
        OR option_name LIKE %s
+       OR option_name LIKE %s
+       OR option_name LIKE %s
   )
 ORDER BY option_id ASC
 LIMIT %d
@@ -161,6 +185,8 @@ Each pass initializes its own cursor exactly once. Neither pass may restart itse
 For each raw fixed prefix:
 
 - wp_auto_connector_idempotency_
+- wp_auto_connector_media_idempotency_
+- wp_auto_connector_taxonomy_idempotency_
 - wp_auto_connector_mutation_audit_lock_
 
 the sequence is mandatory:
@@ -178,6 +204,8 @@ SQL LIKE matching is not deletion authority. Before calling delete_option(), val
 
 ~~~regex
 \Awp_auto_connector_idempotency_[0-9a-f]{64}\z
+\Awp_auto_connector_media_idempotency_[0-9a-f]{64}\z
+\Awp_auto_connector_taxonomy_idempotency_[0-9a-f]{64}\z
 \Awp_auto_connector_mutation_audit_lock_[0-9a-f]{64}\z
 ~~~
 
@@ -231,11 +259,30 @@ After every call, regardless of true or false, run the exact-key verification qu
 - a matching row: INCOMPLETE;
 - query failure, invalid result, or Throwable: INCOMPLETE / UNRESOLVED.
 
-The implementation must not issue a second automatic delete or raw SQL deletion. The postmeta query is Family B, the second of exactly three uninstall-only direct-SQL families.
+The implementation must not issue a second automatic delete or raw SQL deletion. The postmeta query is Family B, the second of exactly four uninstall-only direct-SQL families.
 
-## Direct SQL family C: authoritative multisite blog enumeration
+## Direct SQL family C: taxonomy-audit termmeta absence verification
 
-Family C is permitted only when is_multisite() is true. It is the authoritative source of physical blog namespaces for COMPLETE classification; get_sites() and WP_Site_Query are not completeness authorities because their results can be filtered or short-circuited.
+Only the current blog's trusted `$wpdb->termmeta` table may be queried for
+the exact taxonomy audit key. The conceptual statement is:
+
+~~~sql
+SELECT meta_id
+FROM <trusted current $wpdb->termmeta>
+WHERE meta_key = %s
+ORDER BY meta_id ASC
+LIMIT 1
+~~~
+
+The only bound value is `_wp_auto_connector_taxonomy_mutation_audit`. The
+query selects only `meta_id`, uses a fixed limit of one, and runs after the
+Core term metadata deletion call. A residual row, invalid result, query failure,
+or deletion Throwable makes cleanup INCOMPLETE. No termmeta value is read and
+no direct SQL deletion is allowed.
+
+## Direct SQL family D: authoritative multisite blog enumeration
+
+Family D is permitted only when is_multisite() is true. It is the authoritative source of physical blog namespaces for COMPLETE classification; get_sites() and WP_Site_Query are not completeness authorities because their results can be filtered or short-circuited.
 
 The conceptual statement is:
 
@@ -251,13 +298,13 @@ Only blog_id may be selected. The table is the trusted `$wpdb->blogs` property, 
 
 For each returned integer blog_id (validated to be at least 1), switch_to_blog( $blog_id ), run that blog's option Pass 1, option Pass 2, audit-meta deletion, and audit-meta verification, and always restore_current_blog() in finally. Advance the cursor monotonically. An empty batch is the terminal verification point. A query, validation, switch, processing, or restore failure leaves that blog unresolved and makes overall cleanup INCOMPLETE; it must not be silently skipped.
 
-Each Family C traversal initializes its cursor once and never restarts itself. A normal new site receives a higher blog_id and is included if it appears before the terminal empty batch. A site added after that point is a concurrent lifecycle residual. A site removed during traversal can make processing fail and therefore produces INCOMPLETE. No transactional network snapshot is claimed.
+Each Family D traversal initializes its cursor once and never restarts itself. A normal new site receives a higher blog_id and is included if it appears before the terminal empty batch. A site added after that point is a concurrent lifecycle residual. A site removed during traversal can make processing fail and therefore produces INCOMPLETE. No transactional network snapshot is claimed.
 
-Family C is the only direct read against `$wpdb->blogs`; no direct SQL is used against blogs for any other column, or against sitemeta, network options, or a network-global ownership table.
+Family D is the only direct read against `$wpdb->blogs`; no direct SQL is used against blogs for any other column, or against sitemeta, network options, or a network-global ownership table.
 
 ## Complete direct-SQL prohibition
 
-Outside the three exact read families above, ADR-004 authorizes no direct database behavior.
+Outside the four exact read families above, ADR-004 authorizes no direct database behavior.
 
 Explicitly prohibited are:
 
@@ -265,23 +312,30 @@ Explicitly prohibited are:
 - transactions, SELECT FOR UPDATE, LOCK TABLES, advisory locks, and row locks;
 - ownership-value SELECTs;
 - meta_value or post-content SELECTs;
-- arbitrary options, posts, users, terms, termmeta, sitemeta, network-option, custom-table, or client-table reads; `$wpdb->blogs` reads are limited to Family C's `blog_id` column and predicate;
+- arbitrary options, posts, users, terms, termmeta, sitemeta, network-option, custom-table, or client-table reads; `$wpdb->blogs` reads are limited to Family D's `blog_id` column and predicate;
 - any SQL supplied or parameterized by a client.
 
 The runtime remains subject to ADR-003. This uninstall exception is not a generic database permission.
 
 ## Multisite traversal
 
-Cleanup is per blog, never network-global. On multisite, use Family C's bounded `$wpdb->blogs` blog-ID keyset traversal as the authoritative site set:
+Cleanup is per blog, never network-global. On multisite, use Family D's bounded `$wpdb->blogs` blog-ID keyset traversal as the authoritative site set:
 
 1. Initialize last_seen_blog_id to 0 exactly once.
-2. Fetch fixed-size Family C batches ordered by ascending blog_id until the terminal empty batch.
+2. Fetch fixed-size Family D batches ordered by ascending blog_id until the terminal empty batch.
 3. For each validated blog ID, call switch_to_blog( $blog_id ).
-4. In a try block, run that blog's Pass 1 option deletion traversal, Pass 2 option final verification traversal, audit-meta Core deletion, and unconditional audit-meta SQL verification.
+4. In a try block, run that blog's Pass 1 option deletion traversal, Pass 2 option final verification traversal, postmeta and termmeta audit-key deletion, and exact-key SQL verification for both metadata domains.
 5. In finally, always call restore_current_blog(), including after a Throwable, query failure, or Core failure.
 6. Advance the blog cursor monotonically. A query, validation, switch, processing, or restore failure leaves that blog unresolved and makes final cleanup INCOMPLETE; it must not be silently skipped.
 
-After switching, option enumeration uses the switched site's $wpdb->options and audit verification uses the switched site's $wpdb->postmeta. Family C is the only direct SQL read against `$wpdb->blogs`; no direct SQL is used against sitemeta, network options, or a network-global ownership table. No unbounded all-site ID array is built. `get_sites()`/WP_Site_Query may be used only as non-authoritative convenience, if at all, and never to decide that all blogs were processed or that cleanup is COMPLETE.
+After switching, option enumeration uses the switched site's $wpdb->options and
+postmeta verification uses the switched site's $wpdb->postmeta. Termmeta
+verification uses the trusted `$wpdb->termmeta` table for the exact taxonomy
+audit key. Family D is the only direct SQL read against `$wpdb->blogs`; no
+direct SQL is used against sitemeta, network options, or a network-global
+ownership table. No unbounded all-site ID array is built. `get_sites()`/
+WP_Site_Query may be used only as non-authoritative convenience, if at all, and
+never to decide that all blogs were processed or that cleanup is COMPLETE.
 
 Memory is bounded by fixed site batches and fixed per-site option batches. Total work is O(site count + owned rows). Very large networks may exceed one PHP request's execution budget, and network changes during traversal can leave cleanup incomplete. This limitation is documented rather than addressed with background jobs, persistent cleanup state, or a public API.
 
@@ -298,7 +352,7 @@ One final bounded read-only verification pass is recommended because it catches 
 
 ## Privacy and data minimization
 
-The cleanup removes only the three inventoried private WP-Auto state families. It never logs their values. No raw idempotency key, title, content, excerpt, request body, Application Password, Authorization header, credential, SQL, path, or stack trace is expected or emitted.
+The cleanup removes only the four inventoried private WP-Auto state families. It never logs their values. No raw idempotency key, title, content, excerpt, request body, Application Password, Authorization header, credential, SQL, path, or stack trace is expected or emitted.
 
 Unrelated options, metadata, posts, users, terms, and another plugin's data remain untouched. The fixed audit metadata key and dynamic option names are not exposed through an MCP tool or public response.
 
@@ -321,7 +375,7 @@ This is consistent with the [WordPress Plugin Handbook uninstall guidance](https
 
 The decision uses Core deletion APIs, a fixed private-state inventory, no remote service, no credentials, no public endpoint, no remote code, and no broad wildcard deletion. It is designed to be reviewable under WordPress.org privacy and lifecycle expectations.
 
-The read-only option enumeration is a narrow compatibility exception because Core lacks a prefix enumerator. The postmeta verification query is equally narrow and selects only meta_id. Large multisite cleanup may be resource-intensive, and incomplete cleanup is reported honestly. These are documented limitations, not hidden behavior or claims of a universal WordPress.org requirement.
+The read-only option enumeration is a narrow compatibility exception because Core lacks a prefix enumerator. The postmeta and termmeta verification queries are equally narrow and select only `meta_id`. Large multisite cleanup may be resource-intensive, and incomplete cleanup is reported honestly. These are documented limitations, not hidden behavior or claims of a universal WordPress.org requirement.
 
 ## Rejected alternatives
 
@@ -341,7 +395,7 @@ The read-only option enumeration is a narrow compatibility exception because Cor
 AGENTS.md currently describes the Phase 1.3 direct-SQL exception as ADR-003-scoped. ADR-004 does not silently invalidate that rule. Before uninstall cleanup implementation is authorized, AGENTS.md must receive a narrow governance alignment stating:
 
 - runtime direct SQL remains ADR-003-only;
-- explicit uninstall may additionally use only the three ADR-004-approved read-only SQL families: options enumeration/final verification, exact-key postmeta verification, and multisite blog-ID enumeration.
+- explicit uninstall may additionally use only the four ADR-004-approved read-only SQL families: options enumeration/final verification, exact-key postmeta verification, exact-key termmeta verification, and multisite blog-ID enumeration.
 
 That alignment must not be combined with a broad GOV-1 status rewrite unless separately authorized. It is a prerequisite for implementation, not a change made by this ADR.
 
@@ -365,11 +419,11 @@ Future deterministic tests and a live probe must prove:
 
 - exact valid idempotency and audit-lock options are removed;
 - malformed, uppercase, short, long, appended, similar, unrelated, trailing LF, trailing CRLF, embedded-newline, and leading-newline options remain;
-- the exact option allowlist uses absolute PCRE anchors: `\Awp_auto_connector_idempotency_[0-9a-f]{64}\z` and `\Awp_auto_connector_mutation_audit_lock_[0-9a-f]{64}\z`, with case-sensitive no-newline-exception behavior;
+- the exact option allowlist uses absolute PCRE anchors for the idempotency, media-idempotency, taxonomy-idempotency, and audit-lock families, with case-sensitive no-newline-exception behavior;
 - esc_like() precedes wildcard append and prepare() binds both patterns, cursor, and fixed limit;
 - the options query is a current-blog prepared SELECT of only option_id and option_name;
 - the postmeta query is a current-blog prepared SELECT of only meta_id for the exact key with limit one;
-- Family C is a multisite-only current `$wpdb->blogs` prepared SELECT of only blog_id, with an internal keyset cursor, fixed limit, ascending order, and no OFFSET;
+- Family D is a multisite-only current `$wpdb->blogs` prepared SELECT of only blog_id, with an internal keyset cursor, fixed limit, ascending order, and no OFFSET;
 - no direct SQL write, ownership-value read, meta_value read, post-content read, arbitrary table read, lock, transaction, or advisory lock occurs;
 - keyset batches advance monotonically without OFFSET, restart, skips, or unbounded memory;
 - delete_option(false) uses bounded proof, no blind second delete, and no raw SQL fallback;
@@ -380,7 +434,7 @@ Future deterministic tests and a live probe must prove:
 - postmeta verification failure is INCOMPLETE with no second delete;
 - persistent option cache remains coherent through Core operations;
 - `sites_pre_query`, `pre_get_sites`, and `the_sites` cannot hide cleanup targets because get_sites()/WP_Site_Query is not the completeness authority;
-- multiple Family C batches visit every blog ID exactly once; site addition/deletion during traversal, Family C query failure, invalid/non-monotonic IDs, and switch failure produce INCOMPLETE;
+- multiple Family D batches visit every blog ID exactly once; site addition/deletion during traversal, Family D query failure, invalid/non-monotonic IDs, and switch failure produce INCOMPLETE;
 - multisite switch/restore is balanced on success and failure, with bounded memory and partial-failure reporting;
 - `switch_to_blog()` is inside the guarded switch/restore control flow; if WordPress has pushed/switched context before a Throwable, `restore_current_blog()` still runs exactly when a switch context was established and is not skipped merely because the call did not return normally;
 - a direct request to uninstall.php is blocked;

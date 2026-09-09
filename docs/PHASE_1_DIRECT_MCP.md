@@ -71,6 +71,25 @@ request. Phase 1.4.3 adds only an authorized, concurrency-checked update of
 image title, alt text, caption, and description. Remote import remains deferred
 to its later checkpoint.
 
+## Taxonomy mutation safety
+
+Phase 1.5.0 freezes the built-in Category Create, built-in Tag Create, and
+draft-Post taxonomy Assignment contracts in
+`PHASE_1_5_TAXONOMY_CONTRACTS.md`, with the capability, idempotency,
+concurrency, invariant, audit, and uninstall decisions in
+`ADR-006-TAXONOMY-SAFETY.md`. This documentation checkpoint did not register
+an Ability or change the exact eighteen-tool runtime. Phase 1.5.1 and 1.5.2
+subsequently register only `wp-auto/category-create` and `wp-auto/tag-create`,
+extending the explicit runtime to twenty tools under the frozen contract and
+ADR-004 uninstall amendment.
+
+Later checkpoints may append only the three frozen tools. Create uses the
+fixed taxonomy object's actual management capability and persistent atomic
+ownership. Assignment accepts IDs only, composes taxonomy and Post/object
+permissions, and exactly replaces one non-empty Category/Tag set on one
+authorized built-in Post draft using a required expected-set precondition. It
+is explicitly destructive and best-effort rather than atomic CAS.
+
 ## Phase 1 final acceptance scenario
 
 From a compatible AI client:
