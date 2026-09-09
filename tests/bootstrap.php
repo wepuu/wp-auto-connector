@@ -733,6 +733,10 @@ namespace {
 		return json_encode( $value, $flags );
 	}
 
+	function wp_parse_url( string $url ) {
+		return parse_url( $url );
+	}
+
 	function wp_rand(): int {
 		return 123456;
 	}
@@ -1707,6 +1711,17 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Media/MediaIngestionIdempotencyStore.php';
 	require_once dirname( __DIR__ ) . '/src/Media/MediaMutationAuditStore.php';
 	require_once dirname( __DIR__ ) . '/src/Media/MediaUploadService.php';
+	require_once dirname( __DIR__ ) . '/src/Media/MediaImportContract.php';
+	require_once dirname( __DIR__ ) . '/src/Media/RemoteDnsResolverInterface.php';
+	require_once dirname( __DIR__ ) . '/src/Media/RemoteHttpClientInterface.php';
+	require_once dirname( __DIR__ ) . '/src/Media/RemoteClockInterface.php';
+	require_once dirname( __DIR__ ) . '/src/Media/RemoteUrlPolicy.php';
+	require_once dirname( __DIR__ ) . '/src/Media/WordPressRemoteDnsResolver.php';
+	require_once dirname( __DIR__ ) . '/src/Media/WordPressRemoteHttpClient.php';
+	require_once dirname( __DIR__ ) . '/src/Media/SystemRemoteClock.php';
+	require_once dirname( __DIR__ ) . '/src/Media/RemoteMediaDownloaderInterface.php';
+	require_once dirname( __DIR__ ) . '/src/Media/RemoteMediaDownloader.php';
+	require_once dirname( __DIR__ ) . '/src/Media/MediaImportService.php';
 	require_once dirname( __DIR__ ) . '/src/Media/MediaUpdateContract.php';
 	require_once dirname( __DIR__ ) . '/src/Media/MediaUpdateService.php';
 	require_once dirname( __DIR__ ) . '/src/Media/MediaFeaturedContract.php';
@@ -1727,6 +1742,7 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaSearchAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaGetAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaUploadAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaImportUrlAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaUpdateAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Media/MediaSetFeaturedAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TaxonomyAbilityCategory.php';

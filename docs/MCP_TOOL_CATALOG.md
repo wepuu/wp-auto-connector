@@ -55,7 +55,7 @@ Publishing, deletion, arbitrary status changes, and generic WordPress mutation a
 
 ## Phase 1.4
 
-Phase 1.4.0 froze the public contracts in `docs/PHASE_1_4_MEDIA_CONTRACTS.md` and safety model in `docs/ADR-005-MEDIA-SAFETY.md`. Phase 1.4.1 formally sealed the first two read-only Media tools, Phase 1.4.2 sealed authenticated image upload, and Phase 1.4.3 sealed narrow metadata update. Phase 1.4.4 adds draft featured-image assignment. The Direct MCP allowlist is exactly seventeen for this checkpoint.
+Phase 1.4.0 froze the public contracts in `docs/PHASE_1_4_MEDIA_CONTRACTS.md` and safety model in `docs/ADR-005-MEDIA-SAFETY.md`. Phase 1.4.1 through 1.4.4 formally sealed Media Search/Get, authenticated image Upload, narrow metadata Update, and draft Featured Image Assignment. Phase 1.4.5 adds caller-triggered remote URL Import. The implementation target is exactly eighteen explicitly allowlisted tools.
 
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
@@ -64,9 +64,9 @@ Phase 1.4.0 froze the public contracts in `docs/PHASE_1_4_MEDIA_CONTRACTS.md` an
 | `wp-auto/media-upload` | `wp-auto-media-upload` | Image creation | `upload_files`; optional draft Post/Page parent `edit_post` | Implemented and validated — Phase 1.4.2 |
 | `wp-auto/media-update` | `wp-auto-media-update` | Mutation | `upload_files`, attachment `edit_post` | Implemented and validated — Phase 1.4.3 |
 | `wp-auto/media-set-featured` | `wp-auto-media-set-featured` | Mutation | fixed type baseline plus target `edit_post`; attachment `read_post` | Implemented and validated — Phase 1.4.4 |
-| `wp-auto/media-import-url` | `wp-auto-media-import-url` | Mutation/open-world | `upload_files`; optional parent `edit_post`; SSRF/media policy | Frozen; planned Phase 1.4.5 |
+| `wp-auto/media-import-url` | `wp-auto-media-import-url` | Mutation/open-world | `upload_files`; optional parent `edit_post`; SSRF/media policy | Implemented candidate; focused live validation passed; Phase 1.4.6 seal pending |
 
-The fixed implementation order produces exact allowlist counts of 14, 15, 16, 17, and 18. The current seventeen-tool surface ends with Media Search, Media Get, Media Upload, Media Update, and Media Set Featured. No generic media, file, URL-fetch, REST, filesystem, arbitrary metadata, resource, prompt, or third-party capability is authorized.
+The fixed implementation order produces exact allowlist counts of 14, 15, 16, 17, and 18. The eighteen-tool implementation ends with Media Search, Media Get, Media Upload, Media Update, Media Set Featured, and Media Import URL. No generic media, file, URL-fetch, REST, filesystem, arbitrary metadata, resource, prompt, or third-party capability is authorized.
 
 ## Phase 1.5
 

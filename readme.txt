@@ -20,13 +20,13 @@ Phase 1.2 provides a validated authenticated direct MCP endpoint at `/wp-json/wp
 
 Phase 1.3 is formally sealed on `main` after contract, Create Draft, `modified_gmt` compatibility, Draft Update, mutation security, and full integration validation. Its twelve-tool baseline includes authenticated Post/Page Create Draft and draft-only Post/Page Update. Create operations always produce drafts owned by the authenticated user and use persistent idempotency claims.
 
-Phase 1.4 adds bounded, permission-aware image Media Search/Get and one authenticated image Upload tool. Upload accepts only strict canonical Base64 for JPEG, PNG, GIF, WebP, or AVIF, enforces the smaller of the site's upload limit and 10 MiB, uses WordPress Core media APIs, and supports only an optional editable Post/Page draft parent. Persistent idempotency prevents duplicate retries and private attribution is bounded.
+Phase 1.4 adds bounded, permission-aware image Media Search/Get, authenticated image Upload, narrow metadata update, draft featured-image assignment, and caller-triggered remote image import. Upload and import accept only JPEG, PNG, GIF, WebP, or AVIF, enforce the smaller of the site's upload limit and 10 MiB, use WordPress Core media APIs, and support only an optional editable Post/Page draft parent. Remote import applies independent public-destination, DNS, redirect, timeout, byte, and real-file validation. Persistent idempotency prevents duplicate retries and private attribution is bounded.
 
-No publish, delete, arbitrary content/file write, remote URL import, cloud, telemetry, or automation operation is included. The media upload does not contact an external service.
+No publish, delete, arbitrary content/file write, generic URL fetching, cloud, telemetry, or automation operation is included. Remote import runs only when an authenticated caller explicitly invokes it with a caller-selected URL; it is not a background or WP-Auto Cloud request.
 
 = Privacy and external services =
 
-This version does not contact WP-Auto or any other external service automatically.
+The plugin does not contact WP-Auto or any other external service automatically. When an authenticated caller invokes the remote image import tool, the WordPress site makes a bounded HTTP(S) request to the caller-selected public destination to retrieve one image. The destination can observe the site's egress IP and WordPress HTTP user agent. The request does not include caller credentials, cookies, authorization headers, or arbitrary client headers. WP-Auto Cloud is not involved.
 
 Future optional cloud features will require explicit administrator action before any site data is transmitted. Before those features are released, this section will document what data is sent, when it is sent, why it is required, and links to the applicable service terms and privacy policy.
 
@@ -42,7 +42,7 @@ Future optional cloud features will require explicit administrator action before
 
 = Does this version connect to an external service? =
 
-No. Version 0.1.0 does not make external service requests.
+Only when an authenticated caller explicitly invokes remote image import. That request goes to the caller-selected destination and is subject to the fixed SSRF and image validation policy; there is no background request or WP-Auto Cloud connection.
 
 = Is the plugin free? =
 
@@ -63,3 +63,4 @@ The WordPress connector is distributed under GPLv2 or later. Optional hosted WP-
 * Added bounded, permission-aware `wp-auto-media-search`, `wp-auto-media-get`, and authenticated `wp-auto-media-upload` image tools.
 * Added permission-aware `wp-auto-media-update` for narrowly allowlisted image presentation metadata with optimistic concurrency.
 * Added authenticated transport and per-ability `read` capability checks.
+* Added caller-triggered `wp-auto-media-import-url` with bounded public URL, DNS, redirect, byte, and image validation.

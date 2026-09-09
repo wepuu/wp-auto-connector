@@ -13,6 +13,7 @@ use WPAuto\Connector\Abilities\Content\PostUpdateAbility;
 use WPAuto\Connector\Abilities\Media\MediaGetAbility;
 use WPAuto\Connector\Abilities\Media\MediaSearchAbility;
 use WPAuto\Connector\Abilities\Media\MediaUploadAbility;
+use WPAuto\Connector\Abilities\Media\MediaImportUrlAbility;
 use WPAuto\Connector\Abilities\Media\MediaUpdateAbility;
 use WPAuto\Connector\Abilities\Media\MediaSetFeaturedAbility;
 use WPAuto\Connector\Plugin;
@@ -36,8 +37,9 @@ final class PluginTest extends TestCase {
 		self::assertContains( MediaSearchAbility::class, $classes );
 		self::assertContains( MediaGetAbility::class, $classes );
 		self::assertContains( MediaUploadAbility::class, $classes );
+		self::assertContains( MediaImportUrlAbility::class, $classes );
 		self::assertContains( MediaUpdateAbility::class, $classes );
 		self::assertContains( MediaSetFeaturedAbility::class, $classes );
-		self::assertCount( 17, $callbacks );
+		self::assertCount( 18, $callbacks );
 	}
 }

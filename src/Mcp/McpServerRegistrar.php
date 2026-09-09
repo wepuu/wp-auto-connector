@@ -18,6 +18,7 @@ use WPAuto\Connector\Abilities\Content\PostUpdateAbility;
 use WPAuto\Connector\Abilities\Media\MediaGetAbility;
 use WPAuto\Connector\Abilities\Media\MediaSearchAbility;
 use WPAuto\Connector\Abilities\Media\MediaUploadAbility;
+use WPAuto\Connector\Abilities\Media\MediaImportUrlAbility;
 use WPAuto\Connector\Abilities\Media\MediaUpdateAbility;
 use WPAuto\Connector\Abilities\Media\MediaSetFeaturedAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
@@ -86,6 +87,7 @@ final class McpServerRegistrar {
 				MediaUploadAbility::NAME,
 				MediaUpdateAbility::NAME,
 				MediaSetFeaturedAbility::NAME,
+				MediaImportUrlAbility::NAME,
 			),
 			array(),
 			array(),

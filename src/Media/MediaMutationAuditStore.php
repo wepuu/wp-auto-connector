@@ -87,13 +87,26 @@ final class MediaMutationAuditStore {
 	 * @param string $fingerprint Payload fingerprint.
 	 */
 	public function has_upload_event( int $post_id, string $ability, int $actor_id, string $fingerprint ): bool {
+		return $this->has_ingestion_event( $post_id, $ability, $actor_id, $fingerprint );
+	}
+
+	/**
+	 * Prove one exact ingestion event exists for recovery.
+	 *
+	 * @param int    $post_id Target attachment ID.
+	 * @param string $ability Ability name.
+	 * @param int    $actor_id Actor user ID.
+	 * @param string $fingerprint Payload fingerprint.
+	 */
+	public function has_ingestion_event( int $post_id, string $ability, int $actor_id, string $fingerprint ): bool {
 		$events = $this->read_events( $post_id );
 		if ( null === $events ) {
 			return false;
 		}
 		$matches = 0;
 		foreach ( $events as $event ) {
-			if ( 'upload' === $event['operation'] && $ability === $event['ability'] && $actor_id === $event['actor_user_id'] && $post_id === $event['target_object_id'] && $fingerprint === $event['fingerprint'] ) {
+			$ingestion_match = ( 'upload' === $event['operation'] && 'wp-auto/media-upload' === $event['ability'] ) || ( 'import_url' === $event['operation'] && 'wp-auto/media-import-url' === $event['ability'] );
+			if ( $ingestion_match && $ability === $event['ability'] && $actor_id === $event['actor_user_id'] && $post_id === $event['target_object_id'] && $fingerprint === $event['fingerprint'] ) {
 				++$matches;
 			}
 		}
@@ -141,7 +154,7 @@ final class MediaMutationAuditStore {
 	 */
 	private function is_valid_event( array $event ): bool {
 		$base = array( 'version', 'operation', 'ability', 'actor_user_id', 'target_object_id', 'timestamp_gmt' );
-		if ( 'upload' === ( $event['operation'] ?? null ) ) {
+		if ( in_array( $event['operation'] ?? null, array( 'upload', 'import_url' ), true ) ) {
 			$expected = array_merge( $base, array( 'fingerprint' ) );
 		} elseif ( 'update' === ( $event['operation'] ?? null ) ) {
 			$expected = array_merge( $base, array( 'expected_modified_gmt', 'result_modified_gmt' ) );
@@ -162,8 +175,8 @@ final class MediaMutationAuditStore {
 			return false;
 		}
 
-		if ( 'upload' === $event['operation'] ) {
-			return 'wp-auto/media-upload' === $event['ability']
+		if ( in_array( $event['operation'], array( 'upload', 'import_url' ), true ) ) {
+			return ( ( 'upload' === $event['operation'] && 'wp-auto/media-upload' === $event['ability'] ) || ( 'import_url' === $event['operation'] && 'wp-auto/media-import-url' === $event['ability'] ) )
 				&& is_string( $event['fingerprint'] )
 				&& 1 === preg_match( '/^[0-9a-f]{64}$/D', $event['fingerprint'] );
 		}

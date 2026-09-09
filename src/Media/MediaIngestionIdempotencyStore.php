@@ -162,7 +162,7 @@ final class MediaIngestionIdempotencyStore {
 		return $keys === $expected
 			&& 1 === $record['version']
 			&& is_int( $record['actor_user_id'] ) && $record['actor_user_id'] >= 1
-			&& 'wp-auto/media-upload' === $record['ability']
+			&& in_array( $record['ability'], array( 'wp-auto/media-upload', 'wp-auto/media-import-url' ), true )
 			&& is_string( $record['fingerprint'] ) && 1 === preg_match( '/^[0-9a-f]{64}$/D', $record['fingerprint'] )
 			&& in_array( $record['state'], array( 'in_progress', 'audit_recorded', 'completed' ), true )
 			&& is_int( $record['target_id'] ) && $record['target_id'] >= 0

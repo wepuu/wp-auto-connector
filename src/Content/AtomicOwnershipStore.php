@@ -164,7 +164,7 @@ final class AtomicOwnershipStore {
 		}
 
 		if ( 1 === preg_match( self::MEDIA_IDEMPOTENCY_PATTERN, $option_name ) ) {
-			return is_array( $value ) && $this->valid_initial_record( $value, array( 'wp-auto/media-upload' ) ) ? 'idempotency' : null;
+			return is_array( $value ) && $this->valid_initial_record( $value, array( 'wp-auto/media-upload', 'wp-auto/media-import-url' ) ) ? 'idempotency' : null;
 		}
 
 		if ( 1 === preg_match( self::AUDIT_LOCK_PATTERN, $option_name ) ) {
