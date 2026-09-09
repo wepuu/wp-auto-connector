@@ -392,7 +392,7 @@ final class PrivateStateCleanup {
 			$previous_suppress = $this->wpdb->suppress_errors( true );
 			try {
 				// Every caller constructs one of the three ADR-004 fixed read families.
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Fixed prepared uninstall read approved by ADR-004.
 				$rows       = $this->wpdb->get_results( $prepared, ARRAY_A );
 				$last_error = (string) $this->wpdb->last_error;
 			} finally {

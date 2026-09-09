@@ -5,8 +5,6 @@
 AGENTS.md
 README.md
 docs
-composer.json
-composer.lock
 phpcs.xml.dist
 tests
 node_modules

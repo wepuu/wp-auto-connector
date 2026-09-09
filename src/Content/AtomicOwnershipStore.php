@@ -243,7 +243,7 @@ final class AtomicOwnershipStore {
 			$previous_suppress = $this->wpdb->suppress_errors( true );
 			try {
 				// The caller has just prepared this query and no other SQL reaches this method.
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Fixed prepared ownership query approved by ADR-003.
 				$result     = $this->wpdb->query( $prepared );
 				$last_error = (string) $this->wpdb->last_error;
 			} finally {
