@@ -77,11 +77,10 @@ Phase 1.5.0 freezes the built-in Category Create, built-in Tag Create, and
 draft-Post taxonomy Assignment contracts in
 `PHASE_1_5_TAXONOMY_CONTRACTS.md`, with the capability, idempotency,
 concurrency, invariant, audit, and uninstall decisions in
-`ADR-006-TAXONOMY-SAFETY.md`. This documentation checkpoint did not register
-an Ability or change the exact eighteen-tool runtime. Phase 1.5.1 and 1.5.2
-subsequently register only `wp-auto/category-create` and `wp-auto/tag-create`,
-extending the explicit runtime to twenty tools under the frozen contract and
-ADR-004 uninstall amendment.
+`ADR-006-TAXONOMY-SAFETY.md`. Phase 1.5.1 through 1.5.3 subsequently register
+only the three frozen abilities, and Phase 1.5.4 seals the authenticated
+twenty-one-tool runtime and its WordPress 6.9/7.1, Plugin Check, uninstall,
+and security gates.
 
 Later checkpoints may append only the three frozen tools. Create uses the
 fixed taxonomy object's actual management capability and persistent atomic
@@ -89,6 +88,19 @@ ownership. Assignment accepts IDs only, composes taxonomy and Post/object
 permissions, and exactly replaces one non-empty Category/Tag set on one
 authorized built-in Post draft using a required expected-set precondition. It
 is explicitly destructive and best-effort rather than atomic CAS.
+
+## SEO abstraction boundary
+
+Phase 1.6.0 freezes the provider-neutral SEO contract in
+`PHASE_1_6_SEO_CONTRACTS.md` and the provider-safety decision in
+`ADR-007-SEO-PROVIDER-ABSTRACTION.md`. It adds no Ability and leaves the
+runtime at exactly twenty-one tools. The next implementation checkpoints
+append `wp-auto/seo-get` and `wp-auto/seo-update` in that order. Get reads only
+explicit title, description, canonical URL, focus keywords, and index/follow
+directives on authorized built-in Posts/Pages; Update is restricted to
+authorized drafts and uses a best-effort state token. Rank Math is the first
+internal adapter, while provider names, arbitrary meta, provider REST/MCP
+calls, site-wide settings, and outbound requests remain outside the boundary.
 
 ## Phase 1 final acceptance scenario
 

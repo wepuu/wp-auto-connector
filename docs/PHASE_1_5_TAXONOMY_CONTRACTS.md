@@ -1,13 +1,14 @@
 # Phase 1.5 Taxonomy Mutation Contracts
 
-Status: **PHASE 1.5.0–1.5.3 CONTRACTS; CATEGORY, TAG CREATE, AND TAXONOMY ASSIGN IMPLEMENTED CANDIDATES; RUNTIME EXACTLY TWENTY-ONE TOOLS**
+Status: **Phase 1.5.0 through Phase 1.5.4 complete and formally sealed on `main`; runtime exactly twenty-one tools**
 
 This document is the authoritative public contract for Phase 1.5 taxonomy
 mutation. It extends the sealed Phase 1.2 category/tag read contracts without
 changing them. Phase 1.5.0 was documentation-only; the separately authorized
-Phase 1.5.1 and 1.5.2 checkpoints implement Category Create and Tag Create and
-extend the runtime to exactly twenty-one tools. The Phase 1.5.4 integration and
-security seal remains open.
+Phase 1.5.1, 1.5.2, and 1.5.3 checkpoints implement Category Create, Tag Create,
+and draft-Post Assignment and extend the runtime to exactly twenty-one tools.
+Phase 1.5.4 integration and security validation is complete and formally seals
+the phase on `main`.
 
 ## Fixed scope
 
@@ -381,4 +382,5 @@ production service, test stub, registrar change, private state, publishing,
 deletion, SEO, Cloud, telemetry, external request, or later-roadmap
 implementation. Phase 1.5.1 through 1.5.3 are the separately authorized
 Category Create, Tag Create, and draft-Post assignment checkpoints described
-above; Phase 1.5.4 remains pending.
+above. Phase 1.5.4 completed the integration and security seal without changing
+the public contracts or the exact twenty-one-tool order.

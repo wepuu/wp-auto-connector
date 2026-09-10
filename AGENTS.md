@@ -12,7 +12,7 @@ Phase 1.1 is complete: the direct MCP server foundation proves the authenticated
 
 Phase 1.2 is complete: all eight read-only tools passed the frozen contract, permission, privacy, schema, bounded-query, and live MCP validation gates.
 
-Phase 1.3.0 through Phase 1.3.4 and Phase 1.4.0 through Phase 1.4.6 are formally sealed on `main`. Phase 1.3.3 resolved SEC-1, SEC-2, and SEC-3; landed the ADR-003 atomic ownership runtime and ADR-004 uninstall cleanup; enforced HTTPS for remote Direct MCP with an exact local-development exception; and completed a zero-finding exact-main security audit. Phase 1.3.4 then completed full real-WordPress and Streamable HTTP mutation integration validation without changing the exact twelve-tool runtime. Phase 1.4 implemented and validated the image-only Media surface through an exact eighteen-tool runtime. Phase 1.5.0 froze the taxonomy mutation contracts and ADR-006 safety boundary; Phase 1.5.1 Category Create, Phase 1.5.2 Tag Create, and Phase 1.5.3 draft-Post taxonomy assignment extend the runtime to exactly twenty-one tools and are formally sealed by the Phase 1.5.4 integration/security validation. The approved public identity is `WePuu Auto Connector` with slug, main-file basename, and text domain `wepuu-auto-connector`; official Plugin Check 2.1.0 passes without errors or warnings, WordPress 6.9 and 7.1 activation succeeds, and the exact runtime security diff review found zero findings. Phase 1.6 and all later roadmap work remain unstarted unless explicitly authorized.
+Phase 1.3.0 through Phase 1.3.4 and Phase 1.4.0 through Phase 1.4.6 are formally sealed on `main`. Phase 1.3.3 resolved SEC-1, SEC-2, and SEC-3; landed the ADR-003 atomic ownership runtime and ADR-004 uninstall cleanup; enforced HTTPS for remote Direct MCP with an exact local-development exception; and completed a zero-finding exact-main security audit. Phase 1.3.4 then completed full real-WordPress and Streamable HTTP mutation integration validation without changing the exact twelve-tool runtime. Phase 1.4 implemented and validated the image-only Media surface through an exact eighteen-tool runtime. Phase 1.5.0 froze the taxonomy mutation contracts and ADR-006 safety boundary; Phase 1.5.1 Category Create, Phase 1.5.2 Tag Create, and Phase 1.5.3 draft-Post taxonomy assignment extend the runtime to exactly twenty-one tools and are formally sealed by the Phase 1.5.4 integration/security validation. Phase 1.6.0 now freezes the provider-neutral SEO contract and ADR-007 safety boundary without adding a tool; Phase 1.6.1 and later SEO runtime work remain unstarted. The approved public identity is `WePuu Auto Connector` with slug, main-file basename, and text domain `wepuu-auto-connector`; official Plugin Check 2.1.0 passes without errors or warnings, WordPress 6.9 and 7.1 activation succeeds, and the exact runtime security diff review found zero findings.
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
@@ -127,6 +127,31 @@ Phase 1 is not complete until at least Claude Code and one additional standard M
 - Taxonomy audit is separate, private, bounded to 20 events per object, and contains no names, slugs, descriptions, raw keys, bodies, credentials, or unrelated object data. It is never idempotency authority.
 - The Category Create and Tag Create checkpoints extend AtomicOwnership validation and explicit uninstall cleanup to the shared exact private idempotency/audit families. Phase 1.5.0 itself granted no new SQL authority; active taxonomy runtime still uses WordPress APIs only.
 - Publishing, status changes, content/media/SEO mutation, Pages/custom post types, Cloud, telemetry, and outbound requests remain out of scope.
+
+## Phase 1.6 SEO invariants
+
+- `docs/PHASE_1_6_SEO_CONTRACTS.md` is the authoritative public contract;
+  `docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md` records the accepted provider and
+  safety decisions. Phase 1.6.0 is documentation-only and keeps exactly
+  twenty-one tools.
+- The frozen future order is `wp-auto/seo-get`, then `wp-auto/seo-update`.
+  The public shape is provider-neutral and limited to explicit title,
+  description, canonical URL, focus keywords, and index/follow directives.
+- Get is limited to authorized built-in Posts/Pages. Update is limited to
+  authorized Post/Page drafts and repeats provider SEO capability checks,
+  actual Core edit baselines, and final `edit_post` checks in the service.
+- The first adapter is an independent Rank Math integration through fixed
+  WordPress Metadata API keys. Do not invoke provider REST/MCP/Content AI,
+  external services, arbitrary metadata, or site-wide SEO settings.
+- `state_token` is a bounded SHA-256 best-effort concurrency precondition, not
+  CAS. Multi-key writes require re-read and invariant verification; uncertain
+  partial state returns `wp_auto_seo_state_uncertain` and requires a fresh Get.
+- SEO attribution is private and bounded to 20 events per object. It contains
+  no SEO values, URLs, keywords, raw keys, request bodies, or credentials; its
+  exact postmeta family is removed during explicit uninstall.
+- Yoast, AIOSEO, published-content SEO mutation, schema/social metadata,
+  redirects, robots.txt, scores, Cloud, telemetry, and outbound requests
+  remain out of scope until explicitly authorized.
 
 ## Architecture rules
 

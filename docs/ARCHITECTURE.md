@@ -195,3 +195,28 @@ explicitly non-CAS concurrency precondition. Direct runtime SQL
 against Core taxonomy tables remains prohibited. See
 `docs/PHASE_1_5_TAXONOMY_CONTRACTS.md` and
 `docs/ADR-006-TAXONOMY-SAFETY.md`.
+
+## Phase 1.6 SEO boundary
+
+Phase 1.6.0 freezes the provider-neutral SEO contract in
+`docs/PHASE_1_6_SEO_CONTRACTS.md` and the provider decision in
+`docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md`; it adds no runtime code or tool.
+The future order is `wp-auto/seo-get`, then `wp-auto/seo-update`, with the
+sealed baseline remaining exactly twenty-one tools until the first named
+implementation checkpoint.
+
+SEO is exposed through a small internal `SeoProviderInterface` and registry,
+never through a generic metadata API. The public shape contains only explicit
+per-object title, description, canonical URL, focus keywords, and index/follow
+directives. The first provider adapter is an independent Rank Math integration
+using fixed WordPress Metadata API keys; provider REST/MCP/Content AI calls,
+arbitrary metadata, and outbound requests are prohibited.
+
+Get supports authorized built-in Posts/Pages. Update is draft-only and repeats
+the provider capability, actual Post/Page edit baseline, and final `edit_post`
+checks at both Ability and service layers. A bounded SHA-256 state token gives
+best-effort optimistic concurrency; it is not a CAS token. Multi-key writes
+must re-read and verify omitted/protected fields and fail closed as
+`wp_auto_seo_state_uncertain` when final state is ambiguous. SEO audit state is
+private, bounded to 20 events per object, contains no SEO values or credentials,
+and is removed by explicit uninstall without adding runtime SQL authority.

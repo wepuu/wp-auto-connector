@@ -98,10 +98,22 @@ arbitrary metadata, resource, prompt, or third-party tool is authorized.
 
 ## Phase 1.6
 
-| Ability | Type | WordPress capability baseline |
-| --- | --- | --- |
-| `wp-auto/seo-get` | Read-only | target object read/edit policy |
-| `wp-auto/seo-update` | Mutation | target object edit capability |
+Phase 1.6.0 freezes the provider-neutral SEO contracts in
+`docs/PHASE_1_6_SEO_CONTRACTS.md` and the provider/safety boundary in
+`docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md`. No SEO Ability is registered by
+the documentation checkpoint; the sealed Direct MCP runtime remains exactly
+twenty-one tools.
+
+| Ability | MCP tool | Type | WordPress capability baseline | Status |
+| --- | --- | --- | --- | --- |
+| `wp-auto/seo-get` | `wp-auto-seo-get` | Read-only | provider SEO read policy; target `read_post` (and `edit_post` for password-protected objects) | Frozen; Phase 1.6.1 not started; runtime target 22 |
+| `wp-auto/seo-update` | `wp-auto-seo-update` | Draft mutation | provider SEO write policy; fixed Post/Page edit baseline; target `edit_post`; draft status | Frozen; Phase 1.6.2 not started; runtime target 23 |
+
+The public SEO shape contains only explicit title, description, canonical URL,
+focus keywords, and index/follow directives. Provider names, provider meta
+keys, provider REST routes, provider MCP tools, arbitrary metadata, and site-
+wide settings remain outside the catalog. Phase 1.6.3 is the later integration
+and security seal and adds no tool.
 
 ## Explicit Phase 1 exclusions
 

@@ -112,7 +112,7 @@ Delivery checkpoints:
 4. **Phase 1.5.3 - Draft Post Taxonomy Assignment (complete; formally sealed):** implements bounded ID-only exact Category/Tag replacement on authorized built-in Post drafts with expected-set concurrency, invariant verification, private bounded assignment attribution, and the exact twenty-one-tool allowlist. The best-effort non-CAS limitation is retained and `wp_auto_taxonomy_state_uncertain` requires a fresh client read.
 5. **Phase 1.5.4 - Integration and Security Seal (complete; formally sealed):** WordPress 6.9 and 7.1 activation, authenticated Streamable HTTP, low-privilege rejection, idempotency, assignment race/state integrity, uninstall, Multisite cleanup, Plugin Check 2.1.0 static/runtime checks, Composer gates, and exact-diff security review all pass without adding tools.
 
-The authoritative contract is `docs/PHASE_1_5_TAXONOMY_CONTRACTS.md`; the accepted safety decision is `docs/ADR-006-TAXONOMY-SAFETY.md`. Phase 1.5.0 through Phase 1.5.4 are complete and formally sealed with exactly twenty-one tools. Category/Tag updates or deletion, custom taxonomies/post types, Pages, empty-set clearing, publishing, content/media/SEO mutation, Cloud, telemetry, and external requests remain outside this phase. Phase 1.6 has not started.
+The authoritative contract is `docs/PHASE_1_5_TAXONOMY_CONTRACTS.md`; the accepted safety decision is `docs/ADR-006-TAXONOMY-SAFETY.md`. Phase 1.5.0 through Phase 1.5.4 are complete and formally sealed with exactly twenty-one tools. Category/Tag updates or deletion, custom taxonomies/post types, Pages, empty-set clearing, publishing, content/media/SEO mutation, Cloud, telemetry, and external requests remain outside this phase. Phase 1.6.0 is now formally frozen as a documentation-only checkpoint; Phase 1.6.1 and later runtime work have not started.
 
 ### Phase 1.6 - SEO abstraction
 
@@ -122,6 +122,17 @@ Scope:
 - provider abstraction;
 - Rank Math adapter first;
 - Yoast and AIOSEO adapters after the contract is stable.
+
+Delivery checkpoints:
+
+1. **Phase 1.6.0 - SEO Contract and Provider-Safety Freeze (complete; formally frozen):** freezes the provider-neutral five-field object contract, stable `seo-get`/`seo-update` order, draft-only mutation boundary, provider registry, state-token concurrency model, bounded private audit, explicit uninstall boundary, and failure-closed semantics. No runtime tool is added; the sealed runtime remains exactly twenty-one tools.
+2. **Phase 1.6.1 - Rank Math Adapter and SEO Get (not started):** implement the independent internal Rank Math adapter and expose only `wp-auto/seo-get`, producing the exact twenty-two-tool runtime after a user-supplied official package is verified.
+3. **Phase 1.6.2 - Draft SEO Update (not started):** expose only `wp-auto/seo-update` for authorized Post/Page drafts, including state-token checks, invariant verification, bounded attribution, and uninstall cleanup; the runtime becomes exactly twenty-three tools.
+4. **Phase 1.6.3 - Integration and Security Seal (not started):** validate WordPress 6.9/7.1, authenticated Streamable HTTP, provider absence/conflict, state integrity, no outbound requests, Plugin Check, uninstall, and exact-diff security without adding tools.
+
+The authoritative contract is `docs/PHASE_1_6_SEO_CONTRACTS.md`; the accepted
+provider and safety decision is `docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md`;
+the documentation freeze evidence is `docs/PHASE_1_6_0_VALIDATION.md`.
 
 ### Phase 1.7 - Client compatibility and release hardening
 
