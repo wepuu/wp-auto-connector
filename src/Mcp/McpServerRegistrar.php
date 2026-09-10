@@ -23,6 +23,7 @@ use WPAuto\Connector\Abilities\Media\MediaUpdateAbility;
 use WPAuto\Connector\Abilities\Media\MediaSetFeaturedAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
+use WPAuto\Connector\Abilities\Seo\SeoGetAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
@@ -95,6 +96,7 @@ final class McpServerRegistrar {
 				CategoryCreateAbility::NAME,
 				TagCreateAbility::NAME,
 				TaxonomyAssignAbility::NAME,
+				SeoGetAbility::NAME,
 			),
 			array(),
 			array(),

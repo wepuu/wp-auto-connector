@@ -98,15 +98,24 @@ arbitrary metadata, resource, prompt, or third-party tool is authorized.
 
 ## Phase 1.6
 
-Phase 1.6.0 freezes the provider-neutral SEO contracts in
+Phase 1.6.0 froze the provider-neutral SEO contracts in
 `docs/PHASE_1_6_SEO_CONTRACTS.md` and the provider/safety boundary in
 `docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md`. No SEO Ability is registered by
 the documentation checkpoint; the sealed Direct MCP runtime remains exactly
-twenty-one tools.
+twenty-one tools at that checkpoint.
+
+Phase 1.6.0.1 changes only the private Adapter integration boundary. It adds no
+Ability or tool: discovery must remain the same ordered twenty-one tools with
+Rank Math 1.0.278, Yoast SEO 28.4, and All in One SEO 5.0.1.1 active, and must
+never include their provider-native Abilities.
+
+Phase 1.6.1 appends only provider-neutral SEO Get. The current candidate
+therefore exposes exactly twenty-two ordered tools, with `wp-auto-seo-get`
+last. Tool discovery remains stable when the provider is absent or unsupported.
 
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
-| `wp-auto/seo-get` | `wp-auto-seo-get` | Read-only | provider SEO read policy; target `read_post` (and `edit_post` for password-protected objects) | Frozen; Phase 1.6.1 not started; runtime target 22 |
+| `wp-auto/seo-get` | `wp-auto-seo-get` | Read-only | provider SEO read policy; target `read_post` (and `edit_post` for password-protected objects) | Phase 1.6.1 implementation candidate; current runtime 22 |
 | `wp-auto/seo-update` | `wp-auto-seo-update` | Draft mutation | provider SEO write policy; fixed Post/Page edit baseline; target `edit_post`; draft status | Frozen; Phase 1.6.2 not started; runtime target 23 |
 
 The public SEO shape contains only explicit title, description, canonical URL,

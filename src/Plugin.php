@@ -25,6 +25,8 @@ use WPAuto\Connector\Abilities\Media\MediaUpdateAbility;
 use WPAuto\Connector\Abilities\Media\MediaSetFeaturedAbility;
 use WPAuto\Connector\Abilities\Site\SiteHealthAbility;
 use WPAuto\Connector\Abilities\Site\SiteInfoAbility;
+use WPAuto\Connector\Abilities\Seo\SeoAbilityCategory;
+use WPAuto\Connector\Abilities\Seo\SeoGetAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoriesListAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
@@ -92,6 +94,7 @@ final class Plugin {
 		( new ContentAbilityCategory() )->register();
 		( new MediaAbilityCategory() )->register();
 		( new TaxonomyAbilityCategory() )->register();
+		( new SeoAbilityCategory() )->register();
 		( new SiteHealthAbility() )->register();
 		( new SiteInfoAbility() )->register();
 		( new PostsSearchAbility() )->register();
@@ -113,6 +116,7 @@ final class Plugin {
 		( new MediaUpdateAbility() )->register();
 		( new MediaSetFeaturedAbility() )->register();
 		( new MediaImportUrlAbility() )->register();
+		( new SeoGetAbility() )->register();
 		( new McpServerRegistrar() )->register();
 		McpAdapterLoader::initialize();
 

@@ -125,7 +125,14 @@ As of 2026-08-29:
 - official MCP Adapter documentation states that WordPress.org `Requires Plugins` dependency is not yet supported because MCP Adapter is not yet listed in the directory;
 - official documentation allows bundling it as a Composer dependency and recommends a collision-safe autoloading strategy such as Jetpack Autoloader or dependency prefixing.
 
-WP-Auto therefore treats MCP Adapter as a replaceable integration dependency. See `docs/ADR-001-MCP-ADAPTER-DEPENDENCY.md`.
+WP-Auto therefore treats MCP Adapter as a replaceable integration dependency.
+From Phase 1.6.0.1, the locked official 0.6.1 sources and PHP MCP Schema 0.1.3
+are deterministically built into `WPAuto\\Connector\\PrivateMcp`. Private
+hooks, filters, CLI command, and per-site session keys prevent a provider's
+public Adapter from selecting WePuu's protocol runtime. The dedicated endpoint
+continues to expose only WePuu's exact ordered allowlist. See
+`docs/ADR-001-MCP-ADAPTER-DEPENDENCY.md` and
+`docs/ADR-008-MCP-ADAPTER-COEXISTENCE.md`.
 
 ## Future cloud architecture
 
@@ -198,21 +205,21 @@ against Core taxonomy tables remains prohibited. See
 
 ## Phase 1.6 SEO boundary
 
-Phase 1.6.0 freezes the provider-neutral SEO contract in
+Phase 1.6.0 froze the provider-neutral SEO contract in
 `docs/PHASE_1_6_SEO_CONTRACTS.md` and the provider decision in
-`docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md`; it adds no runtime code or tool.
-The future order is `wp-auto/seo-get`, then `wp-auto/seo-update`, with the
-sealed baseline remaining exactly twenty-one tools until the first named
-implementation checkpoint.
+`docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md`; it added no runtime code or tool.
+Phase 1.6.1 implements the first named checkpoint, appending `wp-auto/seo-get`
+after the sealed twenty-one-tool baseline. The candidate runtime is therefore
+exactly twenty-two tools; `wp-auto/seo-update` remains unimplemented.
 
-SEO is exposed through a small internal `SeoProviderInterface` and registry,
+SEO Get is exposed through a small internal `SeoProviderInterface` and registry,
 never through a generic metadata API. The public shape contains only explicit
 per-object title, description, canonical URL, focus keywords, and index/follow
 directives. The first provider adapter is an independent Rank Math integration
 using fixed WordPress Metadata API keys; provider REST/MCP/Content AI calls,
 arbitrary metadata, and outbound requests are prohibited.
 
-Get supports authorized built-in Posts/Pages. Update is draft-only and repeats
+Get supports authorized built-in Posts/Pages and Rank Math 1.0.278 only. Update is draft-only and repeats
 the provider capability, actual Post/Page edit baseline, and final `edit_post`
 checks at both Ability and service layers. A bounded SHA-256 state token gives
 best-effort optimistic concurrency; it is not a CAS token. Multi-key writes

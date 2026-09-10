@@ -96,11 +96,12 @@ is explicitly destructive and best-effort rather than atomic CAS.
 
 ## SEO abstraction boundary
 
-Phase 1.6.0 freezes the provider-neutral SEO contract in
+Phase 1.6.0 froze the provider-neutral SEO contract in
 `PHASE_1_6_SEO_CONTRACTS.md` and the provider-safety decision in
-`ADR-007-SEO-PROVIDER-ABSTRACTION.md`. It adds no Ability and leaves the
-runtime at exactly twenty-one tools. The next implementation checkpoints
-append `wp-auto/seo-get` and `wp-auto/seo-update` in that order. Get reads only
+`ADR-007-SEO-PROVIDER-ABSTRACTION.md`. It added no Ability and left the
+runtime at exactly twenty-one tools. Phase 1.6.1 appends `wp-auto/seo-get`, so
+the current candidate exposes exactly twenty-two tools; `wp-auto/seo-update`
+remains a later checkpoint. Get reads only
 explicit title, description, canonical URL, focus keywords, and index/follow
 directives on authorized built-in Posts/Pages; Update is restricted to
 authorized drafts and uses a best-effort state token. Rank Math is the first

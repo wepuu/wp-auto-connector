@@ -12,7 +12,7 @@ Phase 1.1 is complete: the direct MCP server foundation proves the authenticated
 
 Phase 1.2 is complete: all eight read-only tools passed the frozen contract, permission, privacy, schema, bounded-query, and live MCP validation gates.
 
-Phase 1.3.0 through Phase 1.3.4 and Phase 1.4.0 through Phase 1.4.6 are formally sealed on `main`. Phase 1.3.3 resolved SEC-1, SEC-2, and SEC-3; landed the ADR-003 atomic ownership runtime and ADR-004 uninstall cleanup; enforced HTTPS for remote Direct MCP with an exact local-development exception; and completed a zero-finding exact-main security audit. Phase 1.3.4 then completed full real-WordPress and Streamable HTTP mutation integration validation without changing the exact twelve-tool runtime. Phase 1.4 implemented and validated the image-only Media surface through an exact eighteen-tool runtime. Phase 1.5.0 froze the taxonomy mutation contracts and ADR-006 safety boundary; Phase 1.5.1 Category Create, Phase 1.5.2 Tag Create, and Phase 1.5.3 draft-Post taxonomy assignment extend the runtime to exactly twenty-one tools and are formally sealed by the Phase 1.5.4 integration/security validation. Phase 1.6.0 now freezes the provider-neutral SEO contract and ADR-007 safety boundary without adding a tool; Phase 1.6.1 and later SEO runtime work remain unstarted. The approved public identity is `WePuu Auto Connector` with slug, main-file basename, and text domain `wepuu-auto-connector`; official Plugin Check 2.1.0 passes without errors or warnings, WordPress 6.9 and 7.1 activation succeeds, and the exact runtime security diff review found zero findings.
+Phase 1.3.0 through Phase 1.3.4 and Phase 1.4.0 through Phase 1.4.6 are formally sealed on `main`. Phase 1.3.3 resolved SEC-1, SEC-2, and SEC-3; landed the ADR-003 atomic ownership runtime and ADR-004 uninstall cleanup; enforced HTTPS for remote Direct MCP with an exact local-development exception; and completed a zero-finding exact-main security audit. Phase 1.3.4 then completed full real-WordPress and Streamable HTTP mutation integration validation without changing the exact twelve-tool runtime. Phase 1.4 implemented and validated the image-only Media surface through an exact eighteen-tool runtime. Phase 1.5.0 froze the taxonomy mutation contracts and ADR-006 safety boundary; Phase 1.5.1 Category Create, Phase 1.5.2 Tag Create, and Phase 1.5.3 draft-Post taxonomy assignment extend the runtime to exactly twenty-one tools and are formally sealed by the Phase 1.5.4 integration/security validation. Phase 1.6.0 freezes the provider-neutral SEO contract and ADR-007 safety boundary without adding a tool. Phase 1.6.0.1 is a complete local implementation candidate: ADR-008 isolates locked MCP Adapter 0.6.1 from admitted Rank Math 1.0.278's public Adapter 0.5.0, and its WordPress 6.9/7.1, provider, load-order, Multisite, uninstall, Plugin Check, Composer, and security gates pass with exactly twenty-one tools. Phase 1.6.1 is the explicitly authorized current implementation candidate: its independent Rank Math 1.0.278 read adapter and provider-neutral `wp-auto/seo-get` extend the runtime to exactly twenty-two tools. Phase 1.6.2 and later work remain unauthorized. The approved public identity is `WePuu Auto Connector` with slug, main-file basename, and text domain `wepuu-auto-connector`.
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
@@ -60,7 +60,11 @@ Phase 1 is not complete until at least Claude Code and one additional standard M
 - The official `WordPress/mcp-adapter` project is the preferred MCP protocol adapter.
 - As of 2026-08-31, MCP Adapter is not available as a WordPress.org plugin dependency. Do not add `Requires Plugins: mcp-adapter` unless its directory status is re-verified and changed.
 - For the current development path, use the official Composer-library/bundling approach documented by MCP Adapter. Keep the integration replaceable so a future WordPress.org plugin dependency can be adopted without changing WP-Auto ability contracts.
-- Prefer an already active compatible MCP Adapter instance when present; do not initialize a second conflicting copy.
+- WePuu loads its locked official Adapter implementation only from the ADR-008
+  private runtime; do not reuse or initialize a provider's public Adapter.
+- A provider-bundled incompatible Adapter must never be accepted or initialized
+  as a fallback. Follow ADR-008 for the Phase 1.6 private-runtime coexistence
+  gate; do not replay public Adapter hooks or rely on plugin activation order.
 - Direct MCP and future cloud MCP must invoke the same WP-Auto abilities.
 - Do not convert every registered WordPress REST route into an MCP tool.
 - Only explicitly registered WP-Auto abilities may be exposed through the WP-Auto MCP server.
@@ -134,7 +138,8 @@ Phase 1 is not complete until at least Claude Code and one additional standard M
   `docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md` records the accepted provider and
   safety decisions. Phase 1.6.0 is documentation-only and keeps exactly
   twenty-one tools.
-- The frozen future order is `wp-auto/seo-get`, then `wp-auto/seo-update`.
+- The frozen order is `wp-auto/seo-get`, then `wp-auto/seo-update`; Phase 1.6.1
+  implements only Get and produces the exact twenty-two-tool runtime.
   The public shape is provider-neutral and limited to explicit title,
   description, canonical URL, focus keywords, and index/follow directives.
 - Get is limited to authorized built-in Posts/Pages. Update is limited to
@@ -143,6 +148,9 @@ Phase 1 is not complete until at least Claude Code and one additional standard M
 - The first adapter is an independent Rank Math integration through fixed
   WordPress Metadata API keys. Do not invoke provider REST/MCP/Content AI,
   external services, arbitrary metadata, or site-wide SEO settings.
+- Rank Math 1.0.278 is the only currently admitted SEO runtime. Get requires
+  its effective `rank_math_onpage_general` policy plus final Core `read_post`;
+  password-protected objects additionally require `edit_post`.
 - `state_token` is a bounded SHA-256 best-effort concurrency precondition, not
   CAS. Multi-key writes require re-read and invariant verification; uncertain
   partial state returns `wp_auto_seo_state_uncertain` and requires a fresh Get.

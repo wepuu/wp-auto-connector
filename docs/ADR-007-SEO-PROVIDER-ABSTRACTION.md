@@ -1,6 +1,6 @@
 # ADR-007: Provider-Neutral SEO Abstraction
 
-Status: **Accepted for Phase 1.6.0 contract freeze; implementation deferred**
+Status: **Accepted; Phase 1.6.1 read boundary implemented as a local candidate**
 
 ## Context
 
@@ -9,10 +9,13 @@ own storage, permissions, template expansion, and additional fields. WP-Auto
 must nevertheless expose a stable direct-MCP surface that can survive provider
 changes without becoming an arbitrary post-meta API.
 
-Rank Math is the first planned adapter. Its current plugin can initialize a
-compatible MCP Adapter and its native SEO abilities are evolving independently
-of WP-Auto. WP-Auto therefore must not delegate its public contract to a
-provider Ability, provider REST route, or provider-specific schema.
+Rank Math is the first planned adapter. The admitted Rank Math 1.0.278 package
+initializes its bundled MCP Adapter 0.5.0 before the WePuu registrar when its
+plugin loads first. That version is outside WePuu's verified 0.6.x range. Its
+native SEO abilities are also evolving independently of WP-Auto. WP-Auto
+therefore must resolve protocol-adapter coexistence before SEO implementation
+and must not delegate its public contract to a provider Ability, provider REST
+route, or provider-specific schema.
 
 The implementation review references the [official Rank Math bootstrap](https://github.com/rankmath/seo-by-rank-math/blob/master/rank-math.php)
 and the still-open [native write Ability proposal](https://github.com/rankmath/seo-by-rank-math/pull/345).
@@ -20,9 +23,10 @@ and the still-open [native write Ability proposal](https://github.com/rankmath/s
 ## Decision
 
 1. Define a provider-neutral `SeoProviderInterface` behind a small registry.
-   The interface covers availability, effective read/write authorization,
-   bounded state read, and allowlisted patch/write operations only. It is an
-   internal PHP seam, not a WordPress or MCP public API.
+   Phase 1.6.1 exposes only availability, effective read authorization, and
+   bounded state reads. Phase 1.6.2 must add an equally narrow write seam only
+   when the update checkpoint is authorized. These are internal PHP seams,
+   not WordPress or MCP public APIs.
 2. Expose only `wp-auto/seo-get` and `wp-auto/seo-update`, in that order. The
    public shape contains explicit title, description, canonical URL, focus
    keywords, and index/follow directives; it never contains provider names or
@@ -76,8 +80,10 @@ be added later without changing the two public tool schemas.
 
 ## Required follow-up gates
 
-Phase 1.6.1 requires a user-supplied official Rank Math package with verified
-hash/version, a fake-provider unit matrix, and real WordPress compatibility
-tests. Phase 1.6.2 additionally requires audit/uninstall coverage. Phase 1.6.3
+Phase 1.6.0.1 required the admitted Rank Math, Yoast, and AIOSEO packages to
+pass the MCP Adapter coexistence and exact-allowlist matrix in ADR-008 without
+adding an SEO tool. Phase 1.6.1 supplies the provider-resolution/unit matrix and
+real WordPress compatibility tests against the pinned Rank Math package.
+Phase 1.6.2 additionally requires audit/uninstall coverage. Phase 1.6.3
 requires WordPress 6.9/7.1, authenticated Streamable HTTP, Plugin Check,
 state-integrity, no-outbound-request, and exact-diff security validation.

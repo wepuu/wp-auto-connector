@@ -1,11 +1,11 @@
 # Phase 1.6 SEO Abstraction Contracts
 
-Status: **Phase 1.6.0 contract and safety architecture frozen; runtime not yet implemented**
+Status: **Phase 1.6.0 contract frozen; Phase 1.6.1 SEO Get implementation candidate complete**
 
 This document is the authoritative public contract for the Phase 1.6 SEO
-surface. Phase 1.6.0 is documentation-only and keeps the sealed twenty-one-
-tool runtime. The later implementation checkpoints append `seo-get` and
-`seo-update` in that order and must not change the contracts after a
+surface. Phase 1.6.0 was documentation-only and kept the sealed twenty-one-
+tool runtime. Phase 1.6.1 appends `seo-get`, producing exactly twenty-two
+tools; the later implementation checkpoint may append `seo-update` and must not change the contracts after a
 checkpoint is exposed.
 
 ## Fixed scope and delivery order

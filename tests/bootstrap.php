@@ -949,6 +949,15 @@ namespace {
 		return $single ? $value : array( $value );
 	}
 
+	function metadata_exists( string $meta_type, int $object_id, string $meta_key ): bool {
+		if ( 'post' !== $meta_type ) {
+			return false;
+		}
+
+		return array_key_exists( $meta_key, $GLOBALS['wp_auto_test_post_meta'][ $object_id ] ?? array() )
+			|| array_key_exists( $meta_key, $GLOBALS['wp_auto_test_post_meta_values'][ $object_id ] ?? array() );
+	}
+
 	function get_term_meta( int $term_id, string $meta_key, bool $single = false ) {
 		if ( isset( $GLOBALS['wp_auto_test_term_meta_values'][ $term_id ][ $meta_key ] ) ) {
 			$values = $GLOBALS['wp_auto_test_term_meta_values'][ $term_id ][ $meta_key ];
@@ -1852,6 +1861,65 @@ namespace WPAuto\Connector\Abilities\Media {
 	}
 }
 
+namespace WPAuto\Connector\Abilities\Seo {
+	function add_action( string $hook, callable $callback ): void {
+		$GLOBALS['wp_auto_test_hooks'][ $hook ] = $callback;
+		$GLOBALS['wp_auto_test_hook_history'][ $hook ][] = $callback;
+	}
+
+	function wp_register_ability( string $name, array $args ): void {
+		$GLOBALS['wp_auto_test_registered_ability'] = array(
+			'name' => $name,
+			'args' => $args,
+		);
+	}
+
+	function wp_register_ability_category( string $slug, array $args ): void {
+		$GLOBALS['wp_auto_test_registered_category'] = array(
+			'slug' => $slug,
+			'args' => $args,
+		);
+	}
+
+	function __( string $text ): string {
+		return $text;
+	}
+}
+
+namespace WPAuto\Connector\Seo {
+	function current_user_can( string $capability, int $object_id = 0 ): bool {
+		return \wp_auto_test_user_can( $capability, $object_id );
+	}
+
+	function get_post( int $post_id ) {
+		return \get_post( $post_id );
+	}
+
+	function get_post_meta( int $post_id, string $meta_key = '', bool $single = false ) {
+		return \get_post_meta( $post_id, $meta_key, $single );
+	}
+
+	function metadata_exists( string $meta_type, int $object_id, string $meta_key ): bool {
+		return \metadata_exists( $meta_type, $object_id, $meta_key );
+	}
+
+	function get_current_blog_id(): int {
+		return \get_current_blog_id();
+	}
+
+	function wp_json_encode( $value, int $flags = 0 ) {
+		return \wp_json_encode( $value, $flags );
+	}
+
+	function wp_parse_url( string $url ) {
+		return \wp_parse_url( $url );
+	}
+
+	function __( string $text ): string {
+		return $text;
+	}
+}
+
 namespace WPAuto\Connector\Taxonomy {
 	function is_wp_error( $value ): bool {
 		return \is_wp_error( $value );
@@ -2032,6 +2100,10 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyMutationService.php';
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyAssignContract.php';
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyAssignmentService.php';
+	require_once dirname( __DIR__ ) . '/src/Seo/SeoProviderInterface.php';
+	require_once dirname( __DIR__ ) . '/src/Seo/RankMathSeoProvider.php';
+	require_once dirname( __DIR__ ) . '/src/Seo/SeoProviderRegistry.php';
+	require_once dirname( __DIR__ ) . '/src/Seo/SeoReadService.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteHealthAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteInfoAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Content/ContentAbilityCategory.php';
@@ -2056,6 +2128,8 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/CategoryCreateAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TagCreateAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TaxonomyAssignAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Seo/SeoAbilityCategory.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Seo/SeoGetAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpAdapterLoader.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpServerRegistrar.php';
 	require_once dirname( __DIR__ ) . '/src/Plugin.php';
