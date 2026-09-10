@@ -162,12 +162,16 @@ site isolation, exact-name filtering, and context restoration path.
 ## Exact-diff security review
 
 Codex Security diff scan
-`9a12e2ea-4f4a-4b22-9323-529682dc177f` reviewed the exact runtime range
-`487cdaf8051d4465480b16bec473c6fc8de77338..b5b77e675ebc893857f89b29351e03c0fde4fc30`.
+`77a4aa41-909d-4955-8011-8b72103c4583` reviewed the final candidate range
+`487cdaf8051d4465480b16bec473c6fc8de77338..5d2465c067378b0711296f51365a6217dad34d8b`.
 All 15 changed executable source files were reviewed across MCP exposure,
 WordPress authorization, strict schemas, taxonomy mutation, persistent
 idempotency, audit minimization, and explicit uninstall cleanup. The scan
 completed with full recorded coverage and **zero reportable findings**.
+
+The earlier runtime-only scan `9a12e2ea-4f4a-4b22-9323-529682dc177f` remains
+the independent zero-finding review of the b5b77e6 runtime candidate; the final
+scan above additionally covers the sealed documentation range.
 
 The review retained the documented assignment-concurrency limitation as
 residual product risk rather than treating it as an atomic compare-and-swap
