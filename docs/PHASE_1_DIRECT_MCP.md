@@ -8,6 +8,11 @@ After installing WePuu Auto Connector, a site administrator can connect a compat
 
 Preferred remote transport: Streamable HTTP through the official WordPress MCP Adapter.
 
+Phase 1.6.0.1 privately namespaces the locked official Adapter implementation
+under ADR-008. This preserves the official protocol behavior while making the
+`wp-auto-direct` server independent of incompatible provider-bundled public
+Adapter versions and WordPress plugin load order.
+
 Target WP-Auto endpoint:
 
 ```text

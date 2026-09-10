@@ -151,6 +151,9 @@ namespace {
 	$GLOBALS['wp_auto_test_termmeta_rows']       = array( 1 => array() );
 	$GLOBALS['wp_auto_test_term_meta']           = array();
 	$GLOBALS['wp_auto_test_term_meta_values']    = array();
+	$GLOBALS['wp_auto_test_user_meta']           = array();
+	$GLOBALS['wp_auto_test_delete_user_meta_exception'] = null;
+	$GLOBALS['wp_auto_test_get_users_exception'] = null;
 	$GLOBALS['wp_auto_test_fail_update_term_meta'] = false;
 	$GLOBALS['wp_auto_test_physical_blog_ids']   = array( 1 );
 	$GLOBALS['wp_auto_test_get_results_calls']   = 0;
@@ -1078,6 +1081,47 @@ namespace {
 		return $deleted;
 	}
 
+	function delete_metadata( string $meta_type, int $object_id, string $meta_key, $meta_value = '', bool $delete_all = false ): bool {
+		unset( $object_id, $meta_value );
+		if ( 'user' !== $meta_type || ! $delete_all ) {
+			return false;
+		}
+		if ( $GLOBALS['wp_auto_test_delete_user_meta_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_delete_user_meta_exception'];
+			$GLOBALS['wp_auto_test_delete_user_meta_exception'] = null;
+			throw $exception;
+		}
+		$deleted = false;
+		foreach ( $GLOBALS['wp_auto_test_user_meta'] as &$metadata ) {
+			if ( array_key_exists( $meta_key, $metadata ) ) {
+				unset( $metadata[ $meta_key ] );
+				$deleted = true;
+			}
+		}
+		unset( $metadata );
+		return $deleted;
+	}
+
+	function get_users( array $args = array() ): array {
+		if ( $GLOBALS['wp_auto_test_get_users_exception'] instanceof \Throwable ) {
+			$exception = $GLOBALS['wp_auto_test_get_users_exception'];
+			$GLOBALS['wp_auto_test_get_users_exception'] = null;
+			throw $exception;
+		}
+		$meta_key = (string) ( $args['meta_key'] ?? '' );
+		$limit    = max( 0, (int) ( $args['number'] ?? 0 ) );
+		$users    = array();
+		foreach ( $GLOBALS['wp_auto_test_user_meta'] as $user_id => $metadata ) {
+			if ( array_key_exists( $meta_key, $metadata ) ) {
+				$users[] = (int) $user_id;
+			}
+			if ( $limit > 0 && count( $users ) >= $limit ) {
+				break;
+			}
+		}
+		return $users;
+	}
+
 	function add_option( string $option, $value = '', string $deprecated = '', $autoload = null ): bool {
 		unset( $deprecated );
 		if ( $GLOBALS['wp_auto_test_add_option_exception'] instanceof \Throwable ) {
@@ -1648,9 +1692,22 @@ namespace {
 	}
 }
 
-namespace WP\MCP\Core {
+namespace WPAuto\Connector\PrivateMcp\WP\MCP\Core {
 	final class McpAdapter {
 		public const VERSION = '0.6.1';
+		public static int $instance_calls = 0;
+
+		public static function instance(): self {
+			++self::$instance_calls;
+			return new self();
+		}
+	}
+}
+
+namespace WP\MCP\Core {
+	/** Simulates an incompatible provider-bundled global Adapter. */
+	final class McpAdapter {
+		public const VERSION = '0.5.0';
 		public static int $instance_calls = 0;
 
 		public static function instance(): self {

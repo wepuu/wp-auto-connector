@@ -21,6 +21,7 @@ final class PrivateStateCleanup {
 	private const AUDIT_LOCK_PREFIX           = 'wp_auto_connector_mutation_audit_lock_';
 	private const AUDIT_META_KEYS             = array( '_wp_auto_connector_mutation_audit', '_wp_auto_connector_media_mutation_audit', '_wp_auto_connector_taxonomy_mutation_audit' );
 	private const TAXONOMY_AUDIT_META_KEY     = '_wp_auto_connector_taxonomy_mutation_audit';
+	private const MCP_SESSION_META_KEY        = 'wp_auto_connector_mcp_adapter_sessions';
 
 	private const IDEMPOTENCY_PATTERN          = '/\Awp_auto_connector_idempotency_[0-9a-f]{64}\z/';
 	private const MEDIA_IDEMPOTENCY_PATTERN    = '/\Awp_auto_connector_media_idempotency_[0-9a-f]{64}\z/';
@@ -74,8 +75,45 @@ final class PrivateStateCleanup {
 		$options_absent    = $this->walk_options( false );
 		$audit_absent      = $this->cleanup_audit_metadata();
 		$term_audit_absent = $this->cleanup_term_audit_metadata();
+		$sessions_absent   = $this->cleanup_mcp_session_metadata();
 
-		return $deletion_complete && $options_absent && $audit_absent && $term_audit_absent;
+		return $deletion_complete && $options_absent && $audit_absent && $term_audit_absent && $sessions_absent;
+	}
+
+	/**
+	 * Remove and verify the private Adapter session key for the current site.
+	 */
+	private function cleanup_mcp_session_metadata(): bool {
+		$meta_key = self::MCP_SESSION_META_KEY;
+		if ( is_multisite() ) {
+			$blog_id = $this->positive_database_id( get_current_blog_id() );
+			if ( null === $blog_id ) {
+				return false;
+			}
+			$meta_key .= '_' . $blog_id;
+		}
+
+		$complete = true;
+		try {
+			delete_metadata( 'user', 0, $meta_key, '', true );
+		} catch ( \Throwable ) {
+			$complete = false;
+		}
+
+		try {
+			$users = get_users(
+				array(
+					'fields'   => 'ids',
+					'number'   => 1,
+					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Fixed exact private key with a one-user absence probe during explicit uninstall.
+					'meta_key' => $meta_key,
+				)
+			);
+		} catch ( \Throwable ) {
+			return false;
+		}
+
+		return $complete && is_array( $users ) && array() === $users;
 	}
 
 	/**

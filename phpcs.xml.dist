@@ -8,6 +8,8 @@
 	<file>uninstall.php</file>
 
 	<exclude-pattern>vendor/*</exclude-pattern>
+	<exclude-pattern>build/*</exclude-pattern>
+	<exclude-pattern>tools/*</exclude-pattern>
 	<exclude-pattern>tests/bootstrap.php</exclude-pattern>
 
 	<arg name="basepath" value="."/>
@@ -21,6 +23,13 @@
 	</rule>
 	<rule ref="WordPress-Extra"/>
 	<rule ref="WordPress-Docs"/>
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<property name="custom_capabilities" type="array">
+				<element value="rank_math_onpage_general"/>
+			</property>
+		</properties>
+	</rule>
 
 	<config name="minimum_supported_wp_version" value="6.9"/>
 </ruleset>

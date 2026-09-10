@@ -16,9 +16,16 @@
     "wp-coding-standards/wpcs": "^3.1"
   },
   "scripts": {
+    "build:mcp-runtime": "@php tools/build-mcp-runtime.php",
     "lint": "phpcs -p .",
     "lint:fix": "phpcbf -p .",
-    "test": "phpunit"
+    "test": "phpunit",
+    "post-install-cmd": [
+      "@build:mcp-runtime"
+    ],
+    "post-update-cmd": [
+      "@build:mcp-runtime"
+    ]
   },
   "config": {
     "allow-plugins": {

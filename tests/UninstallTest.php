@@ -22,27 +22,30 @@ final class UninstallTest extends TestCase {
 	 */
 	protected function setUp(): void {
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Isolated wpdb test double.
-		$GLOBALS['wpdb']                                  = new \wpdb();
-		$GLOBALS['wp_auto_test_options']                  = array();
-		$GLOBALS['wp_auto_test_blog_options']             = array();
-		$GLOBALS['wp_auto_test_option_rows']              = array( 1 => array() );
-		$GLOBALS['wp_auto_test_post_meta']                = array();
-		$GLOBALS['wp_auto_test_post_meta_values']         = array();
-		$GLOBALS['wp_auto_test_postmeta_rows']            = array( 1 => array() );
-		$GLOBALS['wp_auto_test_physical_blog_ids']        = array( 1 );
-		$GLOBALS['wp_auto_test_current_blog_id']          = 1;
-		$GLOBALS['wp_auto_test_site_info']['multisite']   = false;
-		$GLOBALS['wp_auto_test_db_prepare_exception']     = null;
-		$GLOBALS['wp_auto_test_db_last_error']            = '';
-		$GLOBALS['wp_auto_test_db_suppress_state']        = false;
-		$GLOBALS['wp_auto_test_db_suppress_history']      = array();
-		$GLOBALS['wp_auto_test_db_prepared_queries']      = array();
-		$GLOBALS['wp_auto_test_get_results_calls']        = 0;
-		$GLOBALS['wp_auto_test_get_results_history']      = array();
-		$GLOBALS['wp_auto_test_get_results_exception']    = null;
-		$GLOBALS['wp_auto_test_get_results_override_set'] = false;
-		$GLOBALS['wp_auto_test_get_results_override']     = null;
-		$GLOBALS['wp_auto_test_fail_delete_option']       = false;
+		$GLOBALS['wpdb']                                    = new \wpdb();
+		$GLOBALS['wp_auto_test_options']                    = array();
+		$GLOBALS['wp_auto_test_blog_options']               = array();
+		$GLOBALS['wp_auto_test_option_rows']                = array( 1 => array() );
+		$GLOBALS['wp_auto_test_post_meta']                  = array();
+		$GLOBALS['wp_auto_test_post_meta_values']           = array();
+		$GLOBALS['wp_auto_test_postmeta_rows']              = array( 1 => array() );
+		$GLOBALS['wp_auto_test_user_meta']                  = array();
+		$GLOBALS['wp_auto_test_delete_user_meta_exception'] = null;
+		$GLOBALS['wp_auto_test_get_users_exception']        = null;
+		$GLOBALS['wp_auto_test_physical_blog_ids']          = array( 1 );
+		$GLOBALS['wp_auto_test_current_blog_id']            = 1;
+		$GLOBALS['wp_auto_test_site_info']['multisite']     = false;
+		$GLOBALS['wp_auto_test_db_prepare_exception']       = null;
+		$GLOBALS['wp_auto_test_db_last_error']              = '';
+		$GLOBALS['wp_auto_test_db_suppress_state']          = false;
+		$GLOBALS['wp_auto_test_db_suppress_history']        = array();
+		$GLOBALS['wp_auto_test_db_prepared_queries']        = array();
+		$GLOBALS['wp_auto_test_get_results_calls']          = 0;
+		$GLOBALS['wp_auto_test_get_results_history']        = array();
+		$GLOBALS['wp_auto_test_get_results_exception']      = null;
+		$GLOBALS['wp_auto_test_get_results_override_set']   = false;
+		$GLOBALS['wp_auto_test_get_results_override']       = null;
+		$GLOBALS['wp_auto_test_fail_delete_option']         = false;
 		$GLOBALS['wp_auto_test_delete_option_return_after_delete'] = null;
 		$GLOBALS['wp_auto_test_delete_option_exception']           = null;
 		$GLOBALS['wp_auto_test_delete_option_calls']               = 0;
@@ -121,6 +124,12 @@ final class UninstallTest extends TestCase {
 				'meta_key' => '_unrelated_term_meta',
 			),
 		);
+		$GLOBALS['wp_auto_test_user_meta']        = array(
+			10 => array(
+				'wp_auto_connector_mcp_adapter_sessions' => array( 'owned-session' ),
+				'mcp_adapter_sessions'                   => array( 'provider-session' ),
+			),
+		);
 
 		self::assertTrue( ( new PrivateStateCleanup() )->run() );
 		$options =& \wp_auto_test_options_for_blog( 1 );
@@ -149,6 +158,30 @@ final class UninstallTest extends TestCase {
 			),
 			$GLOBALS['wp_auto_test_termmeta_rows'][1]
 		);
+		self::assertArrayNotHasKey( 'wp_auto_connector_mcp_adapter_sessions', $GLOBALS['wp_auto_test_user_meta'][10] );
+		self::assertArrayHasKey( 'mcp_adapter_sessions', $GLOBALS['wp_auto_test_user_meta'][10] );
+	}
+
+	/**
+	 * Session cleanup fails closed when Core deletion cannot complete.
+	 */
+	public function test_session_cleanup_reports_delete_failure(): void {
+		$GLOBALS['wp_auto_test_user_meta'][10]              = array(
+			'wp_auto_connector_mcp_adapter_sessions' => array( 'owned-session' ),
+		);
+		$GLOBALS['wp_auto_test_delete_user_meta_exception'] = new \RuntimeException( 'sensitive-internal-detail' );
+
+		self::assertFalse( ( new PrivateStateCleanup() )->run() );
+		self::assertArrayHasKey( 'wp_auto_connector_mcp_adapter_sessions', $GLOBALS['wp_auto_test_user_meta'][10] );
+	}
+
+	/**
+	 * Session cleanup fails closed when bounded absence verification fails.
+	 */
+	public function test_session_cleanup_reports_verification_failure(): void {
+		$GLOBALS['wp_auto_test_get_users_exception'] = new \RuntimeException( 'sensitive-internal-detail' );
+
+		self::assertFalse( ( new PrivateStateCleanup() )->run() );
 	}
 
 	/**
@@ -377,6 +410,12 @@ final class UninstallTest extends TestCase {
 				),
 			);
 		}
+		$GLOBALS['wp_auto_test_user_meta'][10] = array(
+			'wp_auto_connector_mcp_adapter_sessions_1' => array( 'blog-1-session' ),
+			'wp_auto_connector_mcp_adapter_sessions_2' => array( 'blog-2-session' ),
+			'wp_auto_connector_mcp_adapter_sessions_3' => array( 'blog-3-session' ),
+			'mcp_adapter_sessions_1'                   => array( 'provider-session' ),
+		);
 
 		self::assertTrue( ( new PrivateStateCleanup() )->run() );
 		self::assertSame( array( 1, 2, 3 ), $GLOBALS['wp_auto_test_switch_history'] );
@@ -389,6 +428,10 @@ final class UninstallTest extends TestCase {
 			self::assertSame( array(), $GLOBALS['wp_auto_test_postmeta_rows'][ $blog_id ] );
 			self::assertSame( array(), $GLOBALS['wp_auto_test_termmeta_rows'][ $blog_id ] );
 		}
+		self::assertSame(
+			array( 'mcp_adapter_sessions_1' => array( 'provider-session' ) ),
+			$GLOBALS['wp_auto_test_user_meta'][10]
+		);
 	}
 
 	/**

@@ -7,6 +7,8 @@
 
 namespace WPAuto\Connector\Diagnostics;
 
+use WPAuto\Connector\Mcp\McpAdapterLoader;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -41,10 +43,10 @@ final class EnvironmentDiagnostics {
 	}
 
 	/**
-	 * Check whether the official MCP Adapter class is available.
+	 * Check whether the private official MCP Adapter runtime is available.
 	 */
 	public static function mcp_adapter_available(): bool {
-		return class_exists( '\\WP\\MCP\\Core\\McpAdapter' );
+		return McpAdapterLoader::load();
 	}
 
 	/**
@@ -55,7 +57,7 @@ final class EnvironmentDiagnostics {
 			return '';
 		}
 
-		return (string) \WP\MCP\Core\McpAdapter::VERSION;
+		return McpAdapterLoader::version();
 	}
 
 	/**

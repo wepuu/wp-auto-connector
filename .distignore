@@ -7,6 +7,7 @@ README.md
 docs
 phpcs.xml.dist
 tests
+tools
 node_modules
 build
 dist

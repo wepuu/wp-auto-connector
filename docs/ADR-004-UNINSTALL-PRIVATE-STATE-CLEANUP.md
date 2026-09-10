@@ -28,6 +28,18 @@ verification reads against trusted `$wpdb->postmeta` and `$wpdb->termmeta`.
 This amendment changes no uninstall-only family count and leaves the Phase
 1.3 runtime semantics unchanged.
 
+### Phase 1.6.0.1 amendment (implementation candidate)
+
+ADR-008 isolates the official MCP Adapter runtime, including its ordinary
+per-user session metadata. This extends the closed uninstall inventory with
+the exact single-site usermeta key
+`wp_auto_connector_mcp_adapter_sessions` and, on Multisite, the exact
+site-scoped key `wp_auto_connector_mcp_adapter_sessions_<blog_id>`. Cleanup
+uses Core `delete_metadata( 'user', 0, $key, '', true )` and a bounded
+`get_users()` query (`fields=ids`, `number=1`, exact `meta_key`) to verify
+absence. It never reads session values, never deletes the public/provider key
+`mcp_adapter_sessions*`, and adds no direct SQL family or runtime SQL authority.
+
 The historical landing-plan sections below are retained for audit traceability;
 the implementation and validation status is the sealed status stated above.
 
@@ -102,6 +114,10 @@ The closed inventory is:
    _wp_auto_connector_media_mutation_audit
 6. Term metadata with the exact key:
    _wp_auto_connector_taxonomy_mutation_audit
+7. User metadata with the exact single-site key
+   `wp_auto_connector_mcp_adapter_sessions`, or the exact Multisite key
+   `wp_auto_connector_mcp_adapter_sessions_<current_blog_id>` while processing
+   each physical blog.
 
 Idempotency records can contain version, actor user ID, Ability, fingerprint, state, target ID, and GMT timestamps. Audit attribution can contain version, operation/Ability, actor user ID, target object ID, timestamp, Create fingerprint, and Update expected/result modified_gmt. Raw idempotency keys, content, request bodies, credentials, and authorization headers are not stored.
 

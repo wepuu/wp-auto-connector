@@ -52,6 +52,23 @@ Mitigations:
 - document every adapter version bump;
 - keep WP-Auto public ability contracts independent of adapter internals.
 
+## Phase 1.6.0.1 coexistence amendment
+
+Rank Math SEO 1.0.278 bundles and initializes MCP Adapter 0.5.0 in the public
+`WP\\MCP` namespace, so the earlier strategy of accepting or conditionally
+loading one global Adapter is load-order dependent. ADR-008 therefore keeps
+the locked official Adapter 0.6.1 implementation but reproducibly transforms
+its PHP sources and PHP MCP Schema 0.1.3 into the private
+`WPAuto\\Connector\\PrivateMcp` namespace during Composer install/update.
+Adapter hooks, option/filter prefixes, the CLI command, and session metadata
+keys are private as well. WePuu loads only that generated private runtime and
+does not initialize, replace, or disable a provider's public Adapter.
+
+The generated runtime is derived from `composer.lock`, retains upstream
+license files, and is verified byte-for-byte against the deterministic build
+transformation. The public Ability names, MCP endpoint, ordered allowlist, and
+official Adapter protocol behavior remain unchanged.
+
 ## Rejected alternative
 
 Implement a hand-written JSON-RPC/MCP server directly in WePuu Auto Connector.

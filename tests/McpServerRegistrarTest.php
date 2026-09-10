@@ -8,9 +8,6 @@
 namespace WPAuto\Connector\Tests;
 
 use PHPUnit\Framework\TestCase;
-use WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
-use WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
-use WP\MCP\Transport\HttpTransport;
 use WP_Error;
 use WPAuto\Connector\Abilities\Content\PageGetAbility;
 use WPAuto\Connector\Abilities\Content\PageCreateDraftAbility;
@@ -34,6 +31,9 @@ use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAssignAbility;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
+use WPAuto\Connector\PrivateMcp\WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
+use WPAuto\Connector\PrivateMcp\WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
+use WPAuto\Connector\PrivateMcp\WP\MCP\Transport\HttpTransport;
 
 /**
  * Covers custom-server registration and transport authorization.
@@ -61,8 +61,9 @@ final class McpServerRegistrarTest extends TestCase {
 		$registrar = new McpServerRegistrar();
 		$registrar->register();
 
-		self::assertArrayHasKey( 'mcp_adapter_init', $GLOBALS['wp_auto_test_hooks'] );
-		self::assertSame( array( $registrar, 'register_server' ), $GLOBALS['wp_auto_test_hooks']['mcp_adapter_init'] );
+		self::assertArrayHasKey( McpServerRegistrar::ADAPTER_HOOK, $GLOBALS['wp_auto_test_hooks'] );
+		self::assertArrayNotHasKey( 'mcp_adapter_init', $GLOBALS['wp_auto_test_hooks'] );
+		self::assertSame( array( $registrar, 'register_server' ), $GLOBALS['wp_auto_test_hooks'][ McpServerRegistrar::ADAPTER_HOOK ] );
 	}
 
 	/**

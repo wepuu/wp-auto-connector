@@ -28,9 +28,9 @@ use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAssignAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagsListAbility;
-use WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
-use WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
-use WP\MCP\Transport\HttpTransport;
+use WPAuto\Connector\PrivateMcp\WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
+use WPAuto\Connector\PrivateMcp\WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
+use WPAuto\Connector\PrivateMcp\WP\MCP\Transport\HttpTransport;
 use WP_Error;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -44,12 +44,13 @@ final class McpServerRegistrar {
 	public const SERVER_ID       = 'wp-auto-direct';
 	public const ROUTE_NAMESPACE = 'wp-auto';
 	public const ROUTE           = 'mcp';
+	public const ADAPTER_HOOK    = 'wp_auto_connector_mcp_adapter_init';
 
 	/**
 	 * Register the custom-server hook.
 	 */
 	public function register(): void {
-		add_action( 'mcp_adapter_init', array( $this, 'register_server' ) );
+		add_action( self::ADAPTER_HOOK, array( $this, 'register_server' ) );
 	}
 
 	/**
