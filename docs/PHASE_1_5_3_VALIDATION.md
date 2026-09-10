@@ -1,6 +1,6 @@
 # Phase 1.5.3 Draft Post Taxonomy Assignment Validation
 
-Status: **IMPLEMENTED; VALIDATION CANDIDATE ON FEATURE BRANCH**
+Status: **IMPLEMENTED; VALIDATED; PHASE 1.5 FORMALLY SEALED**
 
 Validation date: 2026-09-09
 
@@ -58,14 +58,11 @@ Using an administrator identity and real Core APIs:
 
 The temporary containers and network were removed after validation.
 
-## Plugin Check and final seal
+## Plugin Check and final seal (completed in Phase 1.5.4)
 
-Plugin Check 2.1.0 was not executed. The repository policy prohibits
-downloading or executing a remote plugin, and no local Plugin Check artifact
-was available. This remains a release blocker; no result is inferred from
-unit tests, lint, or the real-WordPress run. Phase 1.5.4 must repeat the full
-authenticated Streamable HTTP, uninstall, exact-allowlist, Plugin Check, and
-security-diff matrix before Phase 1.5 is formally sealed.
+Plugin Check 2.1.0 and the final release matrix are recorded in
+`docs/PHASE_1_5_4_VALIDATION.md`; the verified local artifact passed both
+static and runtime-enabled checks with zero errors and zero warnings.
 
 ## Verdict
 
@@ -75,9 +72,9 @@ Automated tests/lint = PASS
 Real WordPress assignment (Category + Tag) = PASS
 No-op and draft-state proof = PASS
 Assignment audit + uninstall cleanup = PASS
-Plugin Check 2.1.0 = BLOCKED BY REMOTE-PLUGIN DOWNLOAD POLICY
+Plugin Check 2.1.0 = PASS (see Phase 1.5.4 seal)
 Direct MCP tools = 21
-Phase 1.5.3 = VALIDATION CANDIDATE
+Phase 1.5.3 = FORMALLY SEALED
 Phase 1.5.4 evidence = `docs/PHASE_1_5_4_VALIDATION.md`
-Next checkpoint = Phase 1.5.4 integration and security seal
+Next checkpoint = Phase 1.6 (not started)
 ```

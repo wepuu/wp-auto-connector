@@ -1,17 +1,21 @@
 # Phase 1.5.4 Taxonomy Integration and Security Validation
 
-Status: **VALIDATION CANDIDATE; SEAL BLOCKED**
+Status: **COMPLETE; FORMALLY SEALED**
 
-Validation date: 2026-09-09
+Validation date: 2026-09-10
 
-Validation head: `b5b77e675ebc893857f89b29351e03c0fde4fc30`
+Validation head: `0180e051da73d1474ed7d70898e9c548ad5264a0` (runtime candidate; documentation seal follows)
 
 The Phase 1.5.4 run validates the Category Create, Tag Create, and draft Post
-Taxonomy Assignment candidates without changing the frozen twenty-one-tool
-runtime. It records the completed automated and local authenticated MCP smoke
-checks. The formal Phase 1.5 seal remains blocked until a supported Plugin
-Check 2.1.0 artifact and the required higher-version WordPress matrix are
-available.
+Taxonomy Assignment implementation without changing the frozen twenty-one-tool
+runtime. It records the completed automated, WordPress 7.1, authenticated
+Streamable HTTP, uninstall, Plugin Check, concurrency, Multisite, and security
+gates. Phase 1.5 is formally sealed; Phase 1.6 remains unstarted.
+
+Official local release-gate artifacts (SHA-256):
+
+- WordPress 7.1 Core ZIP: `D1AE02B5AE18428031FFC3943659FA87AB361D827F4AA804ADF9276E4DC75DF6`;
+- Plugin Check 2.1.0 ZIP: `6FF4BD2145F3BEFCF907DF158CC466B1649DAFED5686DE8369907403C3013FC4`.
 
 ## Git and automated baseline
 
@@ -23,9 +27,9 @@ the following unpublished taxonomy implementation and validation commits:
 - `421094873a3c93f0435a01b6ad517bc7ba6fe37b` — initial validation record;
 - `b5b77e675ebc893857f89b29351e03c0fde4fc30` — cross-request idempotency evidence.
 
-The local `main` currently points to `37a701b9f446685dd4677745ad4dede79bcf760d`
-and `origin/main` points to `487cdaf8051d4465480b16bec473c6fc8de77338`.
-No Git history operation was performed by this validation record.
+The candidate branch was validated at `0180e051da73d1474ed7d70898e9c548ad5264a0`
+before the documentation seal commit. The final merge is required to be
+fast-forward only; no squash, merge commit, or force push is permitted.
 
 Quality gates passed:
 
@@ -40,19 +44,23 @@ The diff review found no new runtime shell execution, arbitrary evaluation,
 or undocumented outbound request. Direct database access remains limited to
 the already approved AtomicOwnership and uninstall verification paths.
 
-## Real WordPress and authenticated Streamable HTTP
+## Real WordPress 7.1 and authenticated Streamable HTTP
 
 The disposable Docker stack used cached images only:
 
-- WordPress 6.9;
+- WordPress 7.1 Core from the verified local artifact;
 - PHP 8.1.34;
 - MariaDB 11.8.9;
 - bundled MCP Adapter 0.6.1;
 - `WP_ENVIRONMENT_TYPE=local`;
-- endpoint `http://localhost:8891/index.php?rest_route=/wp-auto/mcp`.
+- endpoint `http://127.0.0.1:8895/index.php?rest_route=/wp-auto/mcp`.
 
-The plugin activated successfully and the authenticated Streamable HTTP
-session completed:
+The release-like package activated successfully and the authenticated
+Streamable HTTP session completed:
+
+The 7.1 run also returned `BOOT_OK`; the Abilities API registered 21 WP-Auto
+abilities alongside the three Core and three Adapter abilities. A Subscriber
+Application Password mutation attempt was rejected by the MCP permission layer.
 
 - `initialize` — HTTP 200;
 - `notifications/initialized` — HTTP 202;
@@ -119,6 +127,17 @@ returned no rows for:
 The temporary database was then destroyed with the rest of the isolated
 environment.
 
+## Plugin Check 2.1.0
+
+The verified local Plugin Check 2.1.0 artifact was loaded through its official
+plugin entrypoint and `cli.php` in the WordPress 7.1 test site. Both required
+release-like package checks completed with exit code 0, no errors, and no
+warnings:
+
+- default static check: `Success: Checks complete. No errors found.`;
+- runtime-enabled check using `--require=.../plugin-check/cli.php`:
+  `Success: Checks complete. No errors found.`
+
 ## Real Multisite private-state cleanup
 
 A fresh isolated WordPress 6.9 installation was converted to a two-site
@@ -155,14 +174,15 @@ residual product risk rather than treating it as an atomic compare-and-swap
 guarantee. The dedicated real-runtime assignment-race validation above
 confirmed that behavior without identifying a security bypass.
 
-## Remaining release blockers
+## Release-gate disposition
 
-1. WordPress 7.1 was not available in the local Docker cache. The 6.9 run
-   cannot be presented as 7.1 compatibility evidence.
-2. Plugin Check 2.1.0 is not installed locally. Repository policy prohibits
-   downloading and executing a remote PHP plugin during this run. A supported
-   local official artifact is required; no Plugin Check result is inferred
-   from PHPUnit, lint, or the MCP smoke test.
+The historical blockers below are resolved by the verified local artifacts and
+the completed WordPress 7.1 and Plugin Check 2.1.0 gates.
+
+1. **Resolved:** WordPress 7.1 Core was verified and exercised in the isolated
+   release-like package.
+2. **Resolved:** Plugin Check 2.1.0 static and runtime-enabled checks both
+   exited 0 with no errors or warnings.
 
 The real assignment race/state-integrity, Multisite private-state cleanup,
 and exact runtime diff security gates are complete. If runtime code changes,
@@ -180,8 +200,9 @@ Assignment race + protected state integrity = PASS (best-effort non-CAS semantic
 Uninstall private-state cleanup = PASS
 Real two-site Multisite private-state isolation/cleanup = PASS
 Exact-diff security review = PASS (15/15 surfaces, zero findings)
-WordPress 7.1 compatibility = BLOCKED (image unavailable)
-Plugin Check 2.1.0 = BLOCKED (approved local artifact unavailable)
-Full Phase 1.5.4 seal = PENDING
-Next action = obtain approved local WordPress 7.1 and Plugin Check 2.1.0 artifacts, then rerun the blocked release matrix on main
+WordPress 7.1 compatibility = PASS (verified local Core artifact)
+Plugin Check 2.1.0 static = PASS (zero errors, zero warnings)
+Plugin Check 2.1.0 runtime-enabled = PASS (zero errors, zero warnings)
+Full Phase 1.5.4 seal = COMPLETE; FORMALLY SEALED
+Phase 1.6 = NOT STARTED
 ```

@@ -76,15 +76,19 @@ Phase 1.5.0 froze the public contracts in
 three named checkpoints, Category Create, Tag Create, and draft-Post Taxonomy
 Assignment, and extend the Direct MCP runtime to exactly twenty-one tools.
 
+Phase 1.5.4 integration and security validation is complete; Phase 1.5 is
+formally sealed.
+
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
-| `wp-auto/category-create` | `wp-auto-category-create` | Term creation | fixed Category taxonomy object's actual `cap->manage_terms` | Implemented and validated — Phase 1.5.1 candidate |
-| `wp-auto/tag-create` | `wp-auto-tag-create` | Term creation | fixed Tag taxonomy object's actual `cap->manage_terms` | Implemented and validated — Phase 1.5.2 candidate |
-| `wp-auto/taxonomy-assign` | `wp-auto-taxonomy-assign` | Destructive relationship mutation | selected taxonomy `cap->assign_terms`; fixed Post edit baseline; target `edit_post` | Implemented; validation candidate — Phase 1.5.3 |
+| `wp-auto/category-create` | `wp-auto-category-create` | Term creation | fixed Category taxonomy object's actual `cap->manage_terms` | Implemented, validated, and sealed — Phase 1.5.1 |
+| `wp-auto/tag-create` | `wp-auto-tag-create` | Term creation | fixed Tag taxonomy object's actual `cap->manage_terms` | Implemented, validated, and sealed — Phase 1.5.2 |
+| `wp-auto/taxonomy-assign` | `wp-auto-taxonomy-assign` | Destructive relationship mutation | selected taxonomy `cap->assign_terms`; fixed Post edit baseline; target `edit_post` | Implemented, validated, and sealed — Phase 1.5.3 |
 
-The current working-tree implementation status is Category Create, Tag Create,
-and Taxonomy Assignment implemented as validation candidates (exactly 21
-tools). The Phase 1.5.4 integration/security seal remains open.
+Phase 1.5.1 through Phase 1.5.4 are formally sealed. Category Create, Tag
+Create, and Taxonomy Assignment are implemented and validated in the exact
+twenty-one-tool runtime. Assignment retains its documented best-effort
+non-CAS limitation; `wp_auto_taxonomy_state_uncertain` requires a fresh read.
 
 The fixed implementation order appends only these tools, producing exact
 allowlist counts of 19, 20, and 21. Assignment is limited to one built-in

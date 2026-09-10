@@ -1,6 +1,6 @@
 # ADR-004: Uninstall Private-State Cleanup
 
-- Status: **Accepted, implemented, and included in the Phase 1.3.3 seal; Phase 1.5.1–1.5.3 amendment candidate**
+- Status: **Accepted, implemented, validated, and included in the Phase 1.5.4 seal**
 - Date: 2026-09-04
 - Decision scope: explicit uninstall cleanup of private mutation state and the four uninstall-only read-only SQL families
 
@@ -14,7 +14,7 @@ a tool, Composer dependencies, CI, plugin version, or any public contract.
 
 ADR-004 = ACCEPTED / IMPLEMENTED / VALIDATED / SEALED
 
-### Phase 1.5.1–1.5.3 amendment (working-tree candidate)
+### Phase 1.5.1–1.5.3 amendment (implemented and sealed)
 
 The Category Create checkpoint extends this closed uninstall inventory with
 the exact taxonomy idempotency option family
@@ -27,6 +27,9 @@ the Core metadata deletion APIs plus the existing bounded prepared `meta_id`
 verification reads against trusted `$wpdb->postmeta` and `$wpdb->termmeta`.
 This amendment changes no uninstall-only family count and leaves the Phase
 1.3 runtime semantics unchanged.
+
+The historical landing-plan sections below are retained for audit traceability;
+the implementation and validation status is the sealed status stated above.
 
 ## Authoritative baseline and source architecture
 

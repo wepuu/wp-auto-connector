@@ -1,6 +1,6 @@
 # Phase 1.5.2 Tag Create Validation
 
-Status: **IMPLEMENTED; VALIDATION CANDIDATE IN WORKING TREE**
+Status: **IMPLEMENTED; VALIDATED; PHASE 1.5 FORMALLY SEALED**
 
 Validation date: 2026-09-09
 
@@ -64,23 +64,21 @@ collection.
 
 ## Official Plugin Check
 
-Plugin Check 2.1.0 was not executed. The repository policy prohibits downloading
-or executing a remote plugin, and neither the repository nor the local Docker
-image cache contains a Plugin Check copy. This remains an explicit release
-blocker; no result is inferred from PHPUnit, lint, or the real-WordPress run.
-When an approved local Plugin Check artifact is available, the scan must target
-a release-like package containing the production entry files, `src`,
-`readme.txt`, `LICENSE`, Composer manifests, and bundled dependencies, while
-excluding development files and the standalone MCP Adapter plugin entrypoint.
+Plugin Check 2.1.0 was completed in the Phase 1.5.4 release matrix using the
+verified local official artifact. Both static and runtime-enabled checks passed
+with zero errors and zero warnings against the release-like package containing
+the production entry files, `src`, `readme.txt`, `LICENSE`, Composer manifests,
+and bundled dependencies, while excluding development files and the standalone
+MCP Adapter plugin entrypoint.
 
 ## Uninstall and security boundary
 
 Tag Create introduces no new persistence family: it shares the existing
 taxonomy idempotency option prefix and taxonomy audit termmeta key already
 covered by the explicit uninstall path. No new direct SQL authority is added.
-The Phase 1.5.4 integration/security seal remains open and must repeat the
-authenticated Streamable HTTP, concurrency, state-integrity, uninstall,
-exact-allowlist, and security-diff matrix before Phase 1.5 is formally sealed.
+The Phase 1.5.4 integration/security seal was completed by the final release
+matrix recorded in `docs/PHASE_1_5_4_VALIDATION.md`. The historical checklist
+below remains for traceability and is no longer a release blocker.
 
 ## Verdict
 
@@ -89,8 +87,8 @@ Tag Create implementation = COMPLETE IN WORKING TREE
 Automated tests/lint = PASS
 Real WordPress bootstrap + replay = PASS
 Real WordPress uninstall cleanup = PASS
-Plugin Check 2.1.0 = BLOCKED BY REMOTE-PLUGIN DOWNLOAD POLICY
+Plugin Check 2.1.0 = PASS (see Phase 1.5.4 seal)
 Direct MCP tools = 20
-Phase 1.5.2 = VALIDATION CANDIDATE
-Next checkpoint = Phase 1.5.3 draft-post taxonomy assignment
+Phase 1.5.2 = FORMALLY SEALED
+Next checkpoint = Phase 1.6 (not started)
 ```

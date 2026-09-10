@@ -1,8 +1,8 @@
 # ADR-006: Taxonomy Mutation Safety Boundary
 
-Status: **Accepted safety boundary; Category Create, Tag Create, and draft-Post assignment (Phase 1.5.1–1.5.3) implemented, integration seal pending**
+Status: **Accepted, implemented, validated, and sealed for Phase 1.5.1–1.5.4**
 
-Date: 2026-09-09
+Date: 2026-09-10
 
 ## Context
 
@@ -28,7 +28,8 @@ Taxonomy writes have several non-obvious risks:
 ## Decision
 
 The Phase 1.5.1 Category Create, Phase 1.5.2 Tag Create, and Phase 1.5.3
-draft-Post assignment checkpoints implement the three contracts in this ADR.
+draft-Post assignment checkpoints implement the three contracts in this ADR;
+the Phase 1.5.4 integration and security seal is complete.
 They extend the exact AtomicOwnership option allowlist and ADR-004 uninstall
 verification to shared taxonomy idempotency, termmeta Create audit state, and
 postmeta assignment audit state.
@@ -217,6 +218,8 @@ stale-set conflict, hook races, invariant verification, audit bounds/privacy,
 multisite isolation, uninstall completeness, exact MCP allowlist order, and
 forbidden side effects.
 
-Phase 1.5.4 must repeat the complete matrix through a real WordPress 6.9+
-environment and authenticated Streamable HTTP MCP, then run Plugin Check and an
-exact-diff security review before Phase 1.5 is sealed.
+Phase 1.5.4 repeated the complete matrix through real WordPress 6.9/7.1
+environments and authenticated Streamable HTTP MCP, then passed Plugin Check
+2.1.0 static/runtime checks and an exact-diff security review. Phase 1.5 is
+formally sealed with exactly twenty-one tools. The assignment operation remains
+best-effort non-CAS; clients must re-read after `wp_auto_taxonomy_state_uncertain`.

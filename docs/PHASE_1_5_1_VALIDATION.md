@@ -1,6 +1,6 @@
 # Phase 1.5.1 Category Create Validation
 
-Status: **IMPLEMENTED; VALIDATION CANDIDATE IN WORKING TREE**
+Status: **IMPLEMENTED; VALIDATED; PHASE 1.5 FORMALLY SEALED**
 
 Validation date: 2026-09-09
 
@@ -83,9 +83,9 @@ bounded, prepared exact-key verification authorized by ADR-004. Neighboring
 options and unrelated termmeta remain intact. No active taxonomy runtime SQL
 was added.
 
-The Phase 1.5.4 integration/security seal remains open. It must repeat the
-full authenticated Streamable HTTP, concurrency, state-integrity, uninstall,
-exact-allowlist, and security-diff matrix before Phase 1.5 is formally sealed.
+The Phase 1.5.4 integration/security seal was completed by the final release
+matrix recorded in `docs/PHASE_1_5_4_VALIDATION.md`. The historical checklist
+below remains for traceability and is no longer a release blocker.
 
 ## Verdict
 
@@ -95,6 +95,6 @@ Automated tests/lint/validation = PASS
 Real WordPress bootstrap + replay = PASS
 Plugin Check 2.1.0 static/runtime = PASS, no errors or warnings
 Direct MCP tools = 19
-Phase 1.5.1 = VALIDATION CANDIDATE
-Next checkpoint = Phase 1.5.2 Tag Create
+Phase 1.5.1 = FORMALLY SEALED
+Next checkpoint = Phase 1.6 (not started)
 ```
