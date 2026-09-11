@@ -133,14 +133,15 @@ diagnostic scripts.
 
 The completed working-tree Codex Security scan
 (`eac0f814-41de-4c47-9eb3-4b039aa2f171`) reviewed the changed SEO service with
-complete coverage and zero findings. Delegated workers were unavailable, so
-the parent performed the review sequentially. A final immutable scan of the
-committed `origin/main..HEAD` range is still required after the documentation
-seal commit; it must cover every changed production source file and report
-complete coverage with zero findings. The review specifically checks
-capability enforcement, arbitrary-meta exposure, provider coexistence,
-state-token handling, secret isolation, dependency loading, uninstall scope,
-and outbound-request absence.
+complete coverage and zero findings. The final immutable Codex Security scan
+(`5f45bdd7-318a-4b3d-a535-282013871f39`) covered the complete production
+source range `origin/main@189090f0b5cb4d04893806aa7da576be32dad133..e02b31a9b4c6c9988e51d93312465241502eebfa`
+with 13 changed production files, complete coverage, and zero findings.
+Delegated workers were unavailable, so the parent performed the review
+sequentially. The post-scan evidence commit changes documentation only. The
+review specifically checked capability enforcement, arbitrary-meta exposure,
+provider coexistence, state-token handling, secret isolation, dependency
+loading, uninstall scope, and outbound-request absence.
 
 After that review and GitHub Actions success, PR #24 may be changed from Draft
 to Ready. Phase 1.6 becomes formally sealed only after the review evidence and
