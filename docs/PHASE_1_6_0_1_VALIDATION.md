@@ -81,6 +81,6 @@ no independent worker was available, so the parent completed every review row.
 
 Phase 1.6.0.1 satisfies the coexistence prerequisite as a complete local
 implementation checkpoint and preserves the exact twenty-one-tool runtime.
-SEO Get, provider writes, outbound requests, and other Phase 1.6.2+ behavior
-remain outside this checkpoint and require their separately authorized
-implementation and validation records.
+SEO Get and provider writes remained outside this coexistence checkpoint;
+the separately authorized SEO Get and SEO Update implementation records are
+`PHASE_1_6_1_VALIDATION.md` and `PHASE_1_6_2_VALIDATION.md`.

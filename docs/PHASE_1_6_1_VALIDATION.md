@@ -119,5 +119,6 @@ tools, documentation, ZIPs and provider plugin entry points were excluded.
 ## Remaining seal gates
 
 This records a complete Phase 1.6.1 implementation checkpoint, including the
-final immutable range review and PR quality gate. The formal Phase 1.6 seal is
-deferred to Phase 1.6.3. Phase 1.6.2 remains unimplemented and unauthorized.
+final immutable range review and PR quality gate. The Phase 1.6.2 candidate is
+recorded separately in `PHASE_1_6_2_VALIDATION.md`; the formal Phase 1.6 seal is
+deferred to Phase 1.6.3.

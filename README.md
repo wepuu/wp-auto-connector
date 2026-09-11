@@ -14,17 +14,17 @@ Phase 1.5.0 froze the taxonomy mutation contract and safety architecture. Phase 
 
 Phase 1.6.0 is formally frozen as a documentation-only SEO contract and
 provider-safety checkpoint. Phase 1.6.1 is landed on `main` and implements the
-provider-neutral `wp-auto-seo-get`, extending the runtime to exactly twenty-two
-tools. Phase 1.6.2 is now the active implementation checkpoint for SEO Update.
-Get is available
-for authorized built-in Posts/Pages; any future Update remains limited to
-authorized drafts. The public fields are
+provider-neutral `wp-auto-seo-get`, while the Phase 1.6.2 implementation
+candidate adds `wp-auto-seo-update`, extending the runtime to exactly
+twenty-three tools. Get is available for authorized built-in Posts/Pages, and
+Update is limited to authorized drafts. The public fields are
 explicit title, description, canonical URL, focus keywords, and index/follow
 directives. Rank Math is the first independent internal adapter; provider MCP,
 REST, Content AI, arbitrary metadata, site-wide settings, and outbound requests
 are not part of the contract. See `docs/PHASE_1_6_SEO_CONTRACTS.md`,
 `docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md`, and
-`docs/PHASE_1_6_0_VALIDATION.md`.
+`docs/PHASE_1_6_0_VALIDATION.md`. Phase 1.6.3 remains the integration and
+security seal.
 
 Phase 1.6.0.1 is landed on `main`. The admitted Rank Math
 1.0.278 package bundles MCP Adapter 0.5.0, so WePuu must isolate its locked

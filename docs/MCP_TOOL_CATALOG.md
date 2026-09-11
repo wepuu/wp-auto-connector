@@ -109,15 +109,16 @@ Ability or tool: discovery must remain the same ordered twenty-one tools with
 Rank Math 1.0.278, Yoast SEO 28.4, and All in One SEO 5.0.1.1 active, and must
 never include their provider-native Abilities.
 
-Phase 1.6.1 appends only provider-neutral SEO Get. The landed runtime therefore
-exposes exactly twenty-two ordered tools, with `wp-auto-seo-get` last. Tool
-discovery remains stable when the provider is absent or unsupported. Phase
-1.6.2 is the active draft-only SEO Update implementation checkpoint.
+Phase 1.6.1 appends provider-neutral SEO Get and Phase 1.6.2 appends the
+draft-only SEO Update. The candidate runtime therefore exposes exactly
+twenty-three ordered tools, with `wp-auto-seo-update` last. Tool discovery
+remains stable when the provider is absent or unsupported. Phase 1.6.3 is the
+integration/security seal.
 
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
-| `wp-auto/seo-get` | `wp-auto-seo-get` | Read-only | provider SEO read policy; target `read_post` (and `edit_post` for password-protected objects) | Implemented and landed — Phase 1.6.1; runtime 22 |
-| `wp-auto/seo-update` | `wp-auto-seo-update` | Draft mutation | provider SEO write policy; fixed Post/Page edit baseline; target `edit_post`; draft status | Frozen; Phase 1.6.2 in progress; runtime target 23 |
+| `wp-auto/seo-get` | `wp-auto-seo-get` | Read-only | provider SEO read policy; target `read_post` (and `edit_post` for password-protected objects) | Implemented and landed - Phase 1.6.1; runtime 22 |
+| `wp-auto/seo-update` | `wp-auto-seo-update` | Draft mutation | provider SEO write policy; fixed Post/Page edit baseline; target `edit_post`; draft status | Implemented candidate - Phase 1.6.2; runtime 23 |
 
 The public SEO shape contains only explicit title, description, canonical URL,
 focus keywords, and index/follow directives. Provider names, provider meta

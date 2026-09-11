@@ -1,12 +1,12 @@
 # Phase 1.6 SEO Abstraction Contracts
 
-Status: **Phase 1.6.0 contract frozen; Phase 1.6.1 landed; Phase 1.6.2 implementation in progress**
+Status: **Phase 1.6.0 contract frozen; Phase 1.6.1 landed; Phase 1.6.2 implementation checkpoint complete; Phase 1.6.3 seal pending**
 
 This document is the authoritative public contract for the Phase 1.6 SEO
 surface. Phase 1.6.0 was documentation-only and kept the sealed twenty-one-
 tool runtime. Phase 1.6.1 appends `seo-get`, producing exactly twenty-two
-tools; the later implementation checkpoint may append `seo-update` and must not change the contracts after a
-checkpoint is exposed.
+tools, and Phase 1.6.2 appends `seo-update`, producing exactly twenty-three
+tools. The contracts are frozen once each named checkpoint is exposed.
 
 ## Fixed scope and delivery order
 

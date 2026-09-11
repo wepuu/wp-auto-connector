@@ -71,5 +71,5 @@ remain outside the dedicated WePuu allowlist.
 Phase 1.6.0.1 implemented and locally validated the MCP Adapter coexistence
 solution in `ADR-008-MCP-ADAPTER-COEXISTENCE.md` while retaining the exact
 21-tool runtime. Its evidence is recorded in
-`PHASE_1_6_0_1_VALIDATION.md`; Phase 1.6.1 is the current implementation
-checkpoint and Phase 1.6.2 remains unauthorized.
+`PHASE_1_6_0_1_VALIDATION.md`; Phase 1.6.1 is landed and the Phase 1.6.2
+implementation candidate is recorded in `PHASE_1_6_2_VALIDATION.md`.

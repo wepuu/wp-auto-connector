@@ -1,6 +1,6 @@
 # ADR-007: Provider-Neutral SEO Abstraction
 
-Status: **Accepted; Phase 1.6.1 read boundary landed on `main`; Phase 1.6.2 write boundary in progress**
+Status: **Accepted; Phase 1.6.1 read boundary landed on `main`; Phase 1.6.2 write boundary implemented; Phase 1.6.3 seal pending**
 
 ## Context
 
@@ -24,8 +24,8 @@ and the still-open [native write Ability proposal](https://github.com/rankmath/s
 
 1. Define a provider-neutral `SeoProviderInterface` behind a small registry.
    Phase 1.6.1 exposes only availability, effective read authorization, and
-   bounded state reads. Phase 1.6.2 must add an equally narrow write seam only
-   when the update checkpoint is authorized. These are internal PHP seams,
+   bounded state reads. Phase 1.6.2 adds an equally narrow write seam behind
+   the draft/status/concurrency gates. These are internal PHP seams,
    not WordPress or MCP public APIs.
 2. Expose only `wp-auto/seo-get` and `wp-auto/seo-update`, in that order. The
    public shape contains explicit title, description, canonical URL, focus
