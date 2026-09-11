@@ -53,6 +53,10 @@ Multisite. WordPress 6.9 and 7.1 on PHP 8.1 must prove:
 - Plugin Check 2.1.0 reports zero errors and zero warnings for the release-like
   WePuu package.
 
+Phase 1.6.3 reused this isolation with the sealed SEO Get/Update runtime. The
+final authenticated matrix exposes exactly twenty-three ordered WP-Auto tools
+and still contains no provider-native tool, resource, or prompt.
+
 ## Rejected alternatives
 
 - Accept Rank Math's Adapter 0.5.0: it is outside the verified dependency

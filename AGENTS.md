@@ -16,9 +16,10 @@ Phase 1.3.0 through Phase 1.3.4 and Phase 1.4.0 through Phase 1.4.6 are formally
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
-The Phase 1.6.2 SEO Update implementation is the current candidate; Phase 1.6.3
-integration and security sealing remains pending. Do not begin later SEO or
-roadmap phases before that seal is explicitly authorized.
+The Phase 1.6.2 SEO Update implementation and Phase 1.6.3 integration/security
+validation are the current candidate; final Git landing is pending. Do not
+begin later SEO or roadmap phases before Phase 1.6.3 is landed and explicitly
+closed.
 
 ## Phase 1 product acceptance target
 

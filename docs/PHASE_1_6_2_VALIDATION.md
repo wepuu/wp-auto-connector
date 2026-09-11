@@ -1,6 +1,6 @@
 # Phase 1.6.2 Draft SEO Update Validation
 
-Status: **implementation checkpoint complete; Phase 1.6.3 integration/security seal pending**
+Status: **implementation complete; Phase 1.6.3 integration/security validation complete; final Git landing pending**
 
 This checkpoint adds only the provider-neutral `wp-auto/seo-update` Ability and
 its `wp-auto-seo-update` MCP tool. The candidate runtime is exactly twenty-three
@@ -19,7 +19,7 @@ Post/Page drafts and the admitted Rank Math 1.0.278 adapter.
 
 | Check | Result |
 | --- | --- |
-| PHPUnit full suite | **PASS — 485 tests / 3,168 assertions** |
+| PHPUnit full suite | **PASS — 486 tests / 3,172 assertions** |
 | SEO-focused PHPUnit suite | **PASS — 40 tests / 158 assertions** |
 | SEO source WPCS | **PASS** |
 | `composer validate --strict` | **PASS** |
@@ -27,7 +27,7 @@ Post/Page drafts and the admitted Rank Math 1.0.278 adapter.
 | `composer audit --locked` | **PASS — no security advisories** |
 | Production install dry-run | **PASS — 0 installs, 0 updates** |
 | `git diff --check` | **PASS** |
-| WordPress 6.9/7.1 and Plugin Check 2.1.0 runtime matrix | Deferred to Phase 1.6.3 seal |
+| WordPress 6.9/7.1 and Plugin Check 2.1.0 runtime matrix | **PASS — see PHASE_1_6_3_VALIDATION.md** |
 
 The automated update coverage includes strict input and URL validation, empty
 value clearing, partial updates, robots non-target preservation, stale-token
@@ -47,9 +47,13 @@ write-failure classification, and value-free bounded SEO audit attribution.
 - Explicit uninstall now removes and verifies the exact private SEO audit
   postmeta family.
 
-Phase 1.6.3 must repeat the real WordPress 6.9/7.1 single-site and Multisite
-MCP matrix, Plugin Check 2.1.0 static/runtime checks, no-outbound-request
-review, and exact-range security scan before Phase 1.6 is formally sealed.
+The Phase 1.6.3 matrix found and fixed one provider-neutral input-normalization
+defect: robots object members are now rewritten to the stable `index,follow`
+order before final-state comparison. The real WordPress 6.9/7.1 single-site
+and Multisite MCP matrix, Plugin Check 2.1.0 static/runtime checks, and
+no-outbound-request review are recorded in `PHASE_1_6_3_VALIDATION.md`.
+The final immutable security scan is still required after the fix and seal
+documentation are committed.
 
 ## Final immutable security evidence
 

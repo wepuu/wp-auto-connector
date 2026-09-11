@@ -210,7 +210,8 @@ Phase 1.6.0 froze the provider-neutral SEO contract in
 `docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md`; it added no runtime code or tool.
 Phase 1.6.1 implements the first named checkpoint, appending `wp-auto/seo-get`
 after the sealed twenty-one-tool baseline. Phase 1.6.2 appends the draft-only
-`wp-auto/seo-update`, so the candidate runtime is exactly twenty-three tools.
+`wp-auto/seo-update`, so the Phase 1.6.3-sealed runtime is exactly twenty-three
+tools.
 
 SEO Get is exposed through a small internal `SeoProviderInterface` and registry,
 never through a generic metadata API. The public shape contains only explicit

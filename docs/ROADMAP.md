@@ -128,14 +128,16 @@ Delivery checkpoints:
 1. **Phase 1.6.0 - SEO Contract and Provider-Safety Freeze (complete; formally frozen):** freezes the provider-neutral five-field object contract, stable `seo-get`/`seo-update` order, draft-only mutation boundary, provider registry, state-token concurrency model, bounded private audit, explicit uninstall boundary, and failure-closed semantics. No runtime tool is added; the sealed runtime remains exactly twenty-one tools.
 2. **Phase 1.6.0.1 - SEO Provider Artifact Admission and MCP Adapter Coexistence (complete; landed on main):** admits the pinned Rank Math 1.0.278, Yoast 28.4, and AIOSEO 5.0.1.1 packages; isolates WePuu's locked MCP Adapter 0.6.1 runtime from provider load order; and validates that the dedicated server still exposes exactly twenty-one ordered tools.
 3. **Phase 1.6.1 - Rank Math Adapter and SEO Get (complete; landed on main):** implements the independent internal Rank Math 1.0.278 read adapter and exposes only `wp-auto/seo-get`, producing the exact twenty-two-tool runtime without provider REST/MCP or outbound requests.
-4. **Phase 1.6.2 - Draft SEO Update (implementation checkpoint complete; seal pending):** exposes only `wp-auto/seo-update` for authorized Post/Page drafts, including state-token checks, invariant verification, bounded attribution, and uninstall cleanup; the candidate runtime is exactly twenty-three tools.
-5. **Phase 1.6.3 - Integration and Security Seal (not started):** validate WordPress 6.9/7.1, authenticated Streamable HTTP, provider absence/conflict, state integrity, no outbound requests, Plugin Check, uninstall, and exact-diff security without adding tools.
+4. **Phase 1.6.2 - Draft SEO Update (complete; formally sealed with Phase 1.6.3):** exposes only `wp-auto/seo-update` for authorized Post/Page drafts, including state-token checks, invariant verification, bounded attribution, and uninstall cleanup; the sealed runtime is exactly twenty-three tools.
+5. **Phase 1.6.3 - Integration and Security Seal (implementation complete; final Git landing pending):** WordPress 6.9/7.1, authenticated Streamable HTTP, provider absence/conflict, state integrity, no outbound requests, Plugin Check, uninstall, and exact-diff security validation complete without adding tools. The final immutable security review and documentation commit must land before the Phase 1.6 seal is marked complete.
 
 The authoritative contract is `docs/PHASE_1_6_SEO_CONTRACTS.md`; the accepted
 provider and safety decision is `docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md`;
 the coexistence decision is `docs/ADR-008-MCP-ADAPTER-COEXISTENCE.md`; the
 documentation freeze evidence is `docs/PHASE_1_6_0_VALIDATION.md`; the SEO Get
-candidate evidence is `docs/PHASE_1_6_1_VALIDATION.md`.
+candidate evidence is `docs/PHASE_1_6_1_VALIDATION.md`; the SEO Update and
+integration evidence is `docs/PHASE_1_6_2_VALIDATION.md` and
+`docs/PHASE_1_6_3_VALIDATION.md`.
 
 ### Phase 1.7 - Client compatibility and release hardening
 

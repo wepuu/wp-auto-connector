@@ -112,19 +112,19 @@ never include their provider-native Abilities.
 Phase 1.6.1 appends provider-neutral SEO Get and Phase 1.6.2 appends the
 draft-only SEO Update. The candidate runtime therefore exposes exactly
 twenty-three ordered tools, with `wp-auto-seo-update` last. Tool discovery
-remains stable when the provider is absent or unsupported. Phase 1.6.3 is the
-integration/security seal.
+remains stable when the provider is absent or unsupported. Phase 1.6.3 seals
+this exact runtime and adds no tool.
 
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |
 | `wp-auto/seo-get` | `wp-auto-seo-get` | Read-only | provider SEO read policy; target `read_post` (and `edit_post` for password-protected objects) | Implemented and landed - Phase 1.6.1; runtime 22 |
-| `wp-auto/seo-update` | `wp-auto-seo-update` | Draft mutation | provider SEO write policy; fixed Post/Page edit baseline; target `edit_post`; draft status | Implemented candidate - Phase 1.6.2; runtime 23 |
+| `wp-auto/seo-update` | `wp-auto-seo-update` | Draft mutation | provider SEO write policy; fixed Post/Page edit baseline; target `edit_post`; draft status | Implemented and validated - Phase 1.6.2/1.6.3; runtime 23 |
 
 The public SEO shape contains only explicit title, description, canonical URL,
 focus keywords, and index/follow directives. Provider names, provider meta
 keys, provider REST routes, provider MCP tools, arbitrary metadata, and site-
-wide settings remain outside the catalog. Phase 1.6.3 is the later integration
-and security seal and adds no tool.
+wide settings remain outside the catalog. Phase 1.6.3 is the integration and
+security seal and adds no tool.
 
 ## Explicit Phase 1 exclusions
 

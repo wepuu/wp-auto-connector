@@ -85,5 +85,8 @@ pass the MCP Adapter coexistence and exact-allowlist matrix in ADR-008 without
 adding an SEO tool. Phase 1.6.1 supplies the provider-resolution/unit matrix and
 real WordPress compatibility tests against the pinned Rank Math package.
 Phase 1.6.2 additionally requires audit/uninstall coverage. Phase 1.6.3
-requires WordPress 6.9/7.1, authenticated Streamable HTTP, Plugin Check,
-state-integrity, no-outbound-request, and exact-diff security validation.
+completed the WordPress 6.9/7.1, authenticated Streamable HTTP, Plugin Check,
+state-integrity, and no-outbound-request integration gates without adding a
+tool. The working-tree security review found no issues; the immutable
+`origin/main..HEAD` scan remains the final Git-landing gate. The validation
+record is `PHASE_1_6_3_VALIDATION.md`.
