@@ -73,6 +73,11 @@ final class RankMathSeoProvider implements SeoProviderInterface {
 		return current_user_can( 'rank_math_onpage_general' );
 	}
 
+	/** Match Rank Math's on-page general SEO permission for writes. */
+	public function can_write(): bool {
+		return current_user_can( 'rank_math_onpage_general' );
+	}
+
 	/**
 	 * Read and validate bounded explicit provider state.
 	 *
@@ -113,6 +118,102 @@ final class RankMathSeoProvider implements SeoProviderInterface {
 				'raw_robots' => $robots['raw'],
 			),
 		);
+	}
+
+	/**
+	 * Write the changed fields through the WordPress Metadata API only.
+	 *
+	 * @param int                 $post_id Target Post or Page ID.
+	 * @param array<string,mixed> $state Complete merged state from the service.
+	 * @param array<int,string>   $fields Changed field names.
+	 * @return true|WP_Error
+	 */
+	public function write_state( int $post_id, array $state, array $fields = array() ) {
+		$allowed = array_keys( self::META_KEYS );
+		$fields  = array_values( array_unique( $fields ) );
+		if ( array_diff( $fields, $allowed ) || ! isset( $state['protected']['raw_robots'] ) || ! is_array( $state['protected']['raw_robots'] ) ) {
+			return $this->write_failed();
+		}
+
+		try {
+			foreach ( $fields as $field ) {
+				$meta_key = self::META_KEYS[ $field ];
+				if ( 'robots' === $field ) {
+					$value = $this->merge_robots( $state['protected']['raw_robots'], $state['robots'] ?? null );
+					if ( null === $value ) {
+						return $this->write_failed();
+					}
+					if ( array() === $value ) {
+						if ( metadata_exists( 'post', $post_id, $meta_key ) && ! delete_post_meta( $post_id, $meta_key ) ) {
+							return $this->write_failed();
+						}
+					} elseif ( false === update_post_meta( $post_id, $meta_key, $value ) ) {
+						return $this->write_failed();
+					}
+					continue;
+				}
+
+				$value = $state[ $field ] ?? null;
+				if ( 'focus_keywords' === $field ) {
+					if ( ! is_array( $value ) || array_values( $value ) !== $value || count( $value ) > 5 ) {
+						return $this->write_failed();
+					}
+					foreach ( $value as $keyword ) {
+						if ( ! is_string( $keyword ) || '' === $keyword || false !== strpos( $keyword, ',' ) || null === $this->bounded_text( $keyword, 200 ) ) {
+							return $this->write_failed();
+						}
+					}
+					if ( count( array_unique( $value ) ) !== count( $value ) ) {
+						return $this->write_failed();
+					}
+					$value = implode( ', ', $value );
+				} elseif ( ! is_string( $value ) || null === $this->bounded_text( $value, 'canonical_url' === $field ? 2048 : ( 'description' === $field ? 2000 : 500 ) ) || ( 'canonical_url' === $field && ! $this->is_supported_canonical( $value ) ) ) {
+					return $this->write_failed();
+				}
+				if ( '' === $value ) {
+					if ( metadata_exists( 'post', $post_id, $meta_key ) && ! delete_post_meta( $post_id, $meta_key ) ) {
+						return $this->write_failed();
+					}
+				} elseif ( false === update_post_meta( $post_id, $meta_key, wp_slash( $value ) ) ) {
+					return $this->write_failed();
+				}
+			}
+		} catch ( \Throwable ) {
+			return $this->write_failed();
+		}
+
+		return true;
+	}
+
+	/**
+	 * Preserve non-target provider robots directives while replacing index/follow.
+	 *
+	 * @param array<int,string> $raw Existing provider directives.
+	 * @param mixed             $public_state Public index/follow pair.
+	 */
+	private function merge_robots( array $raw, $public_state ): ?array {
+		$keys = is_array( $public_state ) ? array_keys( $public_state ) : array();
+		sort( $keys );
+		if ( ! is_array( $public_state ) || array( 'follow', 'index' ) !== $keys || ! in_array( $public_state['index'] ?? null, array( 'default', 'index', 'noindex' ), true ) || ! in_array( $public_state['follow'] ?? null, array( 'default', 'follow', 'nofollow' ), true ) ) {
+			return null;
+		}
+		$kept = array_values(
+			array_filter(
+				$raw,
+				static fn( $directive ): bool => is_string( $directive ) && ! in_array( $directive, array( 'index', 'noindex', 'follow', 'nofollow' ), true )
+			)
+		);
+		if ( 'index' === $public_state['index'] ) {
+			$kept[] = 'index';
+		} elseif ( 'noindex' === $public_state['index'] ) {
+			$kept[] = 'noindex';
+		}
+		if ( 'follow' === $public_state['follow'] ) {
+			$kept[] = 'follow';
+		} elseif ( 'nofollow' === $public_state['follow'] ) {
+			$kept[] = 'nofollow';
+		}
+		return $kept;
 	}
 
 	/**
@@ -223,6 +324,15 @@ final class RankMathSeoProvider implements SeoProviderInterface {
 			'wp_auto_seo_state_unsupported',
 			__( 'The stored SEO state is not supported.', 'wepuu-auto-connector' ),
 			array( 'status' => 409 )
+		);
+	}
+
+	/** Return the stable write failure without provider details. */
+	private function write_failed(): WP_Error {
+		return new WP_Error(
+			'wp_auto_seo_write_failed',
+			__( 'The SEO state could not be updated.', 'wepuu-auto-connector' ),
+			array( 'status' => 500 )
 		);
 	}
 }

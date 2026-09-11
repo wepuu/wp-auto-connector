@@ -75,4 +75,10 @@ final class SeoProviderRegistry {
 		$provider = $this->resolve();
 		return $provider instanceof WP_Error || $provider->can_read();
 	}
+
+	/** Enforce provider write permission while preserving unavailable semantics. */
+	public function can_write(): bool {
+		$provider = $this->resolve();
+		return $provider instanceof WP_Error || $provider->can_write();
+	}
 }

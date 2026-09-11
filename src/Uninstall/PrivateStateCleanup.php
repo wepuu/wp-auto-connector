@@ -19,7 +19,7 @@ final class PrivateStateCleanup {
 	private const MEDIA_IDEMPOTENCY_PREFIX    = 'wp_auto_connector_media_idempotency_';
 	private const TAXONOMY_IDEMPOTENCY_PREFIX = 'wp_auto_connector_taxonomy_idempotency_';
 	private const AUDIT_LOCK_PREFIX           = 'wp_auto_connector_mutation_audit_lock_';
-	private const AUDIT_META_KEYS             = array( '_wp_auto_connector_mutation_audit', '_wp_auto_connector_media_mutation_audit', '_wp_auto_connector_taxonomy_mutation_audit' );
+	private const AUDIT_META_KEYS             = array( '_wp_auto_connector_mutation_audit', '_wp_auto_connector_media_mutation_audit', '_wp_auto_connector_taxonomy_mutation_audit', '_wp_auto_connector_seo_mutation_audit' );
 	private const TAXONOMY_AUDIT_META_KEY     = '_wp_auto_connector_taxonomy_mutation_audit';
 	private const MCP_SESSION_META_KEY        = 'wp_auto_connector_mcp_adapter_sessions';
 

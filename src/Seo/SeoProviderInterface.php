@@ -30,6 +30,9 @@ interface SeoProviderInterface {
 	/** Enforce the provider's effective SEO read capability. */
 	public function can_read(): bool;
 
+	/** Enforce the provider's effective SEO write capability. */
+	public function can_write(): bool;
+
 	/**
 	 * Read normalized public values plus bounded protected state.
 	 *
@@ -37,4 +40,14 @@ interface SeoProviderInterface {
 	 * @return array<string,mixed>|\WP_Error
 	 */
 	public function read_state( int $post_id );
+
+	/**
+	 * Write only the provider's fixed SEO metadata keys.
+	 *
+	 * @param int                 $post_id Target Post or Page ID.
+	 * @param array<string,mixed> $state   Complete merged normalized state.
+	 * @param array<int,string>   $fields  Fields that changed and should be written.
+	 * @return bool|\WP_Error
+	 */
+	public function write_state( int $post_id, array $state, array $fields = array() );
 }

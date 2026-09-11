@@ -50,12 +50,31 @@ final class SeoReadService {
 			return $this->invalid_request();
 		}
 
-		$provider = $this->registry->resolve();
+		$snapshot = $this->snapshot( $input['id'] );
+		if ( is_wp_error( $snapshot ) ) {
+			return $snapshot;
+		}
+
+		return $snapshot['record'];
+	}
+
+	/**
+	 * Read one authorized provider state and its opaque token.
+	 *
+	 * @param int                       $post_id Target object ID.
+	 * @param SeoProviderInterface|null $provider Optional already-resolved provider.
+	 * @return array<string,mixed>|WP_Error
+	 */
+	public function snapshot( int $post_id, ?SeoProviderInterface $provider = null ) {
+		if ( $post_id < 1 ) {
+			return $this->invalid_request();
+		}
+		$provider = $provider ?? $this->registry->resolve();
 		if ( $provider instanceof WP_Error ) {
 			return $provider;
 		}
 
-		$post = get_post( $input['id'] );
+		$post = get_post( $post_id );
 		if ( ! $provider->can_read() || ! $this->is_readable_target( $post ) ) {
 			return $this->not_found();
 		}
@@ -65,7 +84,29 @@ final class SeoReadService {
 			return $state;
 		}
 
-		$record        = array(
+		$record = self::record_from_state( $post, $state );
+		$token  = self::token_for( $post, $record, $state, $provider );
+		if ( null === $token ) {
+			return $this->unsupported_state();
+		}
+		$record['state_token'] = $token;
+
+		return array(
+			'post'     => $post,
+			'state'    => $state,
+			'record'   => $record,
+			'provider' => $provider,
+		);
+	}
+
+	/**
+	 * Build the stable public record from one provider state.
+	 *
+	 * @param WP_Post             $post Target object.
+	 * @param array<string,mixed> $state Provider state.
+	 */
+	public static function record_from_state( WP_Post $post, array $state ): array {
+		return array(
 			'id'             => (int) $post->ID,
 			'type'           => (string) $post->post_type,
 			'status'         => (string) $post->post_status,
@@ -75,6 +116,17 @@ final class SeoReadService {
 			'focus_keywords' => $state['focus_keywords'],
 			'robots'         => $state['robots'],
 		);
+	}
+
+	/**
+	 * Build the opaque state token from the provider-neutral state.
+	 *
+	 * @param WP_Post              $post Target object.
+	 * @param array<string,mixed>  $record Public record.
+	 * @param array<string,mixed>  $state Provider state.
+	 * @param SeoProviderInterface $provider Provider adapter.
+	 */
+	public static function token_for( WP_Post $post, array $record, array $state, SeoProviderInterface $provider ): ?string {
 		$token_payload = array(
 			'site_id'          => get_current_blog_id(),
 			'object'           => array(
@@ -96,12 +148,7 @@ final class SeoReadService {
 			'provider_version' => $provider->runtime_version(),
 		);
 		$encoded       = wp_json_encode( $token_payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-		if ( ! is_string( $encoded ) ) {
-			return $this->unsupported_state();
-		}
-
-		$record['state_token'] = hash( 'sha256', $encoded );
-		return $record;
+		return is_string( $encoded ) ? hash( 'sha256', $encoded ) : null;
 	}
 
 	/**

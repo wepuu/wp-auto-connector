@@ -17,6 +17,7 @@ use WPAuto\Connector\Abilities\Media\MediaImportUrlAbility;
 use WPAuto\Connector\Abilities\Media\MediaUpdateAbility;
 use WPAuto\Connector\Abilities\Media\MediaSetFeaturedAbility;
 use WPAuto\Connector\Abilities\Seo\SeoGetAbility;
+use WPAuto\Connector\Abilities\Seo\SeoUpdateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAssignAbility;
@@ -48,6 +49,7 @@ final class PluginTest extends TestCase {
 		self::assertContains( TagCreateAbility::class, $classes );
 		self::assertContains( TaxonomyAssignAbility::class, $classes );
 		self::assertContains( SeoGetAbility::class, $classes );
-		self::assertCount( 22, $callbacks );
+		self::assertContains( SeoUpdateAbility::class, $classes );
+		self::assertCount( 23, $callbacks );
 	}
 }

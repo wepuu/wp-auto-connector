@@ -31,6 +31,7 @@ use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAssignAbility;
 use WPAuto\Connector\Abilities\Seo\SeoGetAbility;
+use WPAuto\Connector\Abilities\Seo\SeoUpdateAbility;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
 use WPAuto\Connector\PrivateMcp\WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
 use WPAuto\Connector\PrivateMcp\WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
@@ -122,10 +123,11 @@ final class McpServerRegistrarTest extends TestCase {
 				TagCreateAbility::NAME,
 				TaxonomyAssignAbility::NAME,
 				SeoGetAbility::NAME,
+				SeoUpdateAbility::NAME,
 			),
 			$adapter->arguments[9]
 		);
-		self::assertCount( 22, $adapter->arguments[9] );
+		self::assertCount( 23, $adapter->arguments[9] );
 		self::assertSame( array(), $adapter->arguments[10] );
 		self::assertSame( array(), $adapter->arguments[11] );
 		self::assertIsCallable( $adapter->arguments[12] );

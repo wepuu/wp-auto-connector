@@ -1903,6 +1903,46 @@ namespace WPAuto\Connector\Seo {
 		return \metadata_exists( $meta_type, $object_id, $meta_key );
 	}
 
+	function update_post_meta( int $post_id, string $meta_key, $value ) {
+		return \update_post_meta( $post_id, $meta_key, $value );
+	}
+
+	function delete_post_meta( int $post_id, string $meta_key ): bool {
+		return \delete_post_meta( $post_id, $meta_key );
+	}
+
+	function wp_slash( $value ) {
+		return \wp_slash( $value );
+	}
+
+	function wp_get_post_terms( int $post_id, string $taxonomy, array $args ) {
+		return \wp_get_post_terms( $post_id, $taxonomy, $args );
+	}
+
+	function get_post_thumbnail_id( int $post_id ): int {
+		return \get_post_thumbnail_id( $post_id );
+	}
+
+	function get_post_type_object( string $post_type ) {
+		return \get_post_type_object( $post_type );
+	}
+
+	function get_current_user_id(): int {
+		return \get_current_user_id();
+	}
+
+	function current_time( string $type, bool $gmt = false ): string {
+		return \current_time( $type, $gmt );
+	}
+
+	function wp_generate_uuid4(): string {
+		return \wp_generate_uuid4();
+	}
+
+	function is_wp_error( $value ): bool {
+		return \is_wp_error( $value );
+	}
+
 	function get_current_blog_id(): int {
 		return \get_current_blog_id();
 	}
@@ -2101,9 +2141,12 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyAssignContract.php';
 	require_once dirname( __DIR__ ) . '/src/Taxonomy/TaxonomyAssignmentService.php';
 	require_once dirname( __DIR__ ) . '/src/Seo/SeoProviderInterface.php';
+	require_once dirname( __DIR__ ) . '/src/Seo/SeoContract.php';
 	require_once dirname( __DIR__ ) . '/src/Seo/RankMathSeoProvider.php';
 	require_once dirname( __DIR__ ) . '/src/Seo/SeoProviderRegistry.php';
 	require_once dirname( __DIR__ ) . '/src/Seo/SeoReadService.php';
+	require_once dirname( __DIR__ ) . '/src/Seo/SeoMutationAuditStore.php';
+	require_once dirname( __DIR__ ) . '/src/Seo/SeoUpdateService.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteHealthAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Site/SiteInfoAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Content/ContentAbilityCategory.php';
@@ -2130,6 +2173,7 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Abilities/Taxonomy/TaxonomyAssignAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Seo/SeoAbilityCategory.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Seo/SeoGetAbility.php';
+	require_once dirname( __DIR__ ) . '/src/Abilities/Seo/SeoUpdateAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpAdapterLoader.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpServerRegistrar.php';
 	require_once dirname( __DIR__ ) . '/src/Plugin.php';

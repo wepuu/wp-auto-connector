@@ -269,7 +269,7 @@ final class UninstallTest extends TestCase {
 	 */
 	public function test_false_audit_delete_with_verified_absence_is_complete(): void {
 		self::assertTrue( ( new PrivateStateCleanup() )->run() );
-		self::assertSame( 3, $GLOBALS['wp_auto_test_delete_post_meta_calls'] );
+		self::assertSame( 4, $GLOBALS['wp_auto_test_delete_post_meta_calls'] );
 	}
 
 	/**
@@ -319,7 +319,7 @@ final class UninstallTest extends TestCase {
 
 		self::assertFalse( ( new PrivateStateCleanup() )->run() );
 		self::assertFalse( $GLOBALS['wp_auto_test_db_suppress_state'] );
-		self::assertSame( array( true, false, true, false, true, false, true, false, true, false, true, false ), $GLOBALS['wp_auto_test_db_suppress_history'] );
+		self::assertSame( array( true, false, true, false, true, false, true, false, true, false, true, false, true, false ), $GLOBALS['wp_auto_test_db_suppress_history'] );
 	}
 
 	/**
@@ -357,7 +357,7 @@ final class UninstallTest extends TestCase {
 		self::assertFalse( $result );
 		self::assertSame( '', $output );
 		self::assertFalse( $GLOBALS['wp_auto_test_db_suppress_state'] );
-		self::assertSame( array( true, false, true, false, true, false, true, false, true, false, true, false ), $GLOBALS['wp_auto_test_db_suppress_history'] );
+		self::assertSame( array( true, false, true, false, true, false, true, false, true, false, true, false, true, false ), $GLOBALS['wp_auto_test_db_suppress_history'] );
 	}
 
 	/**
