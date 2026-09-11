@@ -1,6 +1,6 @@
 # ADR-008: MCP Adapter Coexistence With SEO Providers
 
-Status: **Accepted, implemented, and locally validated; integration seal pending**
+Status: **Accepted, implemented, and landed on `main`**
 
 Date: 2026-09-10
 

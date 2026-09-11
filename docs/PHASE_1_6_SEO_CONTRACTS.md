@@ -1,6 +1,6 @@
 # Phase 1.6 SEO Abstraction Contracts
 
-Status: **Phase 1.6.0 contract frozen; Phase 1.6.1 SEO Get implementation candidate complete**
+Status: **Phase 1.6.0 contract frozen; Phase 1.6.1 landed; Phase 1.6.2 implementation in progress**
 
 This document is the authoritative public contract for the Phase 1.6 SEO
 surface. Phase 1.6.0 was documentation-only and kept the sealed twenty-one-

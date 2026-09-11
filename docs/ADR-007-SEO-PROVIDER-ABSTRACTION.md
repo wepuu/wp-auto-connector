@@ -1,6 +1,6 @@
 # ADR-007: Provider-Neutral SEO Abstraction
 
-Status: **Accepted; Phase 1.6.1 read boundary implemented as a local candidate**
+Status: **Accepted; Phase 1.6.1 read boundary landed on `main`; Phase 1.6.2 write boundary in progress**
 
 ## Context
 

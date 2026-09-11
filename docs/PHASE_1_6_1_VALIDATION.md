@@ -1,6 +1,6 @@
 # Phase 1.6.1 Rank Math SEO Get Validation
 
-Status: **Implementation checkpoint complete; Phase 1.6 seal deferred to 1.6.3**
+Status: **Implementation checkpoint landed on `main`; Phase 1.6 seal deferred to 1.6.3**
 
 ## Scope
 

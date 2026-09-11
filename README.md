@@ -13,9 +13,10 @@ Phase 1.3 and Phase 1.4 are complete and formally sealed on `main`. The image-on
 Phase 1.5.0 froze the taxonomy mutation contract and safety architecture. Phase 1.5.1 through Phase 1.5.3 implement the built-in `wp-auto-category-create`, `wp-auto-tag-create`, and `wp-auto-taxonomy-assign` tools. Create operations require the fixed taxonomy `manage_terms` capability, Core-owned slug/description fields, persistent site/actor/key idempotency, and private bounded attribution. Assignment replaces one bounded Category or Tag ID set on an authorized draft Post after the taxonomy `assign_terms`, Post edit, and object checks, with an expected-set precondition and private bounded attribution. Categories accept an optional validated parent; Tags remain non-hierarchical. The Direct MCP allowlist is exactly twenty-one tools. Phase 1.5.4 is formally sealed after WordPress 6.9/7.1, Plugin Check 2.1.0 static/runtime, MCP, uninstall, Multisite, concurrency/state-integrity, and security gates passed. Assignment remains best-effort non-CAS; clients must re-read after `wp_auto_taxonomy_state_uncertain`.
 
 Phase 1.6.0 is formally frozen as a documentation-only SEO contract and
-provider-safety checkpoint. Phase 1.6.1 now implements the provider-neutral
-`wp-auto-seo-get`, extending the runtime to exactly twenty-two tools. SEO
-Update remains unauthorized until a later roadmap checkpoint. Get is available
+provider-safety checkpoint. Phase 1.6.1 is landed on `main` and implements the
+provider-neutral `wp-auto-seo-get`, extending the runtime to exactly twenty-two
+tools. Phase 1.6.2 is now the active implementation checkpoint for SEO Update.
+Get is available
 for authorized built-in Posts/Pages; any future Update remains limited to
 authorized drafts. The public fields are
 explicit title, description, canonical URL, focus keywords, and index/follow
@@ -25,7 +26,7 @@ are not part of the contract. See `docs/PHASE_1_6_SEO_CONTRACTS.md`,
 `docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md`, and
 `docs/PHASE_1_6_0_VALIDATION.md`.
 
-Phase 1.6.0.1 is a complete local implementation candidate. The admitted Rank Math
+Phase 1.6.0.1 is landed on `main`. The admitted Rank Math
 1.0.278 package bundles MCP Adapter 0.5.0, so WePuu must isolate its locked
 0.6.1 runtime and prove exact allowlist behavior with Rank Math, Yoast 28.4,
 and AIOSEO 5.0.1.1 while retaining the then-current exact 21-tool server. Its full local
