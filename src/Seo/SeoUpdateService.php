@@ -209,6 +209,10 @@ final class SeoUpdateService {
 			if ( ! is_array( $input['robots'] ) || array( 'follow', 'index' ) !== $keys || ! in_array( $input['robots']['index'] ?? null, array( 'default', 'index', 'noindex' ), true ) || ! in_array( $input['robots']['follow'] ?? null, array( 'default', 'follow', 'nofollow' ), true ) ) {
 				return $this->invalid_request();
 			}
+			$input['robots'] = array(
+				'index'  => $input['robots']['index'],
+				'follow' => $input['robots']['follow'],
+			);
 		}
 		return $input;
 	}

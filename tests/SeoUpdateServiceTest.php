@@ -80,6 +80,26 @@ final class SeoUpdateServiceTest extends TestCase {
 		self::assertArrayHasKey( '_wp_auto_connector_seo_mutation_audit', $GLOBALS['wp_auto_test_post_meta'][7] );
 	}
 
+	/** JSON object key order must not affect the robots state comparison. */
+	public function test_normalizes_unordered_robots_keys_before_write(): void {
+		$read   = ( new SeoReadService( new SeoProviderRegistry( array( new RankMathSeoProvider( '1.0.278' ) ) ) ) )->get( array( 'id' => 7 ) );
+		$result = $this->service->update(
+			array(
+				'id'                   => 7,
+				'expected_state_token' => $read['state_token'],
+				'robots'               => array(
+					'follow' => 'nofollow',
+					'index'  => 'noindex',
+				),
+			)
+		);
+
+		self::assertIsArray( $result );
+		self::assertSame( array( 'robots' ), $result['changed_fields'] );
+		self::assertFalse( $result['no_op'] );
+		self::assertSame( array( 'noarchive', 'noindex', 'nofollow' ), $GLOBALS['wp_auto_test_post_meta'][7]['rank_math_robots'] );
+	}
+
 	/** A stale token is accepted for a true no-op. */
 	public function test_stale_token_noop_succeeds(): void {
 		$result = $this->service->update(
