@@ -1,9 +1,9 @@
 # Phase 1.6.2 Draft SEO Update Validation
 
-Status: **implementation complete; Phase 1.6.3 integration/security validation complete; final Git landing pending**
+Status: **implementation complete; Phase 1.6.2 and Phase 1.6.3 formally sealed on `main`**
 
 This checkpoint adds only the provider-neutral `wp-auto/seo-update` Ability and
-its `wp-auto-seo-update` MCP tool. The candidate runtime is exactly twenty-three
+its `wp-auto-seo-update` MCP tool. The sealed runtime is exactly twenty-three
 ordered tools, with SEO Update last. SEO Update is limited to authorized built-in
 Post/Page drafts and the admitted Rank Math 1.0.278 adapter.
 

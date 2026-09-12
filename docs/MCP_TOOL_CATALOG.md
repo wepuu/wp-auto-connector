@@ -110,10 +110,10 @@ Rank Math 1.0.278, Yoast SEO 28.4, and All in One SEO 5.0.1.1 active, and must
 never include their provider-native Abilities.
 
 Phase 1.6.1 appends provider-neutral SEO Get and Phase 1.6.2 appends the
-draft-only SEO Update. The candidate runtime therefore exposes exactly
+draft-only SEO Update. The sealed runtime therefore exposes exactly
 twenty-three ordered tools, with `wp-auto-seo-update` last. Tool discovery
 remains stable when the provider is absent or unsupported. Phase 1.6.3 seals
-this exact runtime and adds no tool.
+this exact runtime on `main` and adds no tool.
 
 | Ability | MCP tool | Type | WordPress capability baseline | Status |
 | --- | --- | --- | --- | --- |

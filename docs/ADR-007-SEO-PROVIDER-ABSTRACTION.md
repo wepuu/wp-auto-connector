@@ -1,6 +1,6 @@
 # ADR-007: Provider-Neutral SEO Abstraction
 
-Status: **Accepted; Phase 1.6.1 read boundary landed on `main`; Phase 1.6.2 write boundary implemented; Phase 1.6.3 seal pending**
+Status: **Accepted; Phase 1.6.0–1.6.3 formally sealed on `main`; Phase 1.7.0 client/release contract freeze pending**
 
 ## Context
 
@@ -87,6 +87,8 @@ real WordPress compatibility tests against the pinned Rank Math package.
 Phase 1.6.2 additionally requires audit/uninstall coverage. Phase 1.6.3
 completed the WordPress 6.9/7.1, authenticated Streamable HTTP, Plugin Check,
 state-integrity, and no-outbound-request integration gates without adding a
-tool. The working-tree security review found no issues; the immutable
-`origin/main..HEAD` scan remains the final Git-landing gate. The validation
-record is `PHASE_1_6_3_VALIDATION.md`.
+tool. The immutable exact-range security review found no issues, and the
+resulting documentation and evidence landed on `main` at `c48ba31`; Phase 1.6
+is formally sealed. Phase 1.7.0 now freezes client-acceptance and release
+contracts without changing this provider boundary. The validation record is
+`PHASE_1_6_3_VALIDATION.md`.

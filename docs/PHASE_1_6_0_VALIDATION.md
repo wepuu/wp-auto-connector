@@ -1,6 +1,6 @@
 # Phase 1.6.0 SEO Contract and Provider-Safety Validation
 
-Status: **Complete; documentation-only checkpoint; formally frozen on branch pending review**
+Status: **Complete; documentation-only checkpoint; Phase 1.6 formally sealed on `main` with Phase 1.6.3**
 
 Validation date: 2026-09-10
 

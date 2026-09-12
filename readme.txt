@@ -24,6 +24,8 @@ Phase 1.4 adds bounded, permission-aware image Media Search/Get, authenticated i
 
 Phase 1.5.1 through Phase 1.5.3 add authenticated Category Create, Tag Create, and draft-Post taxonomy assignment for the built-in `category` and `post_tag` taxonomies. Creation requires the current user's WordPress term-management capability, uses persistent idempotency, and records private bounded attribution. Assignment requires the taxonomy's actual assignment capability plus Post/object edit checks, replaces one bounded ID set with an expected-set precondition, and records private bounded attribution. Categories accept an optional validated parent; Tags are non-hierarchical. Custom taxonomies, implicit term creation, term update/delete, empty-set clearing, and publishing are not exposed.
 
+Phase 1.6 adds provider-neutral `wp-auto-seo-get` and draft-only `wp-auto-seo-update`, extending the Direct MCP runtime to exactly 23 ordered tools. Get reads bounded explicit title, description, canonical URL, focus keywords, and index/follow data on authorized built-in Posts/Pages. Update is restricted to authorized drafts and uses a best-effort state token plus final-state verification. Rank Math 1.0.278 is the only admitted provider; provider-native MCP/REST, arbitrary metadata, published-content SEO mutation, and outbound requests remain unavailable.
+
 No publish, delete, arbitrary content/file write, generic URL fetching, cloud, telemetry, or automation operation is included. Remote import runs only when an authenticated caller explicitly invokes it with a caller-selected URL; it is not a background or WP-Auto Cloud request.
 
 = Privacy and external services =
@@ -69,3 +71,5 @@ The WordPress connector is distributed under GPLv2 or later. Optional hosted WP-
 * Added authenticated `wp-auto-category-create` with capability checks, optional validated parents, persistent idempotency, and private bounded attribution.
 * Added authenticated `wp-auto-tag-create` with capability checks, persistent idempotency, and private bounded attribution.
 * Added authenticated `wp-auto-taxonomy-assign` for bounded exact Category/Tag replacement on draft Posts with expected-set concurrency, invariant checks, and private bounded attribution.
+* Added provider-neutral `wp-auto-seo-get` for bounded Rank Math 1.0.278 SEO reads.
+* Added draft-only `wp-auto-seo-update` with state-token concurrency, protected-state verification, and private bounded attribution.

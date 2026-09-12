@@ -1,12 +1,12 @@
 # Phase 1.6.3 SEO Integration and Security Validation
 
-Status: **implementation complete; Phase 1.6 seal pending final Git landing**
+Status: **implementation complete; Phase 1.6 formally sealed on `main`**
 
 Validation date: 2026-09-11
 
 This checkpoint completes the integration and security validation for the
 provider-neutral SEO Get and Draft Update tools. It adds no Ability or MCP
-tool. The candidate runtime remains exactly twenty-three ordered tools, with
+tool. The sealed runtime remains exactly twenty-three ordered tools, with
 `wp-auto-seo-get` followed by `wp-auto-seo-update` at the end of the dedicated
 allowlist.
 
@@ -143,6 +143,8 @@ review specifically checked capability enforcement, arbitrary-meta exposure,
 provider coexistence, state-token handling, secret isolation, dependency
 loading, uninstall scope, and outbound-request absence.
 
-After that review and GitHub Actions success, PR #24 may be changed from Draft
-to Ready. Phase 1.6 becomes formally sealed only after the review evidence and
-final commit range are recorded here. Phase 1.7 remains unauthorized.
+PR #24 was marked Ready and fast-forward merged to `main` at `c48ba31`; the
+post-merge PHP Quality workflow passed. Phase 1.6 is formally sealed on
+`main`. Phase 1.7.0 is the next documentation-only checkpoint for client
+acceptance and release-contract freeze; later runtime and release actions
+require explicit authorization.

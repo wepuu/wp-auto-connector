@@ -1,6 +1,6 @@
 # Phase 1.6.1 Rank Math SEO Get Validation
 
-Status: **Implementation checkpoint landed on `main`; Phase 1.6 seal deferred to 1.6.3**
+Status: **Implementation checkpoint landed on `main`; Phase 1.6 formally sealed with Phase 1.6.3**
 
 ## Scope
 
@@ -116,9 +116,10 @@ tools, documentation, ZIPs and provider plugin entry points were excluded.
   unrelated historical wp-env projects were left untouched. The user-provided
   source ZIPs under `D:\Codex` are not modified.
 
-## Remaining seal gates
+## Historical follow-up record
 
 This records a complete Phase 1.6.1 implementation checkpoint, including the
-final immutable range review and PR quality gate. The Phase 1.6.2 candidate is
-recorded separately in `PHASE_1_6_2_VALIDATION.md`; the formal Phase 1.6 seal is
-deferred to Phase 1.6.3.
+immutable range review and PR quality gate. Phase 1.6.2 and Phase 1.6.3 are
+recorded separately and are formally sealed on `main`; the current follow-up
+checkpoint is the documentation-only Phase 1.7.0 client/release contract
+freeze.

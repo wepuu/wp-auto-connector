@@ -1,6 +1,6 @@
 # Phase 1.6.0.1 MCP Adapter Coexistence Validation
 
-Status: **Implementation checkpoint landed on `main`; Phase 1.6 seal deferred to 1.6.3**
+Status: **Implementation checkpoint landed on `main`; Phase 1.6 formally sealed with Phase 1.6.3**
 
 Validation date: 2026-09-10
 

@@ -100,8 +100,8 @@ Phase 1.6.0 froze the provider-neutral SEO contract in
 `PHASE_1_6_SEO_CONTRACTS.md` and the provider-safety decision in
 `ADR-007-SEO-PROVIDER-ABSTRACTION.md`. It added no Ability and left the
 runtime at exactly twenty-one tools. Phase 1.6.1 appends `wp-auto/seo-get` and
-Phase 1.6.2 appends `wp-auto/seo-update`; after the Phase 1.6.3 integration
-seal, the runtime exposes exactly twenty-three ordered tools. Get reads only
+Phase 1.6.2 appends `wp-auto/seo-update`; the Phase 1.6.3 integration seal is
+landed on `main`, and the runtime exposes exactly twenty-three ordered tools. Get reads only
 explicit title, description, canonical URL, focus keywords, and index/follow
 directives on authorized built-in Posts/Pages; Update is restricted to
 authorized drafts and uses a best-effort state token. Rank Math is the first
