@@ -5,9 +5,10 @@ gates remain open**
 
 Validation date: 2026-09-12
 
-Baseline: `main@c48ba31` plus the uncommitted Phase 1.7 documentation and probe
-changes. This checkpoint does not modify production PHP, public schemas,
-Composer manifests, persistence, or the ordered twenty-three-tool runtime.
+Baseline: `main@c48ba31`; the Phase 1.7 documentation and probe candidate is
+carried by PR #25. This checkpoint does not modify production PHP, public
+schemas, Composer manifests, persistence, or the ordered twenty-three-tool
+runtime.
 
 ## Scope and admitted artifacts
 
@@ -130,7 +131,8 @@ and metadata normalization failures remain covered by the unit suite.
 | `composer audit --locked` | PASS - no advisories |
 | Production Composer install dry-run | PASS |
 | `git diff --check` | PASS |
-| Codex Security exact-range diff scan | PASS - scan `5c96482a-ea3a-405a-a17b-374562203517`; immutable `daecd1a..c48ba31`, 18 changed source/config files, complete coverage, zero findings |
+| Phase 1.6 runtime Codex Security scan | PASS - scan `5c96482a-ea3a-405a-a17b-374562203517`; immutable `daecd1a..c48ba31`, 18 changed source/config files, complete coverage, zero findings |
+| Phase 1.7 candidate Codex Security scan | PASS - scan `f1c0d5a1-62cd-43fe-9481-aedd2b40dc5c`; immutable `c48ba31..334bdd6`, complete coverage, zero findings |
 
 ## Cleanup and remaining gate
 
@@ -142,11 +144,12 @@ temporary build and project `.codex` directories were removed. No credential,
 machine path, test object identifier, or client transcript is intended for
 source control.
 
-The current uncommitted Phase 1.7.1 documentation/probe changes were checked
-separately for diff whitespace, credential literals, generated files, and
-unapproved external calls; no finding was observed. The immutable security
-scan intentionally excludes those uncommitted files and records that boundary
-in its coverage manifest.
+The committed Phase 1.7.1 documentation/probe candidate was checked for diff
+whitespace, credential literals, generated files, unapproved external calls,
+unsafe client configuration, and runtime/documentation divergence. Its
+immutable range scan completed with full coverage and zero findings. The final
+landing-only evidence correction is scanned again after commit and recorded in
+the PR evidence, avoiding any claim that an uncommitted file was covered.
 
 Phase 1.7.1 local client acceptance is complete: MCP Inspector, Codex CLI,
 WorkBuddy, and Codex Desktop all passed their required local lanes. Remote
