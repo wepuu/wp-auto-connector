@@ -12,19 +12,26 @@ Phase 1.3 and Phase 1.4 are complete and formally sealed on `main`. The image-on
 
 Phase 1.5.0 froze the taxonomy mutation contract and safety architecture. Phase 1.5.1 through Phase 1.5.3 implement the built-in `wp-auto-category-create`, `wp-auto-tag-create`, and `wp-auto-taxonomy-assign` tools. Create operations require the fixed taxonomy `manage_terms` capability, Core-owned slug/description fields, persistent site/actor/key idempotency, and private bounded attribution. Assignment replaces one bounded Category or Tag ID set on an authorized draft Post after the taxonomy `assign_terms`, Post edit, and object checks, with an expected-set precondition and private bounded attribution. Categories accept an optional validated parent; Tags remain non-hierarchical. The Direct MCP allowlist is exactly twenty-one tools. Phase 1.5.4 is formally sealed after WordPress 6.9/7.1, Plugin Check 2.1.0 static/runtime, MCP, uninstall, Multisite, concurrency/state-integrity, and security gates passed. Assignment remains best-effort non-CAS; clients must re-read after `wp_auto_taxonomy_state_uncertain`.
 
-Phase 1.6 is implemented and formally sealed pending final Git landing. It
-freezes the provider-neutral SEO contract and exposes exactly twenty-three
-ordered tools: `wp-auto-seo-get` followed by draft-only
+Phase 1.6.0 through Phase 1.6.3 are formally sealed and landed on `main` at
+`c48ba31`. The phase freezes the provider-neutral SEO contract and exposes
+exactly twenty-three ordered tools: `wp-auto-seo-get` followed by draft-only
 `wp-auto-seo-update`. Get is available for authorized built-in Posts/Pages,
 and Update is limited to authorized drafts. The public fields are explicit
 title, description, canonical URL, focus keywords, and index/follow directives.
 Rank Math is the first independent internal adapter; provider MCP, REST,
 Content AI, arbitrary metadata, site-wide settings, and outbound requests are
 not part of the contract. WordPress 6.9/7.1 single-site and Multisite,
-authenticated MCP, Plugin Check 2.1.0, uninstall, and working-tree security
+authenticated MCP, Plugin Check 2.1.0, uninstall, and exact-range security
 validation pass; the robots input order is normalized before strict final-state
-comparison. The immutable `origin/main..HEAD` security scan remains the final
-Git-landing gate. See
+comparison. Phase 1.7.0 is the completed documentation checkpoint for client
+acceptance and release-contract freeze. Phase 1.7.1 now contains development-
+only client setup and protocol-probe tooling. MCP Inspector, Codex CLI, and
+WorkBuddy canonical 23-tool workflow evidence passes; the Codex Desktop
+read-only smoke also passes its local lane, while remote HTTPS validation and
+release hardening remain open.
+Claude Code is optional when Pro/Max/API authorization is available; the
+runtime is unchanged.
+See
 `docs/PHASE_1_6_SEO_CONTRACTS.md`, `docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md`,
 and `docs/PHASE_1_6_3_VALIDATION.md`.
 
@@ -63,9 +70,16 @@ Start with:
 - `docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md`
 - `docs/ADR-008-MCP-ADAPTER-COEXISTENCE.md`
 - `docs/PHASE_1_6_0_VALIDATION.md`
+- `docs/PHASE_1_6_0_1_VALIDATION.md`
 - `docs/PHASE_1_6_1_VALIDATION.md`
 - `docs/PHASE_1_6_2_VALIDATION.md`
 - `docs/PHASE_1_6_3_VALIDATION.md`
+- `docs/PHASE_1_7_CLIENT_ACCEPTANCE.md`
+- `docs/PHASE_1_7_CLIENT_SETUP.md`
+- `docs/PHASE_1_7_RELEASE_CONTRACT.md`
+- `docs/PHASE_1_7_0_VALIDATION.md`
+- `docs/PHASE_1_7_1_VALIDATION.md`
+- `tools/phase-1-7-client-probe.ps1`
 - `docs/WORDPRESS_ORG_COMPLIANCE.md`
 - `docs/CODEX_FIRST_PROMPT.md`
 

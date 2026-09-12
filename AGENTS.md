@@ -12,14 +12,16 @@ Phase 1.1 is complete: the direct MCP server foundation proves the authenticated
 
 Phase 1.2 is complete: all eight read-only tools passed the frozen contract, permission, privacy, schema, bounded-query, and live MCP validation gates.
 
-Phase 1.3.0 through Phase 1.3.4 and Phase 1.4.0 through Phase 1.4.6 are formally sealed on `main`. Phase 1.3.3 resolved SEC-1, SEC-2, and SEC-3; landed the ADR-003 atomic ownership runtime and ADR-004 uninstall cleanup; enforced HTTPS for remote Direct MCP with an exact local-development exception; and completed a zero-finding exact-main security audit. Phase 1.3.4 then completed full real-WordPress and Streamable HTTP mutation integration validation without changing the exact twelve-tool runtime. Phase 1.4 implemented and validated the image-only Media surface through an exact eighteen-tool runtime. Phase 1.5.0 froze the taxonomy mutation contracts and ADR-006 safety boundary; Phase 1.5.1 Category Create, Phase 1.5.2 Tag Create, and Phase 1.5.3 draft-Post taxonomy assignment extend the runtime to exactly twenty-one tools and are formally sealed by the Phase 1.5.4 integration/security validation. Phase 1.6.0 freezes the provider-neutral SEO contract and ADR-007 safety boundary without adding a tool. Phase 1.6.0.1 and Phase 1.6.1 are landed on `main`: ADR-008 isolates locked MCP Adapter 0.6.1 from admitted Rank Math 1.0.278's public Adapter 0.5.0, and the independent provider-neutral `wp-auto/seo-get` extends the runtime to exactly twenty-two tools. Phase 1.6.2 is implemented as the current candidate; Phase 1.6.3 remains the authorized integration/security seal, and later work remains unauthorized. The approved public identity is `WePuu Auto Connector` with slug, main-file basename, and text domain `wepuu-auto-connector`.
+Phase 1.3.0 through Phase 1.3.4 and Phase 1.4.0 through Phase 1.4.6 are formally sealed on `main`. Phase 1.3.3 resolved SEC-1, SEC-2, and SEC-3; landed the ADR-003 atomic ownership runtime and ADR-004 uninstall cleanup; enforced HTTPS for remote Direct MCP with an exact local-development exception; and completed a zero-finding exact-main security audit. Phase 1.3.4 then completed full real-WordPress and Streamable HTTP mutation integration validation without changing the exact twelve-tool runtime. Phase 1.4 implemented and validated the image-only Media surface through an exact eighteen-tool runtime. Phase 1.5.0 froze the taxonomy mutation contracts and ADR-006 safety boundary; Phase 1.5.1 Category Create, Phase 1.5.2 Tag Create, and Phase 1.5.3 draft-Post taxonomy assignment extend the runtime to exactly twenty-one tools and are formally sealed by the Phase 1.5.4 integration/security validation. Phase 1.6.0 freezes the provider-neutral SEO contract and ADR-007 safety boundary without adding a tool. Phase 1.6.0.1 and Phase 1.6.1 are landed on `main`: ADR-008 isolates locked MCP Adapter 0.6.1 from admitted Rank Math 1.0.278's public Adapter 0.5.0, and the independent provider-neutral `wp-auto/seo-get` extends the runtime to exactly twenty-two tools. Phase 1.6.2 and Phase 1.6.3 are formally sealed on `main` at `c48ba31`, producing the exact twenty-three-tool runtime. Phase 1.7.0 is the completed documentation checkpoint and Phase 1.7.1 local client acceptance is complete; MCP Inspector, Codex CLI, WorkBuddy canonical workflow validation, and the Codex Desktop read-only smoke pass, while remote HTTPS and release work remain pending. The approved public identity is `WePuu Auto Connector` with slug, main-file basename, and text domain `wepuu-auto-connector`.
 
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
-The Phase 1.6.2 SEO Update implementation and Phase 1.6.3 integration/security
-validation are the current candidate; final Git landing is pending. Do not
-begin later SEO or roadmap phases before Phase 1.6.3 is landed and explicitly
-closed.
+Phase 1.6.0 through Phase 1.6.3 are formally sealed on `main` at `c48ba31`.
+Phase 1.7.0 freezes the client-acceptance and release contracts as a
+documentation-only checkpoint. Phase 1.7.1 now has a development-only client
+setup guide and protocol probe; the required Codex CLI and WorkBuddy canonical
+workflows pass, as does the Codex Desktop read-only smoke, while remote HTTPS
+and release work remain pending.
 
 ## Phase 1 product acceptance target
 
@@ -34,7 +36,7 @@ A site administrator installs WePuu Auto Connector, configures an authenticated 
 7. read and update supported SEO metadata;
 8. do all of the above without receiving publish/delete/admin privileges by default.
 
-Phase 1 is not complete until at least Claude Code and one additional standard MCP client can complete the documented end-to-end acceptance scenario.
+Phase 1 is not complete until Codex CLI and WorkBuddy can each complete the documented end-to-end acceptance scenario. MCP Inspector is the protocol oracle and Codex Desktop must complete a read-only smoke test. Claude Code is an optional compatibility lane when a Pro, Max, or API-authorized account is available.
 
 ## Product invariants
 

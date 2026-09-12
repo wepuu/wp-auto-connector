@@ -129,22 +129,31 @@ Delivery checkpoints:
 2. **Phase 1.6.0.1 - SEO Provider Artifact Admission and MCP Adapter Coexistence (complete; landed on main):** admits the pinned Rank Math 1.0.278, Yoast 28.4, and AIOSEO 5.0.1.1 packages; isolates WePuu's locked MCP Adapter 0.6.1 runtime from provider load order; and validates that the dedicated server still exposes exactly twenty-one ordered tools.
 3. **Phase 1.6.1 - Rank Math Adapter and SEO Get (complete; landed on main):** implements the independent internal Rank Math 1.0.278 read adapter and exposes only `wp-auto/seo-get`, producing the exact twenty-two-tool runtime without provider REST/MCP or outbound requests.
 4. **Phase 1.6.2 - Draft SEO Update (complete; formally sealed with Phase 1.6.3):** exposes only `wp-auto/seo-update` for authorized Post/Page drafts, including state-token checks, invariant verification, bounded attribution, and uninstall cleanup; the sealed runtime is exactly twenty-three tools.
-5. **Phase 1.6.3 - Integration and Security Seal (implementation complete; final Git landing pending):** WordPress 6.9/7.1, authenticated Streamable HTTP, provider absence/conflict, state integrity, no outbound requests, Plugin Check, uninstall, and exact-diff security validation complete without adding tools. The final immutable security review and documentation commit must land before the Phase 1.6 seal is marked complete.
+5. **Phase 1.6.3 - Integration and Security Seal (complete; formally sealed on `main`):** WordPress 6.9/7.1, authenticated Streamable HTTP, provider absence/conflict, state integrity, no outbound requests, Plugin Check, uninstall, and exact-diff security validation completed without adding tools. Phase 1.6 is formally sealed on `main` at `c48ba31` with the exact twenty-three-tool runtime.
 
 The authoritative contract is `docs/PHASE_1_6_SEO_CONTRACTS.md`; the accepted
 provider and safety decision is `docs/ADR-007-SEO-PROVIDER-ABSTRACTION.md`;
 the coexistence decision is `docs/ADR-008-MCP-ADAPTER-COEXISTENCE.md`; the
 documentation freeze evidence is `docs/PHASE_1_6_0_VALIDATION.md`; the SEO Get
-candidate evidence is `docs/PHASE_1_6_1_VALIDATION.md`; the SEO Update and
+implementation evidence is `docs/PHASE_1_6_1_VALIDATION.md`; the SEO Update and
 integration evidence is `docs/PHASE_1_6_2_VALIDATION.md` and
 `docs/PHASE_1_6_3_VALIDATION.md`.
 
 ### Phase 1.7 - Client compatibility and release hardening
 
+Phase 1.7.0 is complete as the documentation checkpoint. Current checkpoint:
+**Phase 1.7.1 - Client Compatibility Validation (local acceptance complete)**.
+The development-only client setup guide and protocol probe are in place. MCP
+Inspector, Codex CLI, WorkBuddy, and the Codex Desktop read-only smoke all pass
+their local lanes. Remote HTTPS validation and release hardening remain
+pending. The production code, dependencies, persistence, and twenty-three-tool
+order are unchanged.
+
 Target clients:
-- Claude Code;
-- WorkBuddy/CodeBuddy-compatible MCP client;
-- MCP Inspector/custom standards-compliant client;
+- Codex CLI and Codex Desktop smoke;
+- WorkBuddy 2.137.1-compatible MCP client;
+- MCP Inspector/custom standards-compliant MCP client;
+- Claude Code when Pro/Max/API authorization is available (optional);
 - ChatGPT direct compatibility where the current client capability permits it.
 
 Scope:
