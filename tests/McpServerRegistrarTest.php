@@ -32,8 +32,8 @@ use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAssignAbility;
 use WPAuto\Connector\Abilities\Seo\SeoGetAbility;
 use WPAuto\Connector\Abilities\Seo\SeoUpdateAbility;
+use WPAuto\Connector\Mcp\McpErrorHandler;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
-use WPAuto\Connector\PrivateMcp\WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
 use WPAuto\Connector\PrivateMcp\WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
 use WPAuto\Connector\PrivateMcp\WP\MCP\Transport\HttpTransport;
 
@@ -97,7 +97,7 @@ final class McpServerRegistrarTest extends TestCase {
 		self::assertSame( 'wp-auto', $adapter->arguments[1] );
 		self::assertSame( 'mcp', $adapter->arguments[2] );
 		self::assertSame( array( HttpTransport::class ), $adapter->arguments[6] );
-		self::assertSame( ErrorLogMcpErrorHandler::class, $adapter->arguments[7] );
+		self::assertSame( McpErrorHandler::class, $adapter->arguments[7] );
 		self::assertSame( NullMcpObservabilityHandler::class, $adapter->arguments[8] );
 		self::assertSame(
 			array(

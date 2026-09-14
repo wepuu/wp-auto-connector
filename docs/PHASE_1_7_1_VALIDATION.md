@@ -1,7 +1,7 @@
 # Phase 1.7.1 Local Client Compatibility Validation
 
-Status: **local client acceptance complete; Phase 1.7 release and remote HTTPS
-gates remain open**
+Status: **local client acceptance complete; remote Codex and WorkBuddy acceptance
+subsequently completed; final Phase 1.7 release gates remain open**
 
 Validation date: 2026-09-12
 
@@ -153,5 +153,7 @@ the PR evidence, avoiding any claim that an uncommitted file was covered.
 
 Phase 1.7.1 local client acceptance is complete: MCP Inspector, Codex CLI,
 WorkBuddy, and Codex Desktop all passed their required local lanes. Remote
-HTTPS validation and formal Phase 1.7 release sealing remain separate gates;
-Phase 2/Cloud, telemetry, and new MCP tools remain out of scope.
+Codex and WorkBuddy acceptance subsequently completed the authenticated
+twenty-three-tool workflow. Site-scoped post-cleanup log evidence and formal
+Phase 1.7 release sealing remain separate gates; Phase 2/Cloud, telemetry, and
+new MCP tools remain out of scope.

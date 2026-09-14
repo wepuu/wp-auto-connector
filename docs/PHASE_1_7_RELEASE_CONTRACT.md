@@ -1,6 +1,6 @@
 # Phase 1.7 Release Contract
 
-Status: **Phase 1.7.0 documentation freeze; no release candidate declared**
+Status: **Phase 1.7.5 observability hardening locally validated; immutable-package, remote site-scoped log, immutable-range security review, and Git landing pending; no release candidate declared**
 
 Baseline: `main@c48ba31`
 
@@ -24,6 +24,14 @@ documentation, tests, tools, fixtures, build/cache directories, `node_modules`,
 ZIP archives, credentials, logs, generated diagnostics, provider plugin entry
 points, and the provider's public MCP Adapter 0.5.0. No generated file may
 silently replace human-readable source.
+
+Archive entry names must use the ZIP-standard `/` path separator on every
+build host. A backslash in any entry name is a build failure. Every entry must
+be below the single `wepuu-auto-connector/` root, and the exact main plugin
+entry must be `wepuu-auto-connector/wepuu-auto-connector.php`. The canonical
+local build command is `composer build:release`; its generated manifest records
+the ordered file list, hashes, source commit, private runtime, and final ZIP
+hash.
 
 ## Dependency and license review
 
@@ -62,6 +70,11 @@ Before a release decision, the package must pass:
 - no more than five readme tags and complete disclosure for caller-triggered
   remote image import before any release that ships it.
 
+The exact generated ZIP, rather than only its staging directory, must also be
+installed and activated on a Linux-based WordPress environment. WordPress must
+resolve the plugin basename as
+`wepuu-auto-connector/wepuu-auto-connector.php` before the archive is accepted.
+
 ## Compatibility and security gates
 
 The release evidence must include the client contract in
@@ -71,6 +84,13 @@ capability enforcement, authentication and Origin handling, provider
 coexistence, dependency loading, uninstall scope, output privacy, and the
 absence of outbound requests. Dynamic provider tools and arbitrary WordPress
 administration remain unavailable.
+
+Expected, structured connector 4xx results are client control flow and must not
+be written to PHP stderr. Unexpected error families, state-uncertain/5xx
+results, transport failures, and thrown exceptions must remain visible through
+fixed event names and bounded, non-sensitive context. A release candidate must
+prove both behaviors without logging request arguments, content, URLs,
+credentials, Authorization, exception text, or arbitrary provider state.
 
 ## Version policy
 

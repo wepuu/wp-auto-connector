@@ -83,4 +83,10 @@ build directories, and verify a clean evidence tree.
 Phase 1.7.1 local acceptance is complete: Codex CLI and WorkBuddy completed
 the canonical and core negative scenarios, Codex Desktop passed its read-only
 smoke, Inspector confirmed the exact protocol, and all quality gates passed.
-Remote HTTPS and formal Phase 1.7 release sealing remain subsequent gates.
+Phase 1.7.3 remote Codex and Phase 1.7.4 remote WorkBuddy acceptance completed
+the authenticated 23-tool workflow and low-privilege negative checks.
+Temporary-account revocation and fixture cleanup are complete. Phase 1.7.5
+locally proves that a successful read and expected 404 retain their MCP results
+without producing PHP runtime or connector error-log entries. Immutable-package
+and remote site-scoped log evidence plus formal Phase 1.7 release sealing remain
+subsequent gates.

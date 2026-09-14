@@ -103,6 +103,11 @@ These expected WP_Error results are currently emitted at the connector's
 indicating a PHP fatal. Changing their severity or routing is an observability
 change outside this acceptance checkpoint and is not applied here.
 
+Phase 1.7.5 subsequently implements and locally validates that observability
+change through a connector-owned handler. The remote package used by this
+record predates the handler and must be replaced before the final remote
+site-scoped clean-log gate.
+
 ## Boundary
 
 This checkpoint adds no production PHP, dependency, persistence, schema, or

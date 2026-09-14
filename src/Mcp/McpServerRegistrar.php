@@ -30,7 +30,6 @@ use WPAuto\Connector\Abilities\Taxonomy\CategoryCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagCreateAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAssignAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagsListAbility;
-use WPAuto\Connector\PrivateMcp\WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler;
 use WPAuto\Connector\PrivateMcp\WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
 use WPAuto\Connector\PrivateMcp\WP\MCP\Transport\HttpTransport;
 use WP_Error;
@@ -73,7 +72,7 @@ final class McpServerRegistrar {
 			'Direct access to explicitly exposed WP-Auto WordPress abilities.',
 			WP_AUTO_CONNECTOR_VERSION,
 			array( HttpTransport::class ),
-			ErrorLogMcpErrorHandler::class,
+			McpErrorHandler::class,
 			NullMcpObservabilityHandler::class,
 			array(
 				SiteHealthAbility::NAME,

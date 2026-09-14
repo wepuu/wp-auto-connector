@@ -96,11 +96,12 @@ require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Seo/SeoAbilityCategory.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Seo/SeoGetAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Abilities/Seo/SeoUpdateAbility.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Mcp/McpAdapterLoader.php';
+if ( WPAuto\Connector\Mcp\McpAdapterLoader::load() ) {
+	require_once WP_AUTO_CONNECTOR_DIR . 'src/Mcp/McpErrorHandler.php';
+}
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Mcp/McpServerRegistrar.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Admin/AdminPage.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Plugin.php';
-
-WPAuto\Connector\Mcp\McpAdapterLoader::load();
 
 register_activation_hook( __FILE__, array( 'WPAuto\\Connector\\Plugin', 'activate' ) );
 

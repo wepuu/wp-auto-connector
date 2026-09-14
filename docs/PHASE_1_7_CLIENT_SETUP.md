@@ -1,6 +1,6 @@
 # Phase 1.7 Client Setup Guide
 
-Status: **Phase 1.7.1 local client acceptance complete; remote HTTPS and release gates remain open**
+Status: **Phase 1.7.5 observability hardening locally validated; immutable-package, remote site-scoped log, and release gates remain open**
 
 This guide uses only process-local credentials and temporary configuration.
 Never paste an Application Password into a committed file or recorded log.

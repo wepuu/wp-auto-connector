@@ -27,8 +27,15 @@ comparison. Phase 1.7.0 is the completed documentation checkpoint for client
 acceptance and release-contract freeze. Phase 1.7.1 now contains development-
 only client setup and protocol-probe tooling. MCP Inspector, Codex CLI, and
 WorkBuddy canonical 23-tool workflow evidence passes; the Codex Desktop
-read-only smoke also passes its local lane, while remote HTTPS validation and
-release hardening remain open.
+read-only smoke also passes its local lane. Phase 1.7.2 adds a cross-platform
+release builder that rejects Windows separators inside ZIP entries; the exact
+generated ZIP installs and activates on WordPress 7.1/PHP 8.2 and retains the
+strict twenty-three-tool order. Phase 1.7.3 remote Codex and Phase 1.7.4
+remote WorkBuddy acceptance both pass; temporary-account revocation and fixture
+cleanup are complete. Phase 1.7.5 locally validates redacted MCP error handling
+that keeps expected client rejections out of PHP stderr without changing client
+results. Formal release sealing remains open pending immutable-package, remote
+site-scoped log, immutable-range security, and Git landing gates.
 Claude Code is optional when Pro/Max/API authorization is available; the
 runtime is unchanged.
 See
@@ -79,6 +86,10 @@ Start with:
 - `docs/PHASE_1_7_RELEASE_CONTRACT.md`
 - `docs/PHASE_1_7_0_VALIDATION.md`
 - `docs/PHASE_1_7_1_VALIDATION.md`
+- `docs/PHASE_1_7_2_VALIDATION.md`
+- `docs/PHASE_1_7_3_REMOTE_CODEX_VALIDATION.md`
+- `docs/PHASE_1_7_4_REMOTE_WORKBUDDY_VALIDATION.md`
+- `docs/PHASE_1_7_5_VALIDATION.md`
 - `tools/phase-1-7-client-probe.ps1`
 - `docs/WORDPRESS_ORG_COMPLIANCE.md`
 - `docs/CODEX_FIRST_PROMPT.md`

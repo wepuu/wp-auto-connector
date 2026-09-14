@@ -25,6 +25,7 @@ namespace {
 	$GLOBALS['wp_auto_test_environment_type']    = 'production';
 	$GLOBALS['wp_auto_test_application_passwords_supported'] = null;
 	$GLOBALS['wp_auto_test_application_passwords_available'] = false;
+	$GLOBALS['wp_auto_test_error_log']             = array();
 	$GLOBALS['wp_auto_test_current_user_id_calls'] = 0;
 	$GLOBALS['wp_auto_test_before_current_user_id'] = null;
 	$GLOBALS['wp_auto_test_current_user_can_calls'] = 0;
@@ -2075,6 +2076,11 @@ namespace WPAuto\Connector\Diagnostics {
 }
 
 namespace WPAuto\Connector\Mcp {
+	function error_log( string $message ): bool {
+		$GLOBALS['wp_auto_test_error_log'][] = $message;
+		return true;
+	}
+
 	function add_action( string $hook, callable $callback ): void {
 		$GLOBALS['wp_auto_test_hooks'][ $hook ] = $callback;
 		$GLOBALS['wp_auto_test_hook_history'][ $hook ][] = $callback;
@@ -2175,6 +2181,8 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Abilities/Seo/SeoGetAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Abilities/Seo/SeoUpdateAbility.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpAdapterLoader.php';
+	require_once dirname( __DIR__ ) . '/vendor/wp-auto-mcp-runtime/autoload.php';
+	require_once dirname( __DIR__ ) . '/src/Mcp/McpErrorHandler.php';
 	require_once dirname( __DIR__ ) . '/src/Mcp/McpServerRegistrar.php';
 	require_once dirname( __DIR__ ) . '/src/Plugin.php';
 }

@@ -141,13 +141,26 @@ integration evidence is `docs/PHASE_1_6_2_VALIDATION.md` and
 
 ### Phase 1.7 - Client compatibility and release hardening
 
-Phase 1.7.0 is complete as the documentation checkpoint. Current checkpoint:
-**Phase 1.7.1 - Client Compatibility Validation (local acceptance complete)**.
+Phase 1.7.0 is complete as the documentation checkpoint. Phase 1.7.1 client
+compatibility validation is complete locally. Phase 1.7.3 remote Codex and
+Phase 1.7.4 remote WorkBuddy acceptance are complete. Current checkpoint:
+**Phase 1.7.5 - MCP error-log hardening locally validated; immutable-package,
+remote site-scoped log, immutable-range security, and Git landing gates pending**.
 The development-only client setup guide and protocol probe are in place. MCP
 Inspector, Codex CLI, WorkBuddy, and the Codex Desktop read-only smoke all pass
-their local lanes. Remote HTTPS validation and release hardening remain
-pending. The production code, dependencies, persistence, and twenty-three-tool
-order are unchanged.
+their local lanes. The release builder now rejects non-portable ZIP entry
+separators and the exact generated archive installs, activates, and exposes the
+ordered twenty-three-tool server on WordPress 7.1/PHP 8.2. Remote Codex
+validation also passes, and the remote WorkBuddy workflow and fixture cleanup
+pass. Temporary-account revocation and fixture cleanup are complete. The
+shared-host log excerpt does not certify a site-scoped post-cleanup clean-log
+window. Phase 1.7.5 adds a connector-owned, redacted MCP error handler so
+expected client rejections no longer enter PHP stderr while internal failures
+remain visible. Its local WordPress 7.1/PHP 8.1 probe passes with a zero-byte
+clean log. Formal release sealing remains pending until the new candidate is
+committed, rebuilt as an immutable package, deployed to the remote test site,
+and passes the remaining immutable-range security and Git landing gates. Dependencies,
+persistence, public schemas, and the twenty-three-tool order are unchanged.
 
 Target clients:
 - Codex CLI and Codex Desktop smoke;
