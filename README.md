@@ -34,8 +34,9 @@ strict twenty-three-tool order. Phase 1.7.3 remote Codex and Phase 1.7.4
 remote WorkBuddy acceptance both pass; temporary-account revocation and fixture
 cleanup are complete. Phase 1.7.5 locally validates redacted MCP error handling
 that keeps expected client rejections out of PHP stderr without changing client
-results. Formal release sealing remains open pending the remote site-scoped log
-and Git landing gates.
+results, and the remote site-scoped PHP-FPM/Nginx review window is clean.
+Formal release sealing remains open pending Git landing and revocation of the
+temporary remote credential.
 Claude Code is optional when Pro/Max/API authorization is available; the
 runtime is unchanged.
 See

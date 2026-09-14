@@ -1,8 +1,8 @@
 # Phase 1.7.5 MCP Error Logging Validation
 
-Status: **local observability hardening candidate complete; immutable package and
-Plugin Check gates complete; remote site-scoped log evidence and Git landing
-remain pending**
+Status: **local observability hardening candidate complete; immutable package,
+Plugin Check, and remote site-scoped log gates complete; Git landing remains
+pending**
 
 Development baseline: `main@864da2df1daea0326798cec2ffd50fb7204cd937`.
 Implementation commits: `cb02fd2`, `6431d04`, `bdafbab`; the final package
@@ -98,8 +98,33 @@ and identical per-file manifests. The build environment must keep these inputs
 fixed; an earlier comparison used different environment inputs and was not a
 valid reproducibility test.
 
-The fixed candidate must also be installed on the remote HTTPS test site before
-capturing the site-scoped post-cleanup log window. The currently installed
-remote package predates this handler. Remote deployment, credentials, server
-log access, Git operations, versioning, tagging, and WordPress.org submission
-are not performed by this checkpoint.
+The fixed candidate has now been installed on the remote HTTPS test site, and
+the site-scoped post-cleanup log review passes for the recorded window. Git
+operations, versioning, tagging, and WordPress.org submission are not performed
+by this checkpoint.
+
+## Remote HTTPS candidate spot-check
+
+The fixed release candidate was installed on the administrator-provided remote
+HTTPS test site and exercised with process-local credentials. The redacted
+results below contain no usernames, object IDs, authorization values, URLs
+beyond the documented endpoint, or response bodies:
+
+| Gate | Result |
+| --- | --- |
+| Repository protocol probe | PASS - HTTPS, MCP 2025-06-18, required client commands present |
+| Authenticated `initialize` and strict `tools/list` | PASS - exactly 23 tools in catalog order |
+| `wp-auto-site-health` | PASS - WordPress 7.1, PHP 8.2.28, HTTPS and Adapter 0.6.1 reported healthy |
+| Absent `wp-auto-post-get` target | PASS - expected `isError` existence-hidden result |
+| Anonymous `initialize` | PASS - HTTP 401 |
+| Mutation/deletion side effects | PASS - none requested |
+| Local credential cleanup | PASS - DPAPI file removed after the run |
+| Site-scoped PHP-FPM/Nginx review | PASS - no matching records in PHP-FPM or site/global Nginx error logs; WordPress `debug.log` absent |
+
+The final authenticated read-only request completed in the server-log review
+window `2026-09-14T08:51:08Z` through `2026-09-14T08:51:12Z`. The root SSH
+review of `/www/server/php/82/var/log/php-fpm.log`,
+`/www/wwwlogs/www.itravoce.com.error.log`, and `/www/wwwlogs/nginx_error.log`
+returned no records in that window; the WordPress `debug.log` file was absent.
+The temporary remote Application Password must still be revoked by the site
+administrator.
