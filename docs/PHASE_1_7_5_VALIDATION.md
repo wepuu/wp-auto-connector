@@ -1,12 +1,11 @@
 # Phase 1.7.5 MCP Error Logging Validation
 
-Status: **local observability hardening candidate complete; immutable release
-package, remote site-scoped log evidence, immutable-range review, and Git landing
+Status: **local observability hardening candidate complete; immutable package and
+Plugin Check gates complete; remote site-scoped log evidence and Git landing
 remain pending**
 
 Development baseline: `main@864da2df1daea0326798cec2ffd50fb7204cd937`.
-The implementation is currently an uncommitted working-tree candidate and is
-not a release artifact.
+Implementation commits: `cb02fd2`, `6431d04`, `bdafbab`.
 
 ## Scope and decision
 
@@ -44,6 +43,9 @@ persistence, and exact twenty-three-tool order are unchanged.
 | `composer audit --locked` | PASS - no advisories |
 | Production install dry-run | PASS |
 | Working-tree security diff scan | PASS - complete coverage, zero findings |
+| Immutable-range security scan (`864da2df..bdafbab`) | PASS - complete coverage, zero findings |
+| Plugin Check 2.1.0 default strict | PASS - exit 0, zero errors/warnings |
+| Plugin Check 2.1.0 runtime-enabled `cli.php` | PASS - exit 0, zero errors/warnings |
 
 The unit matrix proves that normal connector 403/404/409 results and transport
 denials produce no PHP log line, while state-uncertain/5xx and unexpected
@@ -55,8 +57,8 @@ Codex Security scan `79f76cc1-0a09-45aa-9cbb-d7a86ac7ebe0` reviewed all five
 security-relevant working-tree files reported by its deterministic inventory:
 the Composer command registration, custom error handler, MCP server registrar,
 release builder, and plugin bootstrap. Coverage was complete with zero
-findings. Because the source is not yet an immutable commit, this result does
-not replace the final post-commit range review.
+findings. The final immutable range review `176a2f58-3d9c-462a-9868-68293e4be0e3`
+also completed with zero findings across all five security-relevant files.
 
 ## Real WordPress validation
 
@@ -83,11 +85,12 @@ extracted archives, configuration, and probe files were removed.
 
 ## Remaining release gates
 
-This run mounted the working source and therefore is not evidence for an
-immutable exact-ZIP release candidate. After Git landing authorization, the
-candidate must be committed, rebuilt from the immutable commit, and pass exact
-ZIP activation, Plugin Check 2.1.0 static/runtime-enabled checks, and the final
-immutable security range review.
+The immutable ZIP built from `bdafbab` has SHA-256
+`4327ef1c910c64735eb2fda3ad2500b904ac4af7d8bd4b5074cb78aed06ec3da`, contains
+651 production entries, and its extracted payload activated on WordPress 7.1.
+Both Plugin Check 2.1.0 modes passed with exit code 0 and no errors or warnings.
+After this documentation-only evidence update, rebuild once more so the final
+package manifest points at the final candidate commit.
 
 The fixed candidate must also be installed on the remote HTTPS test site before
 capturing the site-scoped post-cleanup log window. The currently installed
