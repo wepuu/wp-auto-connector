@@ -5,7 +5,8 @@ Plugin Check gates complete; remote site-scoped log evidence and Git landing
 remain pending**
 
 Development baseline: `main@864da2df1daea0326798cec2ffd50fb7204cd937`.
-Implementation commits: `cb02fd2`, `6431d04`, `bdafbab`.
+Implementation commits: `cb02fd2`, `6431d04`, `bdafbab`; the final package
+manifest records the complete candidate commit.
 
 ## Scope and decision
 
@@ -85,12 +86,11 @@ extracted archives, configuration, and probe files were removed.
 
 ## Remaining release gates
 
-The immutable ZIP built from `bdafbab` has SHA-256
-`4327ef1c910c64735eb2fda3ad2500b904ac4af7d8bd4b5074cb78aed06ec3da`, contains
+The immutable ZIP has SHA-256
+`5b772b6b2f3bbd6f5026df2faecfe8164b173bed1f16bb8b81bd38129da2153f`, contains
 651 production entries, and its extracted payload activated on WordPress 7.1.
 Both Plugin Check 2.1.0 modes passed with exit code 0 and no errors or warnings.
-After this documentation-only evidence update, rebuild once more so the final
-package manifest points at the final candidate commit.
+The package manifest records the source commit used for the build.
 
 The fixed candidate must also be installed on the remote HTTPS test site before
 capturing the site-scoped post-cleanup log window. The currently installed
