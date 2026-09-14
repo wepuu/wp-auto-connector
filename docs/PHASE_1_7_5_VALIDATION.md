@@ -86,11 +86,15 @@ extracted archives, configuration, and probe files were removed.
 
 ## Remaining release gates
 
-The immutable ZIP has SHA-256
-`5b772b6b2f3bbd6f5026df2faecfe8164b173bed1f16bb8b81bd38129da2153f`, contains
-651 production entries, and its extracted payload activated on WordPress 7.1.
-Both Plugin Check 2.1.0 modes passed with exit code 0 and no errors or warnings.
-The package manifest records the source commit used for the build.
+The immutable ZIP contains 651 production entries, and its extracted payload
+activated on WordPress 7.1. Both Plugin Check 2.1.0 modes passed with exit code
+0 and no errors or warnings. The ignored package `manifest.json` records the
+authoritative source commit and SHA-256 for the current build.
+
+The builder currently produces different ZIP digests across successive clean
+Composer installs because generated dependency metadata varies; byte-for-byte
+reproducibility is therefore not claimed by this checkpoint and remains a
+release-hardening follow-up.
 
 The fixed candidate must also be installed on the remote HTTPS test site before
 capturing the site-scoped post-cleanup log window. The currently installed
