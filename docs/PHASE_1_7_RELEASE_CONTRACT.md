@@ -1,6 +1,6 @@
 # Phase 1.7 Release Contract
 
-Status: **Phase 1.7.5 local package, Plugin Check, immutable-range security, remote site-scoped log, and Git landing gates complete; temporary remote credential revocation pending; no release candidate declared**
+Status: **Phase 1.7.5 formally sealed; local package, Plugin Check, immutable-range security, remote site-scoped log, Git landing, and credential-cleanup gates complete; no release candidate declared**
 
 Baseline: `main@c48ba31`
 

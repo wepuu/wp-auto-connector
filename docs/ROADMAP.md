@@ -145,8 +145,8 @@ Phase 1.7.0 is complete as the documentation checkpoint. Phase 1.7.1 client
 compatibility validation is complete locally. Phase 1.7.3 remote Codex and
 Phase 1.7.4 remote WorkBuddy acceptance are complete. Current checkpoint:
 **Phase 1.7.5 - MCP error-log hardening, reproducible package, Plugin Check,
-immutable-range security, remote site-scoped log, and Git landing gates
-complete; temporary remote credential revocation pending**.
+immutable-range security, remote site-scoped log, Git landing, and credential
+cleanup gates complete; formally sealed**.
 The development-only client setup guide and protocol probe are in place. MCP
 Inspector, Codex CLI, WorkBuddy, and the Codex Desktop read-only smoke all pass
 their local lanes. The release builder now rejects non-portable ZIP entry
@@ -158,8 +158,8 @@ the exact remote site-scoped PHP-FPM/Nginx review window returned no matching
 records. Phase 1.7.5 adds a connector-owned, redacted MCP error handler so
 expected client rejections no longer enter PHP stderr while internal failures
 remain visible. Its local WordPress 7.1/PHP 8.1 probe passes with a zero-byte
-clean log. Formal release sealing remains pending until the temporary remote
-credential is revoked.
+clean log. Phase 1.7.5 is formally sealed on `main`; public release tagging and
+WordPress.org submission remain separate decisions.
 Dependencies,
 persistence, public schemas, and the twenty-three-tool order are unchanged.
 

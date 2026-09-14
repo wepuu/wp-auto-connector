@@ -17,8 +17,8 @@ Phase 1.3.0 through Phase 1.3.4 and Phase 1.4.0 through Phase 1.4.6 are formally
 Do not jump ahead to bulk content tools, publishing, cloud pairing, Skills, automation, telemetry, or SaaS code unless the active task explicitly advances the roadmap.
 
 Status update: the reproducible candidate is deployed, the remote site-scoped
-log window is clean, and Git landing is complete. Only revocation of the
-temporary remote credential remains for Phase 1.7.5 release sealing.
+log window is clean, Git landing is complete, and the temporary remote
+credential was revoked. Phase 1.7.5 is formally sealed.
 
 Phase 1.6.0 through Phase 1.6.3 are formally sealed on `main` at `c48ba31`.
 Phase 1.7.0 freezes the client-acceptance and release contracts as a
@@ -31,8 +31,9 @@ acceptance also pass. Temporary-account revocation and fixture cleanup are
 complete. Phase 1.7.5 locally validates a connector-owned redacted MCP error
 handler: expected client rejections no longer enter PHP stderr, while internal
 failures remain diagnosable. The reproducible package, remote site-scoped log,
-immutable-range security, and Git landing gates pass; formal release sealing
-remains pending until the temporary remote credential is revoked.
+immutable-range security, Git landing, and credential-cleanup gates pass.
+Phase 1.7.5 is formally sealed; public release tagging remains a separate
+decision.
 
 ## Phase 1 product acceptance target
 

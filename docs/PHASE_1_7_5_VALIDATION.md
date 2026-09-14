@@ -1,8 +1,7 @@
 # Phase 1.7.5 MCP Error Logging Validation
 
-Status: **local observability hardening candidate complete; immutable package,
-Plugin Check, remote site-scoped log, and Git landing gates complete; temporary
-remote credential revocation remains pending**
+Status: **Phase 1.7.5 formally sealed; immutable package, Plugin Check, remote
+site-scoped log, Git landing, and credential-cleanup gates complete**
 
 Development baseline: `main@864da2df1daea0326798cec2ffd50fb7204cd937`.
 Implementation commits: `cb02fd2`, `6431d04`, `bdafbab`; the final package
@@ -120,11 +119,13 @@ beyond the documented endpoint, or response bodies:
 | Mutation/deletion side effects | PASS - none requested |
 | Local credential cleanup | PASS - DPAPI file removed after the run |
 | Site-scoped PHP-FPM/Nginx review | PASS - no matching records in PHP-FPM or site/global Nginx error logs; WordPress `debug.log` absent |
+| Remote credential cleanup | PASS - administrator confirmed the temporary Application Password was revoked |
 
 The final authenticated read-only request completed in the server-log review
 window `2026-09-14T08:51:08Z` through `2026-09-14T08:51:12Z`. The root SSH
 review of `/www/server/php/82/var/log/php-fpm.log`,
 `/www/wwwlogs/www.itravoce.com.error.log`, and `/www/wwwlogs/nginx_error.log`
 returned no records in that window; the WordPress `debug.log` file was absent.
-The temporary remote Application Password must still be revoked by the site
-administrator.
+The site administrator subsequently confirmed that the temporary remote
+Application Password was revoked. Phase 1.7.5 is formally sealed on `main`;
+public release tagging and WordPress.org submission remain separate decisions.
