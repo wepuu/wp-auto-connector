@@ -1,6 +1,6 @@
 # Phase 1.7 Release Contract
 
-Status: **Phase 1.7.5 observability hardening locally validated; immutable-package, remote site-scoped log, immutable-range security review, and Git landing pending; no release candidate declared**
+Status: **Phase 1.7.5 local package, Plugin Check, and immutable-range security gates complete; remote site-scoped log and Git landing pending; no release candidate declared**
 
 Baseline: `main@c48ba31`
 
