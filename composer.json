@@ -17,6 +17,7 @@
   },
   "scripts": {
     "build:mcp-runtime": "@php tools/build-mcp-runtime.php",
+    "build:release": "@php tools/build-release-package.php",
     "lint": "phpcs -p .",
     "lint:fix": "phpcbf -p .",
     "test": "phpunit",
