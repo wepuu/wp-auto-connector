@@ -1,8 +1,8 @@
 # Phase 1.7.5 MCP Error Logging Validation
 
 Status: **local observability hardening candidate complete; immutable package,
-Plugin Check, and remote site-scoped log gates complete; Git landing remains
-pending**
+Plugin Check, remote site-scoped log, and Git landing gates complete; temporary
+remote credential revocation remains pending**
 
 Development baseline: `main@864da2df1daea0326798cec2ffd50fb7204cd937`.
 Implementation commits: `cb02fd2`, `6431d04`, `bdafbab`; the final package
