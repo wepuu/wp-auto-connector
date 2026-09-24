@@ -2,8 +2,7 @@
 
 Date: 2026-09-24
 
-Status: implementation in progress; pairing foundation accepted locally, phase
-closure not yet claimed.
+Status: accepted and closed with the platform Phase 2.0.3 exit decision.
 
 ## Passed evidence
 
@@ -62,15 +61,17 @@ closure not yet claimed.
   is otherwise valid.
 - The disposable PostgreSQL container and volume were removed after testing.
 
-## Remaining closure gates
+## Closure evidence
 
-- Run the accepted Node 26.7+ `@keyobject/aws-kms`/`jose` signing path against
-  the test key in hosted Linux CI; its unit contract, fixed JOSE header, public
-  key pinning, and fail-closed configuration checks pass locally.
-- Complete a real resource/domain-change re-pair check. Fixture containers,
-  networks, volumes, logs, the fingerprinted CA, marked hosts block and local
-  state marker have all been removed and independently verified absent.
-- Run final hosted CI after Phase 2.0.3 push is separately authorized.
-
-No push, deployment, Phase 2.0.4 token lifecycle, or Phase 2.0.5 Bearer
-authentication was performed.
+- The real resource/domain-change check suspended the old binding, rejected its
+  proof route, revoked its platform site/grant, rotated the site ID and Ed25519
+  key on explicit re-pair, and required fresh local consent for the new exact
+  MCP resource. The old local grant remained inactive.
+- The dual-domain fixture containers, networks, volumes, marked hosts entries,
+  and fingerprinted CurrentUser CA were removed and independently verified.
+- Platform GitHub Actions run `35967643811` passed the complete validation job
+  and the Node 26.7 provider-backed JOSE contract against the real AWS KMS test
+  key through short-lived GitHub OIDC credentials.
+- The connector and platform Phase 2.0.3 branches were pushed after explicit
+  authorization. No deployment, Phase 2.0.4 token lifecycle, or Phase 2.0.5
+  Bearer authentication was performed.
