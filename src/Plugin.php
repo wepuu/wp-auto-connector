@@ -35,8 +35,11 @@ use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAssignAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TagsListAbility;
 use WPAuto\Connector\Abilities\Taxonomy\TaxonomyAbilityCategory;
 use WPAuto\Connector\Admin\AdminPage;
+use WPAuto\Connector\Grants\ConsentController;
 use WPAuto\Connector\Mcp\McpAdapterLoader;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
+use WPAuto\Connector\Pairing\PairingRestController;
+use WPAuto\Connector\Pairing\AdminPairingController;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -120,9 +123,12 @@ final class Plugin {
 		( new SeoGetAbility() )->register();
 		( new SeoUpdateAbility() )->register();
 		( new McpServerRegistrar() )->register();
+		( new PairingRestController() )->register();
+		( new ConsentController() )->register();
 		McpAdapterLoader::initialize();
 
 		if ( is_admin() ) {
+			( new AdminPairingController() )->register();
 			( new AdminPage() )->register();
 		}
 	}

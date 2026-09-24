@@ -74,6 +74,7 @@ final class UninstallTest extends TestCase {
 		$valid_media       = $this->media_idempotency_name( 'c' );
 		$valid_taxonomy    = $this->taxonomy_idempotency_name( 'f' );
 		$valid_lock        = $this->audit_lock_name( 'b' );
+		$valid_grant       = 'wp_auto_connector_grant_' . str_repeat( '9', 64 );
 		$preserved         = array(
 			$this->idempotency_name( 'A' ),
 			'wp_auto_connector_idempotency_' . str_repeat( 'c', 63 ),
@@ -87,12 +88,17 @@ final class UninstallTest extends TestCase {
 			'wp_auto_connector_other_' . str_repeat( 'f', 64 ),
 			$this->media_idempotency_name( 'A' ),
 			$this->media_idempotency_name( 'd' ) . '-suffix',
+			'wp_auto_connector_grant_' . str_repeat( 'A', 64 ),
 		);
 
 		$this->seed_option( 1, 1, $valid_idempotency );
 		$this->seed_option( 1, 2, $valid_media );
 		$this->seed_option( 1, 3, $valid_lock );
 		$this->seed_option( 1, 4, $valid_taxonomy );
+		$this->seed_option( 1, 1000, $valid_grant );
+		$GLOBALS['wp_auto_test_options']['wp_auto_connector_platform_connection'] = array( 'enabled' => true );
+		$GLOBALS['wp_auto_test_options']['wp_auto_connector_pairing_state']       = array( 'verifier_hash' => 'private' );
+		$GLOBALS['wp_auto_test_options']['wp_auto_connector_site_identity']       = array( 'secret_key' => 'private' );
 		foreach ( $preserved as $index => $name ) {
 			$this->seed_option( 1, $index + 5, $name );
 		}
@@ -137,6 +143,10 @@ final class UninstallTest extends TestCase {
 		self::assertArrayNotHasKey( $valid_media, $options );
 		self::assertArrayNotHasKey( $valid_taxonomy, $options );
 		self::assertArrayNotHasKey( $valid_lock, $options );
+		self::assertArrayNotHasKey( $valid_grant, $options );
+		self::assertArrayNotHasKey( 'wp_auto_connector_platform_connection', $options );
+		self::assertArrayNotHasKey( 'wp_auto_connector_pairing_state', $options );
+		self::assertArrayNotHasKey( 'wp_auto_connector_site_identity', $options );
 		foreach ( $preserved as $name ) {
 			self::assertArrayHasKey( $name, $options );
 		}
@@ -202,7 +212,10 @@ final class UninstallTest extends TestCase {
 		self::assertSame( 'wp\\_auto\\_connector\\_media\\_idempotency\\_%', $first['args'][2] );
 		self::assertSame( 'wp\\_auto\\_connector\\_taxonomy\\_idempotency\\_%', $first['args'][3] );
 		self::assertSame( 'wp\\_auto\\_connector\\_mutation\\_audit\\_lock\\_%', $first['args'][4] );
-		self::assertSame( 100, $first['args'][5] );
+		self::assertSame( 'wp\\_auto\\_connector\\_grant\\_%', $first['args'][5] );
+		self::assertSame( 'wp\\_auto\\_connector\\_pending\\_consent\\_%', $first['args'][6] );
+		self::assertSame( 'wp\\_auto\\_connector\\_pending\\_consent\\_lock\\_%', $first['args'][7] );
+		self::assertSame( 100, $first['args'][8] );
 	}
 
 	/**
@@ -234,7 +247,7 @@ final class UninstallTest extends TestCase {
 
 		self::assertFalse( ( new PrivateStateCleanup() )->run() );
 		self::assertArrayHasKey( $name, $GLOBALS['wp_auto_test_options'] );
-		self::assertSame( 1, $GLOBALS['wp_auto_test_delete_option_calls'] );
+		self::assertSame( 4, $GLOBALS['wp_auto_test_delete_option_calls'] );
 	}
 
 	/**

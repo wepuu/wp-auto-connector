@@ -10,6 +10,8 @@ namespace WPAuto\Connector\Admin;
 use WPAuto\Connector\Diagnostics\EnvironmentDiagnostics;
 use WPAuto\Connector\Mcp\McpAdapterLoader;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
+use WPAuto\Connector\Pairing\AdminPairingController;
+use WPAuto\Connector\Pairing\ConnectionSettings;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -55,10 +57,11 @@ final class AdminPage {
 			&& $compatible;
 		$endpoint    = rest_url( McpServerRegistrar::ROUTE_NAMESPACE . '/' . McpServerRegistrar::ROUTE );
 		$warnings    = $this->warnings( $diagnostics, $compatible );
+		$connection  = ( new ConnectionSettings() )->load();
 		?>
 		<div class="wrap">
 			<h1><?php echo esc_html__( 'WePuu Auto Connector', 'wepuu-auto-connector' ); ?></h1>
-			<p><?php echo esc_html__( 'Phase 1.1 exposes one authenticated, read-only site-health tool through the official WordPress MCP Adapter.', 'wepuu-auto-connector' ); ?></p>
+			<p><?php echo esc_html__( 'Direct MCP remains available through WordPress authentication. Optional platform pairing is a separate, administrator-controlled connection.', 'wepuu-auto-connector' ); ?></p>
 
 			<?php foreach ( $warnings as $warning ) : ?>
 				<div class="notice notice-warning inline"><p><?php echo esc_html( $warning ); ?></p></div>
@@ -97,6 +100,60 @@ final class AdminPage {
 					</tr>
 				</tbody>
 			</table>
+
+			<hr />
+			<h2><?php echo esc_html__( 'Optional WePuu Platform pairing', 'wepuu-auto-connector' ); ?></h2>
+			<p>
+				<?php echo esc_html__( 'The platform manages connection and consent metadata only. MCP requests, tool inputs, tool results, WordPress content, passwords, and Application Passwords are not sent to the platform.', 'wepuu-auto-connector' ); ?>
+			</p>
+			<p>
+				<?php echo esc_html__( 'Saving these settings enables the local pairing endpoint but does not contact the platform. A later explicit Connect action is required before the first external request.', 'wepuu-auto-connector' ); ?>
+			</p>
+
+			<?php if ( null === $connection ) : ?>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="max-width: 900px;">
+					<input type="hidden" name="action" value="<?php echo esc_attr( AdminPairingController::ENABLE_ACTION ); ?>" />
+					<?php wp_nonce_field( AdminPairingController::ENABLE_ACTION ); ?>
+					<table class="form-table" role="presentation">
+						<tr>
+							<th scope="row"><label for="wp-auto-control-origin"><?php echo esc_html__( 'Control-plane origin', 'wepuu-auto-connector' ); ?></label></th>
+							<td><input class="regular-text code" id="wp-auto-control-origin" name="control_origin" type="url" required placeholder="https://platform.example.com" /></td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="wp-auto-platform-issuer"><?php echo esc_html__( 'Authorization issuer', 'wepuu-auto-connector' ); ?></label></th>
+							<td><input class="regular-text code" id="wp-auto-platform-issuer" name="platform_issuer" type="url" required placeholder="https://auth.example.com" /></td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="wp-auto-tenant-id"><?php echo esc_html__( 'Tenant ID', 'wepuu-auto-connector' ); ?></label></th>
+							<td><input class="regular-text code" id="wp-auto-tenant-id" name="tenant_id" type="text" required maxlength="36" /></td>
+						</tr>
+					</table>
+					<?php submit_button( __( 'Enable platform pairing locally', 'wepuu-auto-connector' ) ); ?>
+				</form>
+			<?php else : ?>
+				<table class="widefat striped" style="max-width: 900px;">
+					<tbody>
+						<tr><th scope="row"><?php echo esc_html__( 'Status', 'wepuu-auto-connector' ); ?></th><td><?php echo esc_html( $connection['status'] ); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__( 'Control plane', 'wepuu-auto-connector' ); ?></th><td><code><?php echo esc_html( $connection['control_origin'] ); ?></code></td></tr>
+						<tr><th scope="row"><?php echo esc_html__( 'Issuer', 'wepuu-auto-connector' ); ?></th><td><code><?php echo esc_html( $connection['platform_issuer'] ); ?></code></td></tr>
+						<tr><th scope="row"><?php echo esc_html__( 'Resource', 'wepuu-auto-connector' ); ?></th><td><code><?php echo esc_html( $connection['resource'] ); ?></code></td></tr>
+					</tbody>
+				</table>
+				<?php if ( 'unpaired' === $connection['status'] ) : ?>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+						<input type="hidden" name="action" value="<?php echo esc_attr( AdminPairingController::CONNECT_ACTION ); ?>" />
+						<?php wp_nonce_field( AdminPairingController::CONNECT_ACTION ); ?>
+						<?php submit_button( __( 'Connect to WePuu Platform', 'wepuu-auto-connector' ), 'primary' ); ?>
+					</form>
+				<?php elseif ( 'pending' === $connection['status'] ) : ?>
+					<p><?php echo esc_html__( 'Pairing is pending. Complete the platform window or disconnect to cancel and start again.', 'wepuu-auto-connector' ); ?></p>
+				<?php endif; ?>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+					<input type="hidden" name="action" value="<?php echo esc_attr( AdminPairingController::DISCONNECT_ACTION ); ?>" />
+					<?php wp_nonce_field( AdminPairingController::DISCONNECT_ACTION ); ?>
+					<?php submit_button( __( 'Disconnect and remove local pairing trust', 'wepuu-auto-connector' ), 'delete' ); ?>
+				</form>
+			<?php endif; ?>
 		</div>
 		<?php
 	}

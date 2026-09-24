@@ -15,10 +15,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Removes only the private persistent families approved by ADR-004/ADR-005/ADR-006.
  */
 final class PrivateStateCleanup {
+	private const PAIRING_OPTION_NAMES        = array(
+		'wp_auto_connector_platform_connection',
+		'wp_auto_connector_pairing_state',
+		'wp_auto_connector_site_identity',
+	);
 	private const IDEMPOTENCY_PREFIX          = 'wp_auto_connector_idempotency_';
 	private const MEDIA_IDEMPOTENCY_PREFIX    = 'wp_auto_connector_media_idempotency_';
 	private const TAXONOMY_IDEMPOTENCY_PREFIX = 'wp_auto_connector_taxonomy_idempotency_';
 	private const AUDIT_LOCK_PREFIX           = 'wp_auto_connector_mutation_audit_lock_';
+	private const GRANT_PREFIX                = 'wp_auto_connector_grant_';
+	private const PENDING_CONSENT_PREFIX      = 'wp_auto_connector_pending_consent_';
+	private const CONSENT_LOCK_PREFIX         = 'wp_auto_connector_pending_consent_lock_';
 	private const AUDIT_META_KEYS             = array( '_wp_auto_connector_mutation_audit', '_wp_auto_connector_media_mutation_audit', '_wp_auto_connector_taxonomy_mutation_audit', '_wp_auto_connector_seo_mutation_audit' );
 	private const TAXONOMY_AUDIT_META_KEY     = '_wp_auto_connector_taxonomy_mutation_audit';
 	private const MCP_SESSION_META_KEY        = 'wp_auto_connector_mcp_adapter_sessions';
@@ -27,6 +35,9 @@ final class PrivateStateCleanup {
 	private const MEDIA_IDEMPOTENCY_PATTERN    = '/\Awp_auto_connector_media_idempotency_[0-9a-f]{64}\z/';
 	private const TAXONOMY_IDEMPOTENCY_PATTERN = '/\Awp_auto_connector_taxonomy_idempotency_[0-9a-f]{64}\z/';
 	private const AUDIT_LOCK_PATTERN           = '/\Awp_auto_connector_mutation_audit_lock_[0-9a-f]{64}\z/';
+	private const GRANT_PATTERN                = '/\Awp_auto_connector_grant_[0-9a-f]{64}\z/';
+	private const PENDING_CONSENT_PATTERN      = '/\Awp_auto_connector_pending_consent_[0-9a-f]{64}\z/';
+	private const CONSENT_LOCK_PATTERN         = '/\Awp_auto_connector_pending_consent_lock_[0-9a-f]{64}\z/';
 
 	private const OPTION_BATCH_SIZE    = 100;
 	private const SITE_BATCH_SIZE      = 50;
@@ -71,13 +82,36 @@ final class PrivateStateCleanup {
 	 * Clean the active blog and prove the approved families absent.
 	 */
 	private function cleanup_current_blog(): bool {
+		$pairing_absent    = $this->cleanup_pairing_options();
 		$deletion_complete = $this->walk_options( true );
 		$options_absent    = $this->walk_options( false );
 		$audit_absent      = $this->cleanup_audit_metadata();
 		$term_audit_absent = $this->cleanup_term_audit_metadata();
 		$sessions_absent   = $this->cleanup_mcp_session_metadata();
 
-		return $deletion_complete && $options_absent && $audit_absent && $term_audit_absent && $sessions_absent;
+		return $pairing_absent && $deletion_complete && $options_absent && $audit_absent && $term_audit_absent && $sessions_absent;
+	}
+
+	/** Delete and verify the three exact Phase 2.0.3B local trust options. */
+	private function cleanup_pairing_options(): bool {
+		$complete = true;
+		$sentinel = new \stdClass();
+		foreach ( self::PAIRING_OPTION_NAMES as $option_name ) {
+			try {
+				delete_option( $option_name );
+			} catch ( \Throwable ) {
+				$complete = false;
+			}
+			try {
+				if ( get_option( $option_name, $sentinel ) !== $sentinel ) {
+					$complete = false;
+				}
+			} catch ( \Throwable ) {
+				$complete = false;
+			}
+		}
+
+		return $complete;
 	}
 
 	/**
@@ -175,14 +209,20 @@ final class PrivateStateCleanup {
 			$media_idempotency_like    = $this->wpdb->esc_like( self::MEDIA_IDEMPOTENCY_PREFIX ) . '%';
 			$taxonomy_idempotency_like = $this->wpdb->esc_like( self::TAXONOMY_IDEMPOTENCY_PREFIX ) . '%';
 			$audit_lock_like           = $this->wpdb->esc_like( self::AUDIT_LOCK_PREFIX ) . '%';
+			$grant_like                = $this->wpdb->esc_like( self::GRANT_PREFIX ) . '%';
+			$pending_consent_like      = $this->wpdb->esc_like( self::PENDING_CONSENT_PREFIX ) . '%';
+			$consent_lock_like         = $this->wpdb->esc_like( self::CONSENT_LOCK_PREFIX ) . '%';
 			$prepared                  = $this->wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT option_id, option_name FROM {$this->wpdb->options} WHERE option_id > %d AND ( option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s ) ORDER BY option_id ASC LIMIT %d",
+				"SELECT option_id, option_name FROM {$this->wpdb->options} WHERE option_id > %d AND ( option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s ) ORDER BY option_id ASC LIMIT %d",
 				$cursor,
 				$idempotency_like,
 				$media_idempotency_like,
 				$taxonomy_idempotency_like,
 				$audit_lock_like,
+				$grant_like,
+				$pending_consent_like,
+				$consent_lock_like,
 				self::OPTION_BATCH_SIZE
 			);
 		} catch ( \Throwable ) {
@@ -549,6 +589,9 @@ final class PrivateStateCleanup {
 		return 1 === preg_match( self::IDEMPOTENCY_PATTERN, $option_name )
 			|| 1 === preg_match( self::MEDIA_IDEMPOTENCY_PATTERN, $option_name )
 			|| 1 === preg_match( self::TAXONOMY_IDEMPOTENCY_PATTERN, $option_name )
-			|| 1 === preg_match( self::AUDIT_LOCK_PATTERN, $option_name );
+			|| 1 === preg_match( self::AUDIT_LOCK_PATTERN, $option_name )
+			|| 1 === preg_match( self::GRANT_PATTERN, $option_name )
+			|| 1 === preg_match( self::PENDING_CONSENT_PATTERN, $option_name )
+			|| 1 === preg_match( self::CONSENT_LOCK_PATTERN, $option_name );
 	}
 }

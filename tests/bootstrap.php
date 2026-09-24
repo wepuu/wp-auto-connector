@@ -17,11 +17,13 @@ namespace {
 	$GLOBALS['wp_auto_test_hook_history']        = array();
 	$GLOBALS['wp_auto_test_registered_ability']  = null;
 	$GLOBALS['wp_auto_test_registered_category'] = null;
+	$GLOBALS['wp_auto_test_rest_routes']         = array();
 	$GLOBALS['wp_auto_test_can_read']            = false;
 	$GLOBALS['wp_auto_test_logged_in']           = false;
 	$GLOBALS['wp_auto_test_is_user_logged_in_calls'] = 0;
 	$GLOBALS['wp_auto_test_mcp_current_user_can_calls'] = 0;
 	$GLOBALS['wp_auto_test_is_ssl']              = true;
+	$GLOBALS['wp_auto_test_rest_url']            = 'https://example.test/wp-json/';
 	$GLOBALS['wp_auto_test_environment_type']    = 'production';
 	$GLOBALS['wp_auto_test_application_passwords_supported'] = null;
 	$GLOBALS['wp_auto_test_application_passwords_available'] = false;
@@ -188,6 +190,30 @@ namespace {
 
 	class WP_Ability {}
 	class WP_REST_Server {}
+	class WP_REST_Request {
+		/** @param array<string,mixed> $params */
+		public function __construct( private array $params = array(), private string $content_type = 'application/json' ) {}
+
+		public function get_header( string $name ): string {
+			return 'content-type' === strtolower( $name ) ? $this->content_type : '';
+		}
+
+		/** @return array<string,mixed> */
+		public function get_json_params(): array {
+			return $this->params;
+		}
+	}
+	class WP_REST_Response {
+		/** @var array<string,string> */
+		public array $headers = array();
+
+		/** @param mixed $data */
+		public function __construct( public $data = null, public int $status = 200 ) {}
+
+		public function header( string $name, string $value ): void {
+			$this->headers[ $name ] = $value;
+		}
+	}
 	class wpdb {
 		public string $options = 'wp_options';
 		public string $postmeta = 'wp_postmeta';
@@ -254,7 +280,7 @@ namespace {
 			$args  = $prepared['args'];
 			if ( false !== stripos( $query, 'SELECT option_id, option_name' ) ) {
 				$cursor  = (int) ( $args[0] ?? 0 );
-				$limit   = (int) ( $args[5] ?? $args[4] ?? 0 );
+				$limit   = (int) ( $args[8] ?? $args[7] ?? $args[6] ?? $args[5] ?? $args[4] ?? 0 );
 				$blog_id = $GLOBALS['wp_auto_test_current_blog_id'];
 				$rows    = $GLOBALS['wp_auto_test_option_rows'][ $blog_id ] ?? array();
 				usort( $rows, static fn( array $left, array $right ): int => (int) $left['option_id'] <=> (int) $right['option_id'] );
@@ -264,7 +290,7 @@ namespace {
 						static function ( array $row ) use ( $cursor ): bool {
 							$name = (string) ( $row['option_name'] ?? '' );
 							return (int) ( $row['option_id'] ?? 0 ) > $cursor
-								&& ( str_starts_with( $name, 'wp_auto_connector_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_media_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_taxonomy_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_mutation_audit_lock_' ) );
+								&& ( str_starts_with( $name, 'wp_auto_connector_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_media_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_taxonomy_idempotency_' ) || str_starts_with( $name, 'wp_auto_connector_mutation_audit_lock_' ) || str_starts_with( $name, 'wp_auto_connector_grant_' ) || str_starts_with( $name, 'wp_auto_connector_pending_consent_' ) || str_starts_with( $name, 'wp_auto_connector_pending_consent_lock_' ) );
 						}
 					)
 				);
@@ -2075,6 +2101,33 @@ namespace WPAuto\Connector\Diagnostics {
 	}
 }
 
+namespace WPAuto\Connector\Pairing {
+	function add_action( string $hook, callable $callback ): void {
+		$GLOBALS['wp_auto_test_hooks'][ $hook ] = $callback;
+		$GLOBALS['wp_auto_test_hook_history'][ $hook ][] = $callback;
+	}
+
+	function register_rest_route( string $namespace, string $route, array $args ): bool {
+		$GLOBALS['wp_auto_test_rest_routes'][ $namespace . $route ] = $args;
+		return true;
+	}
+
+	function rest_url( string $path = '' ): string {
+		return $GLOBALS['wp_auto_test_rest_url'] . ltrim( $path, '/' );
+	}
+
+	function is_ssl(): bool {
+		return $GLOBALS['wp_auto_test_is_ssl'];
+	}
+}
+
+namespace WPAuto\Connector\Grants {
+	function add_action( string $hook, callable $callback ): void {
+		$GLOBALS['wp_auto_test_hooks'][ $hook ] = $callback;
+		$GLOBALS['wp_auto_test_hook_history'][ $hook ][] = $callback;
+	}
+}
+
 namespace WPAuto\Connector\Mcp {
 	function error_log( string $message ): bool {
 		$GLOBALS['wp_auto_test_error_log'][] = $message;
@@ -2108,7 +2161,21 @@ namespace WPAuto\Connector {
 }
 
 namespace {
+	require_once dirname( __DIR__ ) . '/vendor/autoload.php';
 	require_once dirname( __DIR__ ) . '/src/Diagnostics/EnvironmentDiagnostics.php';
+	require_once dirname( __DIR__ ) . '/src/Pairing/CanonicalResource.php';
+	require_once dirname( __DIR__ ) . '/src/Pairing/ConnectionSettings.php';
+	require_once dirname( __DIR__ ) . '/src/Pairing/SiteIdentity.php';
+	require_once dirname( __DIR__ ) . '/src/Pairing/SiteIdentityRepository.php';
+	require_once dirname( __DIR__ ) . '/src/Pairing/PairingStateRepository.php';
+	require_once dirname( __DIR__ ) . '/src/Pairing/SiteProofSigner.php';
+	require_once dirname( __DIR__ ) . '/src/Pairing/PairingRestController.php';
+	require_once dirname( __DIR__ ) . '/src/Grants/LocalUserResolverInterface.php';
+	require_once dirname( __DIR__ ) . '/src/Grants/WordPressLocalUserResolver.php';
+	require_once dirname( __DIR__ ) . '/src/Grants/LocalGrantRepository.php';
+	require_once dirname( __DIR__ ) . '/src/Grants/ConsentRequestVerifier.php';
+	require_once dirname( __DIR__ ) . '/src/Grants/PendingConsentRepository.php';
+	require_once dirname( __DIR__ ) . '/src/Grants/ConsentController.php';
 	require_once dirname( __DIR__ ) . '/src/Uninstall/PrivateStateCleanup.php';
 	require_once dirname( __DIR__ ) . '/src/Content/ContentReadService.php';
 	require_once dirname( __DIR__ ) . '/src/Content/CreateDraftContract.php';
