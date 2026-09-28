@@ -38,6 +38,7 @@ use WPAuto\Connector\Admin\AdminPage;
 use WPAuto\Connector\Grants\ConsentController;
 use WPAuto\Connector\Mcp\McpAdapterLoader;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
+use WPAuto\Connector\OAuth\RevocationController;
 use WPAuto\Connector\Pairing\PairingRestController;
 use WPAuto\Connector\Pairing\AdminPairingController;
 
@@ -125,6 +126,7 @@ final class Plugin {
 		( new McpServerRegistrar() )->register();
 		( new PairingRestController() )->register();
 		( new ConsentController() )->register();
+		( new RevocationController() )->register();
 		McpAdapterLoader::initialize();
 
 		if ( is_admin() ) {

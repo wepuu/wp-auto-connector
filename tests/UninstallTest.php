@@ -247,7 +247,7 @@ final class UninstallTest extends TestCase {
 
 		self::assertFalse( ( new PrivateStateCleanup() )->run() );
 		self::assertArrayHasKey( $name, $GLOBALS['wp_auto_test_options'] );
-		self::assertSame( 4, $GLOBALS['wp_auto_test_delete_option_calls'] );
+		self::assertSame( 9, $GLOBALS['wp_auto_test_delete_option_calls'] );
 	}
 
 	/**

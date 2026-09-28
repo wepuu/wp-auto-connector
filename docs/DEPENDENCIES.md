@@ -1,12 +1,13 @@
 # Runtime Dependencies
 
-Phase 1.1 uses three Composer runtime packages. Versions below are fixed by `composer.lock`.
+The connector uses four Composer runtime packages. Versions below are fixed by `composer.lock`.
 
 | Package | Locked version | License | Purpose |
 | --- | --- | --- | --- |
 | `wordpress/mcp-adapter` | `0.6.1` | GPL-2.0-or-later | Official WordPress Abilities API to MCP protocol adapter and HTTP transport. |
 | `wordpress/php-mcp-schema` | `0.1.3` | GPL-2.0-or-later | Typed MCP protocol data-transfer objects used by MCP Adapter. |
 | `automattic/jetpack-autoloader` | `5.0.23` | GPL-2.0-or-later | Required by the locked upstream MCP Adapter package and retained with its reviewed source/license metadata. |
+| `firebase/php-jwt` | `7.2.0` | BSD-3-Clause | Strict RS256 verification of compact, content-free platform revocation events and public JWKS parsing. |
 
 Upstream source and license metadata remain present in each installed Composer package. No remote executable code is downloaded at WordPress runtime.
 

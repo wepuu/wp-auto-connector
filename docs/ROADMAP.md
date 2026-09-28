@@ -1,5 +1,13 @@
 # WePuu Auto Connector Iterative Roadmap
 
+## Phase 2.0.4B - signed revocation state (in progress)
+
+The approved local branch adds strict signed revocation delivery, bounded JWKS
+fresh/safe-stale handling, monotonic local deny state, endpoint abuse controls,
+and uninstall cleanup. It preserves the direct client-to-WordPress data plane
+and does not connect Bearer tokens to MCP tools. Exit remains gated by the
+platform's two-key real-KMS exercise and final cross-repository validation.
+
 ## Phase 0 - Repository foundation (complete)
 
 Goal: an installable WordPress.org-oriented plugin skeleton and durable Codex development rules.

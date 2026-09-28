@@ -192,7 +192,7 @@ namespace {
 	class WP_REST_Server {}
 	class WP_REST_Request {
 		/** @param array<string,mixed> $params */
-		public function __construct( private array $params = array(), private string $content_type = 'application/json' ) {}
+		public function __construct( private array $params = array(), private string $content_type = 'application/json', private string $body = '' ) {}
 
 		public function get_header( string $name ): string {
 			return 'content-type' === strtolower( $name ) ? $this->content_type : '';
@@ -201,6 +201,10 @@ namespace {
 		/** @return array<string,mixed> */
 		public function get_json_params(): array {
 			return $this->params;
+		}
+
+		public function get_body(): string {
+			return $this->body;
 		}
 	}
 	class WP_REST_Response {
@@ -1801,6 +1805,13 @@ namespace WPAuto\Connector\Abilities\Site {
 	}
 }
 
+namespace WPAuto\Connector\OAuth {
+	function add_action( string $hook, callable $callback ): void {
+		$GLOBALS['wp_auto_test_hooks'][ $hook ] = $callback;
+		$GLOBALS['wp_auto_test_hook_history'][ $hook ][] = $callback;
+	}
+}
+
 namespace WPAuto\Connector\Abilities\Content {
 	function add_action( string $hook, callable $callback ): void {
 		$GLOBALS['wp_auto_test_hooks'][ $hook ] = $callback;
@@ -2176,6 +2187,14 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/Grants/ConsentRequestVerifier.php';
 	require_once dirname( __DIR__ ) . '/src/Grants/PendingConsentRepository.php';
 	require_once dirname( __DIR__ ) . '/src/Grants/ConsentController.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/JwksFetcherInterface.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/WordPressJwksFetcher.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/JwksCache.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/RevocationEventVerifier.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/RevocationStateRepository.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/RevocationRateLimiter.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/RevocationController.php';
+	require_once __DIR__ . '/TestJwksFetcher.php';
 	require_once dirname( __DIR__ ) . '/src/Uninstall/PrivateStateCleanup.php';
 	require_once dirname( __DIR__ ) . '/src/Content/ContentReadService.php';
 	require_once dirname( __DIR__ ) . '/src/Content/CreateDraftContract.php';

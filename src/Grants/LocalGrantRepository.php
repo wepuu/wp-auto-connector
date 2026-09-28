@@ -9,6 +9,7 @@ namespace WPAuto\Connector\Grants;
 
 use WPAuto\Connector\Pairing\CanonicalResource;
 use WPAuto\Connector\Pairing\ConnectionSettings;
+use WPAuto\Connector\OAuth\RevocationStateRepository;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -30,12 +31,21 @@ final class LocalGrantRepository {
 	private LocalUserResolverInterface $users;
 
 	/**
+	 * Local revocation deny state.
+	 *
+	 * @var RevocationStateRepository
+	 */
+	private RevocationStateRepository $revocations;
+
+	/**
 	 * Use current WordPress user state by default.
 	 *
-	 * @param LocalUserResolverInterface|null $users Local-user resolver.
+	 * @param LocalUserResolverInterface|null $users       Local-user resolver.
+	 * @param RevocationStateRepository|null  $revocations Local deny state.
 	 */
-	public function __construct( ?LocalUserResolverInterface $users = null ) {
-		$this->users = $users ?? new WordPressLocalUserResolver();
+	public function __construct( ?LocalUserResolverInterface $users = null, ?RevocationStateRepository $revocations = null ) {
+		$this->users       = $users ?? new WordPressLocalUserResolver();
+		$this->revocations = $revocations ?? new RevocationStateRepository();
 	}
 
 	/**
@@ -110,6 +120,7 @@ final class LocalGrantRepository {
 		}
 		if (
 			! hash_equals( $grant_id, $validated['grant_id'] )
+			|| $this->revocations->denies_grant( $grant_id )
 			|| ! $this->users->exists( $validated['user_id'] )
 			|| ! isset( $connection['site_id'], $connection['site_key_kid'] )
 			|| ! hash_equals( $connection['site_id'], $validated['site_id'] )

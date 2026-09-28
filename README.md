@@ -4,6 +4,12 @@ Development repository for the free WordPress.org WePuu Auto Connector.
 
 ## Current objective
 
+Phase 2.0.3B platform pairing and local consent is accepted. Phase 2.0.4B now
+implements the connector-side signed revocation endpoint, bounded JWKS cache,
+and local monotonic deny state on `codex/phase-2-0-4b-revocation`. It does not
+yet enable Bearer authentication for the 23 MCP tools; that remains Phase
+2.0.5. The current branch is local-only and is not committed or deployed.
+
 Phase 1 is Direct WordPress MCP. WePuu Auto Connector should let compatible AI agents connect directly to a WordPress site and invoke explicitly exposed, permission-aware WordPress abilities.
 
 Phase 1.2 is complete: eight read-only site, content, and taxonomy abilities passed the frozen contract and full integration/security validation. The dedicated endpoint is `/wp-json/wp-auto/mcp`, and the exposed MCP tools are `wp-auto-site-health`, `wp-auto-site-info`, `wp-auto-posts-search`, `wp-auto-post-get`, `wp-auto-pages-search`, `wp-auto-page-get`, `wp-auto-categories-list`, and `wp-auto-tags-list`.

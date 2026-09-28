@@ -30,7 +30,9 @@ No publish, delete, arbitrary content/file write, generic URL fetching, cloud, t
 
 = Privacy and external services =
 
-The plugin does not contact WP-Auto or any other external service automatically. When an authenticated caller invokes the remote image import tool, the WordPress site makes a bounded HTTP(S) request to the caller-selected public destination to retrieve one image. The destination can observe the site's egress IP and WordPress HTTP user agent. The request does not include caller credentials, cookies, authorization headers, or arbitrary client headers. WP-Auto Cloud is not involved.
+The plugin does not contact WP-Auto automatically after installation or activation. After an administrator explicitly enables and completes WePuu Platform pairing, the site may fetch the paired platform issuer's public JWKS over HTTPS when verifying a compact signed revocation event. That request sends no WordPress content, MCP input/output, password, cookie, access token, or refresh token; the platform can observe the site's egress IP and HTTP user agent. The paired platform may send content-free signed revocation metadata to the fixed site endpoint. Disabling or removing the pairing stops this integration.
+
+When an authenticated caller invokes the remote image import tool, the WordPress site makes a bounded HTTP(S) request to the caller-selected public destination to retrieve one image. The destination can observe the site's egress IP and WordPress HTTP user agent. The request does not include caller credentials, cookies, authorization headers, or arbitrary client headers. WP-Auto Platform does not proxy that image.
 
 Future optional cloud features will require explicit administrator action before any site data is transmitted. Before those features are released, this section will document what data is sent, when it is sent, why it is required, and links to the applicable service terms and privacy policy.
 
@@ -46,7 +48,7 @@ Future optional cloud features will require explicit administrator action before
 
 = Does this version connect to an external service? =
 
-Only when an authenticated caller explicitly invokes remote image import. That request goes to the caller-selected destination and is subject to the fixed SSRF and image validation policy; there is no background request or WP-Auto Cloud connection.
+Yes, but only after explicit action: remote image import contacts the caller-selected destination, and an administrator-enabled WePuu Platform pairing permits bounded public-JWKS retrieval plus signed revocation delivery. Neither path sends WordPress content or MCP tool data to WePuu Platform.
 
 = Is the plugin free? =
 

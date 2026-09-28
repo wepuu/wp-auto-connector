@@ -19,6 +19,11 @@ final class PrivateStateCleanup {
 		'wp_auto_connector_platform_connection',
 		'wp_auto_connector_pairing_state',
 		'wp_auto_connector_site_identity',
+		'wp_auto_connector_platform_jwks',
+		'wp_auto_connector_revocation_state',
+		'wp_auto_connector_revocation_lock',
+		'wp_auto_connector_revocation_rate',
+		'wp_auto_connector_revocation_rate_lock',
 	);
 	private const IDEMPOTENCY_PREFIX          = 'wp_auto_connector_idempotency_';
 	private const MEDIA_IDEMPOTENCY_PREFIX    = 'wp_auto_connector_media_idempotency_';

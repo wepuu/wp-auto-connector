@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - codex/phase-2-0-4b-revocation
 
 permissions:
   contents: read
@@ -24,7 +25,9 @@ jobs:
           coverage: none
 
       - name: Validate Composer files
-        run: composer validate --strict
+        # Runtime versions are deliberately exact-pinned by the OAuth/JWT
+        # compatibility contract; schema and lock consistency remain checked.
+        run: composer validate --strict --no-check-all
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
@@ -34,3 +37,6 @@ jobs:
 
       - name: Run WordPress Coding Standards
         run: composer lint
+
+      - name: Audit locked dependencies
+        run: composer audit --locked
