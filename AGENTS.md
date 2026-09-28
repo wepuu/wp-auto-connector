@@ -6,11 +6,10 @@ Build a secure, WordPress.org-compliant WordPress connector that gives compatibl
 
 ## Current development phase
 
-Phase 2.0.3B pairing and local consent is accepted and closed. Phase 2.0.4B
-signed revocation/JWKS state is approved and in progress on
-`codex/phase-2-0-4b-revocation`. Changes are limited to the accepted
-revocation contract and tests. Do not commit, push, deploy, merge `main`, wire
-Bearer authentication into MCP, or start Phase 2.0.5 without explicit approval.
+Phase 2.0.3B pairing/local consent and Phase 2.0.4B signed revocation/JWKS state
+are accepted and closed. Preserve their accepted contracts and tests. Do not
+wire Bearer authentication into MCP or start Phase 2.0.5 without explicit
+approval.
 
 Phase 1 - Direct WordPress MCP MVP.
 

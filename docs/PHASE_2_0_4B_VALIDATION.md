@@ -1,7 +1,6 @@
 # Phase 2.0.4B Validation Record
 
-Status: implementation and cross-runtime live validation complete locally;
-hosted CI remains open.
+Status: accepted and closed on 2026-09-28.
 
 ## Implemented boundary
 
@@ -32,8 +31,8 @@ hosted CI remains open.
   --dry-run`: locked runtime graph resolves without install/update.
 - `firebase/php-jwt` is locked at 7.2.0, BSD-3-Clause.
 - The branch CI workflow validates the exact-pinned dependency policy, runs
-  PHP 8.1 tests/lint, and audits the locked graph. Commit, push, merge, and
-  deployment were authorized on 2026-09-28; the hosted run is pending.
+  PHP 8.1 tests/lint, and audits the locked graph. It passed in run
+  [`36372217114`](https://github.com/wepuu/wp-auto-connector/actions/runs/36372217114).
 - The platform repository now contains a disposable Caddy/WordPress fixture
   that drives a real AWS-KMS-signed event through this REST controller and
   verifies only the resulting opaque grant deny decision. The credentialed
