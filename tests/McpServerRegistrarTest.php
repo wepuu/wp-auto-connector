@@ -34,6 +34,7 @@ use WPAuto\Connector\Abilities\Seo\SeoGetAbility;
 use WPAuto\Connector\Abilities\Seo\SeoUpdateAbility;
 use WPAuto\Connector\Mcp\McpErrorHandler;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
+use WPAuto\Connector\OAuth\ScopePolicy;
 use WPAuto\Connector\PrivateMcp\WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
 use WPAuto\Connector\PrivateMcp\WP\MCP\Transport\HttpTransport;
 
@@ -128,6 +129,7 @@ final class McpServerRegistrarTest extends TestCase {
 			$adapter->arguments[9]
 		);
 		self::assertCount( 23, $adapter->arguments[9] );
+		self::assertSame( $adapter->arguments[9], array_keys( ( new ScopePolicy() )->mappings() ) );
 		self::assertSame( array(), $adapter->arguments[10] );
 		self::assertSame( array(), $adapter->arguments[11] );
 		self::assertIsCallable( $adapter->arguments[12] );

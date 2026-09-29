@@ -21,6 +21,7 @@ final class PrivateStateCleanup {
 		'wp_auto_connector_site_identity',
 		'wp_auto_connector_platform_jwks',
 		'wp_auto_connector_revocation_state',
+		'wp_auto_connector_prm_rewrite_version',
 		'wp_auto_connector_revocation_lock',
 		'wp_auto_connector_revocation_rate',
 		'wp_auto_connector_revocation_rate_lock',

@@ -43,6 +43,14 @@ require_once WP_AUTO_CONNECTOR_DIR . 'src/Grants/ConsentController.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/JwksFetcherInterface.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/WordPressJwksFetcher.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/JwksCache.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/BearerRequestContext.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/BearerTokenExtractor.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/AccessTokenVerifier.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/ScopePolicy.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/AbilityScopeGate.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/BearerAuthenticator.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/ProtectedResourceMetadata.php';
+require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/BearerChallenge.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/RevocationEventVerifier.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/RevocationStateRepository.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/OAuth/RevocationRateLimiter.php';
@@ -126,6 +134,7 @@ require_once WP_AUTO_CONNECTOR_DIR . 'src/Admin/AdminPage.php';
 require_once WP_AUTO_CONNECTOR_DIR . 'src/Plugin.php';
 
 register_activation_hook( __FILE__, array( 'WPAuto\\Connector\\Plugin', 'activate' ) );
+register_deactivation_hook( __FILE__, array( 'WPAuto\\Connector\\Plugin', 'deactivate' ) );
 
 add_action(
 	'plugins_loaded',

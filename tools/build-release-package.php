@@ -8,7 +8,12 @@
 declare(strict_types=1);
 
 $project_root = dirname(__DIR__);
-$build_root   = $project_root . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'phase-1-7-2-fixed';
+$build_id     = getenv('WEPUU_BUILD_ID') ?: 'phase-1-7-2-fixed';
+if (! preg_match('/^[a-z0-9][a-z0-9.-]*$/', $build_id)) {
+	fwrite(STDERR, "WEPUU_BUILD_ID must contain only lowercase letters, digits, dots, or hyphens.\n");
+	exit(1);
+}
+$build_root   = $project_root . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . $build_id;
 $package_root = $build_root . DIRECTORY_SEPARATOR . 'wepuu-auto-connector';
 $zip_path     = $build_root . DIRECTORY_SEPARATOR . 'wepuu-auto-connector.zip';
 $manifest_path = $build_root . DIRECTORY_SEPARATOR . 'manifest.json';

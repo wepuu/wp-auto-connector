@@ -5,7 +5,9 @@ param(
 
 	[switch] $Probe,
 	[switch] $RequireDocker,
-	[switch] $RequireClients
+	[switch] $RequireClients,
+	[switch] $ProbeSiteHealth,
+	[string] $ExpectDeniedTool = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -254,6 +256,29 @@ for ($index = 0; $index -lt $ExpectedTools.Count; $index++) {
 	}
 }
 
+if ($ProbeSiteHealth) {
+	$siteHealth = Invoke-McpRequest -Method 'tools/call' -Id 3 -Params @{
+		name      = 'wp-auto-site-health'
+		arguments = @{}
+	} -SessionId $sessionId -ProtocolVersion $negotiatedVersion
+	if ($siteHealth.StatusCode -ne 200 -or $null -eq $siteHealth.Message.result -or $siteHealth.Message.result.isError) {
+		throw 'MCP site-health probe did not return a successful result.'
+	}
+}
+
+if (-not [string]::IsNullOrWhiteSpace($ExpectDeniedTool)) {
+	if ($ExpectedTools -notcontains $ExpectDeniedTool) {
+		throw 'Expected denied tool must belong to the frozen catalog.'
+	}
+	$denied = Invoke-McpRequest -Method 'tools/call' -Id 4 -Params @{
+		name      = $ExpectDeniedTool
+		arguments = @{}
+	} -SessionId $sessionId -ProtocolVersion $negotiatedVersion
+	if ($denied.StatusCode -ne 200 -or $null -eq $denied.Message.result -or -not $denied.Message.result.isError) {
+		throw 'MCP scope-denial probe did not return the expected tool error.'
+	}
+}
+
 [pscustomobject] @{
 	EndpointClass   = $endpointClass
 	Docker          = $dockerStatus
@@ -262,4 +287,6 @@ for ($index = 0; $index -lt $ExpectedTools.Count; $index++) {
 	ToolCount       = $actualTools.Count
 	ToolOrder       = 'PASS'
 	Authentication  = 'PASS (header present; value not displayed)'
+	SiteHealth      = if ($ProbeSiteHealth) { 'PASS' } else { 'SKIPPED' }
+	ScopeDenial     = if ([string]::IsNullOrWhiteSpace($ExpectDeniedTool)) { 'SKIPPED' } else { 'PASS (MCP tool error; body suppressed)' }
 } | Format-List
