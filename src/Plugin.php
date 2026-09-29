@@ -39,6 +39,11 @@ use WPAuto\Connector\Grants\ConsentController;
 use WPAuto\Connector\Mcp\McpAdapterLoader;
 use WPAuto\Connector\Mcp\McpServerRegistrar;
 use WPAuto\Connector\OAuth\RevocationController;
+use WPAuto\Connector\OAuth\AbilityScopeGate;
+use WPAuto\Connector\OAuth\BearerAuthenticator;
+use WPAuto\Connector\OAuth\BearerChallenge;
+use WPAuto\Connector\OAuth\BearerRequestContext;
+use WPAuto\Connector\OAuth\ProtectedResourceMetadata;
 use WPAuto\Connector\Pairing\PairingRestController;
 use WPAuto\Connector\Pairing\AdminPairingController;
 
@@ -90,12 +95,24 @@ final class Plugin {
 				array( 'back_link' => true )
 			);
 		}
+
+		ProtectedResourceMetadata::activate_rewrite();
+	}
+
+	/** Remove the well-known rewrite from persisted rules on deactivation. */
+	public static function deactivate(): void {
+		ProtectedResourceMetadata::deactivate_rewrite();
 	}
 
 	/**
 	 * Register the direct MCP services.
 	 */
 	public function boot(): void {
+		$bearer_context = new BearerRequestContext();
+		( new AbilityScopeGate( $bearer_context ) )->register();
+		( new BearerAuthenticator( $bearer_context ) )->register();
+		( new ProtectedResourceMetadata() )->register();
+		( new BearerChallenge() )->register();
 		( new ContentAbilityCategory() )->register();
 		( new MediaAbilityCategory() )->register();
 		( new TaxonomyAbilityCategory() )->register();
@@ -123,7 +140,7 @@ final class Plugin {
 		( new MediaImportUrlAbility() )->register();
 		( new SeoGetAbility() )->register();
 		( new SeoUpdateAbility() )->register();
-		( new McpServerRegistrar() )->register();
+		( new McpServerRegistrar( $bearer_context ) )->register();
 		( new PairingRestController() )->register();
 		( new ConsentController() )->register();
 		( new RevocationController() )->register();

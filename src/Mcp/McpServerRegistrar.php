@@ -33,6 +33,7 @@ use WPAuto\Connector\Abilities\Taxonomy\TagsListAbility;
 use WPAuto\Connector\PrivateMcp\WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler;
 use WPAuto\Connector\PrivateMcp\WP\MCP\Transport\HttpTransport;
 use WP_Error;
+use WPAuto\Connector\OAuth\BearerRequestContext;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -46,6 +47,15 @@ final class McpServerRegistrar {
 	public const ROUTE_NAMESPACE = 'wp-auto';
 	public const ROUTE           = 'mcp';
 	public const ADAPTER_HOOK    = 'wp_auto_connector_mcp_adapter_init';
+
+	/**
+	 * Build the registrar with one shared request identity context.
+	 *
+	 * @param BearerRequestContext|null $bearer_context Request-local Bearer state.
+	 */
+	public function __construct( private ?BearerRequestContext $bearer_context = null ) {
+		$this->bearer_context = $this->bearer_context ?? new BearerRequestContext();
+	}
 
 	/**
 	 * Register the custom-server hook.
@@ -111,7 +121,23 @@ final class McpServerRegistrar {
 	 * @return bool|WP_Error
 	 */
 	public function check_transport_permission() {
-		if ( ! $this->is_supported_transport() || ! function_exists( 'wp_is_application_passwords_supported' ) || ! wp_is_application_passwords_supported() ) {
+		if ( ! $this->is_supported_transport() ) {
+			return new WP_Error(
+				'wp_auto_connector_authentication_required',
+				__( 'WordPress authentication is required for the WP-Auto MCP server.', 'wepuu-auto-connector' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		if ( $this->bearer_context->authenticated() ) {
+			if ( ! is_user_logged_in() || get_current_user_id() !== $this->bearer_context->user_id() ) {
+				return new WP_Error(
+					'wp_auto_connector_authentication_required',
+					__( 'WordPress authentication is required for the WP-Auto MCP server.', 'wepuu-auto-connector' ),
+					array( 'status' => 401 )
+				);
+			}
+		} elseif ( ! function_exists( 'wp_is_application_passwords_supported' ) || ! wp_is_application_passwords_supported() ) {
 			return new WP_Error(
 				'wp_auto_connector_authentication_required',
 				__( 'WordPress authentication is required for the WP-Auto MCP server.', 'wepuu-auto-connector' ),

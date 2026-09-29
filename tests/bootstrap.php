@@ -37,6 +37,8 @@ namespace {
 	$GLOBALS['wp_auto_test_add_filter_exception'] = null;
 	$GLOBALS['wp_auto_test_remove_filter_exception'] = null;
 	$GLOBALS['wp_auto_test_current_user_id']      = 0;
+	$GLOBALS['wp_auto_test_rewrite_rules']        = array();
+	$GLOBALS['wp_auto_test_flush_rewrite_calls']  = 0;
 	$GLOBALS['wp_auto_test_capabilities']         = array();
 	$GLOBALS['wp_auto_test_posts']                = array();
 	$GLOBALS['wp_auto_test_terms']                = array();
@@ -191,11 +193,16 @@ namespace {
 	class WP_Ability {}
 	class WP_REST_Server {}
 	class WP_REST_Request {
-		/** @param array<string,mixed> $params */
-		public function __construct( private array $params = array(), private string $content_type = 'application/json', private string $body = '' ) {}
+		/** @param array<string,mixed> $params @param array<string,string> $headers */
+		public function __construct( private array $params = array(), private string $content_type = 'application/json', private string $body = '', private string $route = '', private array $headers = array() ) {}
 
 		public function get_header( string $name ): string {
-			return 'content-type' === strtolower( $name ) ? $this->content_type : '';
+			$name = strtolower( $name );
+			return 'content-type' === $name ? $this->content_type : (string) ( $this->headers[ $name ] ?? '' );
+		}
+
+		public function get_route(): string {
+			return $this->route;
 		}
 
 		/** @return array<string,mixed> */
@@ -216,6 +223,14 @@ namespace {
 
 		public function header( string $name, string $value ): void {
 			$this->headers[ $name ] = $value;
+		}
+
+		public function get_status(): int {
+			return $this->status;
+		}
+
+		public function get_data() {
+			return $this->data;
 		}
 	}
 	class wpdb {
@@ -1405,6 +1420,21 @@ namespace {
 		return $GLOBALS['wp_auto_test_current_user_id'];
 	}
 
+	function wp_set_current_user( int $user_id ) {
+		$GLOBALS['wp_auto_test_current_user_id'] = $user_id;
+		$GLOBALS['wp_auto_test_logged_in']       = $user_id > 0;
+		return (object) array( 'ID' => $user_id );
+	}
+
+	function add_rewrite_rule( string $regex, string $query, string $after = 'bottom' ): void {
+		$GLOBALS['wp_auto_test_rewrite_rules'][ $regex ] = array( $query, $after );
+	}
+
+	function flush_rewrite_rules( bool $hard = true ): void {
+		unset( $hard );
+		++$GLOBALS['wp_auto_test_flush_rewrite_calls'];
+	}
+
 	function get_permalink( $post ) {
 		if ( $GLOBALS['wp_auto_test_permalink_exception'] instanceof \Throwable ) {
 			$exception = $GLOBALS['wp_auto_test_permalink_exception'];
@@ -1810,6 +1840,10 @@ namespace WPAuto\Connector\OAuth {
 		$GLOBALS['wp_auto_test_hooks'][ $hook ] = $callback;
 		$GLOBALS['wp_auto_test_hook_history'][ $hook ][] = $callback;
 	}
+
+	function __( string $text ): string {
+		return $text;
+	}
 }
 
 namespace WPAuto\Connector\Abilities\Content {
@@ -2190,11 +2224,20 @@ namespace {
 	require_once dirname( __DIR__ ) . '/src/OAuth/JwksFetcherInterface.php';
 	require_once dirname( __DIR__ ) . '/src/OAuth/WordPressJwksFetcher.php';
 	require_once dirname( __DIR__ ) . '/src/OAuth/JwksCache.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/BearerRequestContext.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/BearerTokenExtractor.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/AccessTokenVerifier.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/ScopePolicy.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/AbilityScopeGate.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/BearerAuthenticator.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/ProtectedResourceMetadata.php';
+	require_once dirname( __DIR__ ) . '/src/OAuth/BearerChallenge.php';
 	require_once dirname( __DIR__ ) . '/src/OAuth/RevocationEventVerifier.php';
 	require_once dirname( __DIR__ ) . '/src/OAuth/RevocationStateRepository.php';
 	require_once dirname( __DIR__ ) . '/src/OAuth/RevocationRateLimiter.php';
 	require_once dirname( __DIR__ ) . '/src/OAuth/RevocationController.php';
 	require_once __DIR__ . '/TestJwksFetcher.php';
+	require_once __DIR__ . '/TestRsaFixture.php';
 	require_once dirname( __DIR__ ) . '/src/Uninstall/PrivateStateCleanup.php';
 	require_once dirname( __DIR__ ) . '/src/Content/ContentReadService.php';
 	require_once dirname( __DIR__ ) . '/src/Content/CreateDraftContract.php';

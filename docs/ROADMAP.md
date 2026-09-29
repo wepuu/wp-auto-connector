@@ -207,6 +207,21 @@ SaaS repository scope:
 
 Do not implement the SaaS runtime in this repository.
 
+### Phase 2.0.5 - Scoped connector integration
+
+Status: accepted and closed on 2026-09-29 after deterministic, live HTTPS,
+two-key AWS KMS, direct Codex MCP, privacy, package and cleanup gates passed on
+`codex/phase-2-0-5-bearer-auth`.
+
+- add locally verified Bearer authentication beside Application Passwords;
+- map an active opaque grant to the current local user for each request;
+- enforce the frozen five-scope ceiling before existing permission callbacks;
+- preserve the exact ordered 23-tool catalog and all domain safety contracts;
+- prove the MCP data path remains client-to-WordPress.
+
+Production deployment and Phase 2.0.6 security qualification remain separately
+gated.
+
 ## Phase 3 - Site Intelligence
 
 Primarily WP-Auto Cloud work:
