@@ -7,10 +7,14 @@ Build a secure, WordPress.org-compliant WordPress connector that gives compatibl
 ## Current development phase
 
 Phase 2.0.3B pairing/local consent, Phase 2.0.4B signed revocation/JWKS state,
-and Phase 2.0.5 scoped Bearer integration are accepted and closed. The Phase
+and Phase 2.0.5 scoped Bearer integration are accepted and closed. Phase 2.0.6
+connector resilience deterministic implementation is complete on an isolated local branch;
+the restricted TAC/Daybreak review is waived under the platform ADR-013 and
+the local HTTPS/Codex regression passes; hosted and final immutable-candidate
+review gates remain open. The Phase
 2.0.5 implementation remains isolated on `codex/phase-2-0-5-bearer-auth`. Preserve the
 accepted contracts and tests, keep Application Password access independent,
-and do not deploy production or start Phase 2.0.6 without explicit approval.
+and do not deploy production or start Phase 2.0.7 without explicit approval.
 
 Phase 1 - Direct WordPress MCP MVP.
 

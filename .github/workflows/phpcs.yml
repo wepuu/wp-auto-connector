@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - codex/phase-2-0-4b-revocation
+      - codex/phase-2-0-6b-connector-resilience
 
 permissions:
   contents: read
