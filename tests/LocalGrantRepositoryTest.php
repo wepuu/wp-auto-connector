@@ -10,6 +10,7 @@ namespace WPAuto\Connector\Tests;
 use PHPUnit\Framework\TestCase;
 use WPAuto\Connector\Grants\LocalGrantRepository;
 use WPAuto\Connector\Grants\LocalUserResolverInterface;
+use WPAuto\Connector\OAuth\RevocationStateRepository;
 use WPAuto\Connector\Pairing\ConnectionSettings;
 use WPAuto\Connector\Pairing\SiteIdentityRepository;
 
@@ -121,6 +122,7 @@ final class LocalGrantRepositoryTest extends TestCase {
 		self::assertTrue( $settings->enable( self::CONTROL, self::ISSUER, self::TENANT ) );
 		self::assertTrue( $settings->mark_pending() );
 		$kid = ( new SiteIdentityRepository() )->get_or_create()->kid();
+		self::assertTrue( ( new RevocationStateRepository( $settings ) )->initialize_for_pairing( self::SITE_ID ) );
 		self::assertTrue( $settings->mark_active( self::SITE_ID, $kid, self::platform_key_pem(), 'kms-key-0001' ) );
 		return $settings;
 	}

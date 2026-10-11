@@ -17,6 +17,12 @@ passes with complete coverage and zero reportable findings. The Phase
 accepted contracts and tests, keep Application Password access independent,
 and do not deploy production or start Phase 2.0.7 without explicit approval.
 
+An undeployed P3-A7 repair candidate binds revocation sequence state to the
+active pairing `site_id`, initializes new pairings at sequence zero, preserves
+legacy deny state, and fails closed on uncertain v2 state. It is documented in
+`docs/P3A7_PAIRING_SCOPED_REVOCATION_VALIDATION_2026-10-11.md`; production
+packaging and deployment remain separately gated.
+
 Phase 1 - Direct WordPress MCP MVP.
 
 Phase 1.1 is complete: the direct MCP server foundation proves the authenticated end-to-end path with the read-only `wp-auto/site-health` ability.

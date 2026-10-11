@@ -106,11 +106,12 @@ final class BearerAuthenticationTest extends TestCase {
 		$this->settings = new ConnectionSettings();
 		self::assertTrue( $this->settings->enable( 'https://platform.example.test', self::ISSUER, self::TENANT ) );
 		self::assertTrue( $this->settings->mark_pending() );
-		$site_kid = ( new SiteIdentityRepository() )->get_or_create()->kid();
+		$site_kid          = ( new SiteIdentityRepository() )->get_or_create()->kid();
+		$this->revocations = new RevocationStateRepository( $this->settings );
+		self::assertTrue( $this->revocations->initialize_for_pairing( self::SITE ) );
 		self::assertTrue( $this->settings->mark_active( self::SITE, $site_kid, TestRsaFixture::public_key(), self::KID ) );
 
-		$this->revocations = new RevocationStateRepository();
-		$users             = new class() implements LocalUserResolverInterface {
+		$users        = new class() implements LocalUserResolverInterface {
 			/**
 			 * Check the one fixture user.
 			 *
@@ -120,7 +121,7 @@ final class BearerAuthenticationTest extends TestCase {
 				return 42 === $user_id;
 			}
 		};
-		$this->grants      = new LocalGrantRepository( $users, $this->revocations );
+		$this->grants = new LocalGrantRepository( $users, $this->revocations );
 		self::assertTrue(
 			$this->grants->activate(
 				self::GRANT,
@@ -199,6 +200,7 @@ final class BearerAuthenticationTest extends TestCase {
 				array(
 					'event_type'     => 'token',
 					'token_jti_hash' => hash( 'sha256', self::JTI ),
+					'site_id'        => self::SITE,
 					'sequence'       => 1,
 				)
 			)
