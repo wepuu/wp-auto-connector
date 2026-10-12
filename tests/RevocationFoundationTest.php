@@ -61,6 +61,7 @@ final class RevocationFoundationTest extends TestCase {
 		$identity  = ( new SiteIdentityRepository() )->get_or_create();
 		self::assertTrue( $settings->enable( 'https://platform.example.test', self::ISSUER, self::TENANT ) );
 		self::assertTrue( $settings->mark_pending() );
+		self::assertTrue( ( new RevocationStateRepository( $settings ) )->initialize_for_pairing( self::SITE ) );
 		self::assertTrue( $settings->mark_active( self::SITE, $identity->kid(), $details['key'], self::KID ) );
 	}
 
@@ -105,6 +106,7 @@ final class RevocationFoundationTest extends TestCase {
 		$event = array(
 			'event_type' => 'grant',
 			'grant_id'   => 'grant_00000001',
+			'site_id'    => self::SITE,
 			'sequence'   => 2,
 			'reason'     => 'refresh_replay',
 		);
@@ -115,6 +117,138 @@ final class RevocationFoundationTest extends TestCase {
 		$stored = $GLOBALS['wp_auto_test_options'][ RevocationStateRepository::OPTION_NAME ];
 		self::assertStringNotContainsString( 'grant_00000001', wp_json_encode( $stored ) );
 		self::assertFalse( $GLOBALS['wp_auto_test_option_autoload'][ RevocationStateRepository::OPTION_NAME ] );
+	}
+
+	/** A new pairing gets a clean site-bound sequence without reviving old deny state. */
+	public function test_new_pairing_resets_only_through_pending_pairing_activation(): void {
+		$settings = new ConnectionSettings();
+		$state    = new RevocationStateRepository( $settings );
+		self::assertTrue(
+			$state->apply(
+				array(
+					'event_type' => 'grant',
+					'grant_id'   => 'grant_old_0001',
+					'site_id'    => self::SITE,
+					'sequence'   => 1,
+					'reason'     => 'token_revoked',
+				)
+			)
+		);
+		self::assertTrue( $state->denies_grant( 'grant_old_0001' ) );
+		self::assertFalse( $state->initialize_for_pairing( 'site_00000002' ) );
+		self::assertTrue( $state->denies_grant( 'grant_old_0001' ) );
+
+		self::assertTrue( $settings->disconnect() );
+		self::assertTrue( $settings->enable( 'https://platform.example.test', self::ISSUER, self::TENANT ) );
+		self::assertTrue( $settings->mark_pending() );
+		self::assertTrue( $state->initialize_for_pairing( 'site_00000002' ) );
+		$identity = ( new SiteIdentityRepository() )->get_or_create();
+		self::assertTrue( $settings->mark_active( 'site_00000002', $identity->kid(), TestRsaFixture::public_key(), self::KID ) );
+
+		$stored = $GLOBALS['wp_auto_test_options'][ RevocationStateRepository::OPTION_NAME ];
+		self::assertSame( '2', $stored['version'] );
+		self::assertSame( 'site_00000002', $stored['site_id'] );
+		self::assertSame( 0, $stored['last_sequence'] );
+		self::assertFalse( $state->denies_grant( 'grant_old_0001' ) );
+		self::assertFalse(
+			$state->apply(
+				array(
+					'event_type' => 'grant',
+					'grant_id'   => 'grant_old_0001',
+					'site_id'    => self::SITE,
+					'sequence'   => 2,
+					'reason'     => 'token_revoked',
+				)
+			)
+		);
+		self::assertTrue(
+			$state->apply(
+				array(
+					'event_type' => 'grant',
+					'grant_id'   => 'grant_new_0001',
+					'site_id'    => 'site_00000002',
+					'sequence'   => 1,
+					'reason'     => 'token_revoked',
+				)
+			)
+		);
+	}
+
+	/** Missing, malformed or cross-site v2 state denies and cannot self-reset. */
+	public function test_uncertain_v2_state_fails_closed(): void {
+		$settings = new ConnectionSettings();
+		$state    = new RevocationStateRepository( $settings );
+		delete_option( RevocationStateRepository::OPTION_NAME );
+		self::assertTrue( $state->denies_grant( 'grant_00000001' ) );
+		self::assertFalse(
+			$state->apply(
+				array(
+					'event_type' => 'grant',
+					'grant_id'   => 'grant_00000001',
+					'site_id'    => self::SITE,
+					'sequence'   => 1,
+					'reason'     => 'token_revoked',
+				)
+			)
+		);
+
+		$GLOBALS['wp_auto_test_options'][ RevocationStateRepository::OPTION_NAME ] = array( 'version' => '2' );
+		self::assertTrue( $state->denies_key( self::KID ) );
+		$GLOBALS['wp_auto_test_options'][ RevocationStateRepository::OPTION_NAME ] = array(
+			'version'           => '2',
+			'site_id'           => 'site_00000002',
+			'last_sequence'     => 0,
+			'last_event_digest' => str_repeat( '0', 64 ),
+			'deny_all'          => false,
+			'grants'            => array(),
+			'tokens'            => array(),
+			'keys'              => array(),
+		);
+		self::assertTrue( $state->denies_token_hash( str_repeat( 'a', 64 ) ) );
+
+		$GLOBALS['wp_auto_test_options'][ RevocationStateRepository::OPTION_NAME ] = array(
+			'version'           => '2',
+			'site_id'           => self::SITE,
+			'last_sequence'     => 0,
+			'last_event_digest' => str_repeat( '0', 64 ),
+			'deny_all'          => false,
+			'grants'            => array( 'not-a-digest' => true ),
+			'tokens'            => array(),
+			'keys'              => array(),
+		);
+		self::assertTrue( $state->denies_grant( 'grant_00000001' ) );
+	}
+
+	/** A valid active v1 state is upgraded only when preserving every deny marker. */
+	public function test_legacy_active_state_preserves_denies_when_next_event_arrives(): void {
+		unset( $GLOBALS['wp_auto_test_options'][ ConnectionSettings::OPTION_NAME ]['revocation_state_version'] );
+		$GLOBALS['wp_auto_test_options'][ RevocationStateRepository::OPTION_NAME ] = array(
+			'version'           => '1',
+			'last_sequence'     => 2,
+			'last_event_digest' => str_repeat( 'a', 64 ),
+			'deny_all'          => false,
+			'grants'            => array( hash( 'sha256', 'grant_legacy_0001' ) => true ),
+			'tokens'            => array(),
+			'keys'              => array(),
+		);
+		$state = new RevocationStateRepository();
+		self::assertTrue( $state->denies_grant( 'grant_legacy_0001' ) );
+		self::assertTrue(
+			$state->apply(
+				array(
+					'event_type' => 'key',
+					'key_id'     => 'kms-key-0002',
+					'site_id'    => self::SITE,
+					'sequence'   => 3,
+					'reason'     => 'key_revoked',
+				)
+			)
+		);
+		$stored = $GLOBALS['wp_auto_test_options'][ RevocationStateRepository::OPTION_NAME ];
+		self::assertSame( '2', $stored['version'] );
+		self::assertSame( self::SITE, $stored['site_id'] );
+		self::assertTrue( $state->denies_grant( 'grant_legacy_0001' ) );
+		self::assertTrue( $state->denies_key( 'kms-key-0002' ) );
 	}
 
 	/** The public signed-event endpoint has a site-global fixed ceiling. */

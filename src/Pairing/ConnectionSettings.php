@@ -18,7 +18,7 @@ final class ConnectionSettings {
 	/**
 	 * Read a validated enabled configuration.
 	 *
-	 * @return array{control_origin:string,platform_issuer:string,tenant_id:string,resource:string,status:string,site_id?:string,site_key_kid?:string,platform_signing_key_pem?:string,platform_signing_kid?:string}|null
+	 * @return array{control_origin:string,platform_issuer:string,tenant_id:string,resource:string,status:string,site_id?:string,site_key_kid?:string,platform_signing_key_pem?:string,platform_signing_kid?:string,revocation_state_version?:string}|null
 	 */
 	public function load(): ?array {
 		$value = get_option( self::OPTION_NAME, null );
@@ -62,6 +62,12 @@ final class ConnectionSettings {
 		}
 		if ( isset( $value['platform_signing_kid'] ) && self::is_opaque_id( $value['platform_signing_kid'] ) ) {
 			$result['platform_signing_kid'] = $value['platform_signing_kid'];
+		}
+		if ( isset( $value['revocation_state_version'] ) ) {
+			if ( '2' !== $value['revocation_state_version'] ) {
+				return null;
+			}
+			$result['revocation_state_version'] = '2';
 		}
 		if ( 'active' === $status && ! isset( $result['site_id'], $result['site_key_kid'], $result['platform_signing_key_pem'], $result['platform_signing_kid'] ) ) {
 			return null;
@@ -153,6 +159,7 @@ final class ConnectionSettings {
 		$value['site_key_kid']             = $site_key_kid;
 		$value['platform_signing_key_pem'] = self::validate_platform_signing_key( $platform_signing_key_pem );
 		$value['platform_signing_kid']     = $platform_signing_kid;
+		$value['revocation_state_version'] = '2';
 		return update_option( self::OPTION_NAME, $value, false );
 	}
 

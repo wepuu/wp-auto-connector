@@ -10,6 +10,7 @@ namespace WPAuto\Connector\Tests;
 use PHPUnit\Framework\TestCase;
 use WPAuto\Connector\OAuth\RevocationStateRepository;
 use WPAuto\Connector\Pairing\ConnectionSettings;
+use WPAuto\Connector\Pairing\SiteIdentityRepository;
 
 /** Keeps local fail-closed state independent from platform availability. */
 final class Phase206ResilienceTest extends TestCase {
@@ -24,12 +25,19 @@ final class Phase206ResilienceTest extends TestCase {
 
 	/** Local key and grant denial remain immediate and monotonic when delivery is unavailable. */
 	public function test_local_denial_is_immediate_idempotent_and_out_of_order_safe(): void {
-		$state = new RevocationStateRepository();
+		$settings = new ConnectionSettings();
+		self::assertTrue( $settings->enable( 'https://platform.example.test', 'https://auth.example.test', '11111111-1111-4111-8111-111111111111' ) );
+		self::assertTrue( $settings->mark_pending() );
+		$state = new RevocationStateRepository( $settings );
+		self::assertTrue( $state->initialize_for_pairing( 'site_00000001' ) );
+		$identity = ( new SiteIdentityRepository() )->get_or_create();
+		self::assertTrue( $settings->mark_active( 'site_00000001', $identity->kid(), TestRsaFixture::public_key(), 'kms-key-0001' ) );
 		self::assertTrue(
 			$state->apply(
 				array(
 					'event_type' => 'key',
 					'key_id'     => 'kms-key-0001',
+					'site_id'    => 'site_00000001',
 					'sequence'   => 8,
 					'reason'     => 'key_revoked',
 				)
@@ -41,6 +49,7 @@ final class Phase206ResilienceTest extends TestCase {
 				array(
 					'event_type' => 'key',
 					'key_id'     => 'kms-key-0001',
+					'site_id'    => 'site_00000001',
 					'sequence'   => 8,
 					'reason'     => 'key_revoked',
 				)
@@ -51,6 +60,7 @@ final class Phase206ResilienceTest extends TestCase {
 				array(
 					'event_type' => 'key',
 					'key_id'     => 'kms-key-0001',
+					'site_id'    => 'site_00000001',
 					'sequence'   => 7,
 					'reason'     => 'stale_event',
 				)
@@ -61,6 +71,7 @@ final class Phase206ResilienceTest extends TestCase {
 				array(
 					'event_type' => 'grant',
 					'grant_id'   => 'grant-00000001',
+					'site_id'    => 'site_00000001',
 					'sequence'   => 9,
 					'reason'     => 'site_disconnected',
 				)

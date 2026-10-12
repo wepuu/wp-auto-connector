@@ -7,6 +7,8 @@
 
 namespace WPAuto\Connector\Pairing;
 
+use WPAuto\Connector\OAuth\RevocationStateRepository;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -19,21 +21,24 @@ final class PairingRestController {
 	/**
 	 * Use injectable services for unit and integration tests.
 	 *
-	 * @param ConnectionSettings|null     $settings   Connection settings.
-	 * @param PairingStateRepository|null $state      Pending pairing state.
-	 * @param SiteIdentityRepository|null $identities Site identity storage.
-	 * @param SiteProofSigner|null        $signer     Proof signer.
+	 * @param ConnectionSettings|null        $settings    Connection settings.
+	 * @param PairingStateRepository|null    $state       Pending pairing state.
+	 * @param SiteIdentityRepository|null    $identities  Site identity storage.
+	 * @param SiteProofSigner|null           $signer      Proof signer.
+	 * @param RevocationStateRepository|null $revocations Pairing-scoped revocation state.
 	 */
 	public function __construct(
 		private ?ConnectionSettings $settings = null,
 		private ?PairingStateRepository $state = null,
 		private ?SiteIdentityRepository $identities = null,
-		private ?SiteProofSigner $signer = null
+		private ?SiteProofSigner $signer = null,
+		private ?RevocationStateRepository $revocations = null
 	) {
-		$this->settings   = $this->settings ?? new ConnectionSettings();
-		$this->state      = $this->state ?? new PairingStateRepository();
-		$this->identities = $this->identities ?? new SiteIdentityRepository();
-		$this->signer     = $this->signer ?? new SiteProofSigner();
+		$this->settings    = $this->settings ?? new ConnectionSettings();
+		$this->state       = $this->state ?? new PairingStateRepository();
+		$this->identities  = $this->identities ?? new SiteIdentityRepository();
+		$this->signer      = $this->signer ?? new SiteProofSigner();
+		$this->revocations = $this->revocations ?? new RevocationStateRepository( $this->settings );
 	}
 
 	/** Register WordPress hooks. */
@@ -75,6 +80,9 @@ final class PairingRestController {
 			}
 			$validated = $this->state->consume( $params );
 			$identity  = $this->identities->get_or_create();
+			if ( ! $this->revocations->initialize_for_pairing( $validated['site_id'] ) ) {
+				throw new \RuntimeException( 'revocation_state_initialization_failed' );
+			}
 			if ( ! $this->settings->mark_active( $validated['site_id'], $identity->kid(), $validated['platform_signing_key_pem'], $validated['platform_signing_kid'] ) ) {
 				throw new \RuntimeException( 'connection_activation_failed' );
 			}

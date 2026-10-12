@@ -18,6 +18,7 @@ use WPAuto\Connector\Pairing\PairingStateRepository;
 use WPAuto\Connector\Pairing\SiteIdentity;
 use WPAuto\Connector\Pairing\SiteIdentityRepository;
 use WPAuto\Connector\Pairing\SiteProofSigner;
+use WPAuto\Connector\OAuth\RevocationStateRepository;
 
 /** Covers local identity, single-use pairing and proof bindings. */
 final class PairingFoundationTest extends TestCase {
@@ -174,10 +175,28 @@ final class PairingFoundationTest extends TestCase {
 		self::assertArrayHasKey( 'publicJwk', $response->data );
 		self::assertSame( 'active', $settings->load()['status'] );
 		self::assertSame( self::SITE_ID, $settings->load()['site_id'] );
+		self::assertSame( '2', $settings->load()['revocation_state_version'] );
+		self::assertSame( self::SITE_ID, $GLOBALS['wp_auto_test_options'][ RevocationStateRepository::OPTION_NAME ]['site_id'] );
+		self::assertSame( 0, $GLOBALS['wp_auto_test_options'][ RevocationStateRepository::OPTION_NAME ]['last_sequence'] );
 
 		$replay = $controller->handle( new \WP_REST_Request( $this->request() ) );
 		self::assertSame( 401, $replay->status );
 		self::assertSame( array( 'error' => 'pairing_denied' ), $replay->data );
+	}
+
+	/** Pairing never becomes active when its site-bound revocation state cannot initialize. */
+	public function test_pairing_activation_fails_closed_when_revocation_state_is_locked(): void {
+		$settings = new ConnectionSettings();
+		$state    = new PairingStateRepository();
+		self::assertTrue( $settings->enable( self::CONTROL, self::ISSUER, self::TENANT ) );
+		self::assertTrue( $state->begin( self::VERIFIER, self::ISSUER, self::TENANT, self::RESOURCE, time() ) );
+		self::assertTrue( $settings->mark_pending() );
+		self::assertTrue( add_option( RevocationStateRepository::LOCK_NAME, array( 'acquired_at' => time() ), '', false ) );
+
+		$response = ( new PairingRestController( $settings, $state ) )->handle( new \WP_REST_Request( $this->request() ) );
+		self::assertSame( 401, $response->status );
+		self::assertSame( 'pending', $settings->load()['status'] );
+		self::assertArrayNotHasKey( 'site_id', $settings->load() );
 	}
 
 	/** A changed canonical endpoint persists suspension without rewriting trust. */
